@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BuszApp – Sistema Inteligente de Mobilidade Urbana</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
+  <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <style>
+    .hero-bg { background: linear-gradient(135deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%); }
+    .dark .hero-bg { background: linear-gradient(135deg,#1e293b 0%,#0f172a 100%); }
+    .feature-card {
+      background: rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+      border-radius:1.25rem; transition: all .35s cubic-bezier(.4,0,.2,1);
+    }
+    .dark .feature-card { background:rgba(45,55,72,0.95); }
+    .feature-card:hover { transform:translateY(-8px); box-shadow:0 24px 48px rgba(251,191,36,.28); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+
+  <header class="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-md z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-xl shadow">
+          <i data-feather="bus" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">BuszApp</h1>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Mobilidade Inteligente</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="DarkMode.toggle()" class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition" aria-label="Tema">
+          <i data-feather="moon" class="w-5 h-5 text-gray-600 dark:text-gray-300"></i>
+        </button>
+        <a href="login.html" class="px-4 py-2 rounded-xl text-yellow-600 dark:text-yellow-400 font-semibold text-sm hover:bg-yellow-50 dark:hover:bg-gray-700 transition">Entrar</a>
+        <a href="register.html" class="btn-primary text-sm">Cadastrar-se</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-bg pt-28 pb-20 text-white relative overflow-hidden">
+    <div class="container mx-auto px-6 text-center relative z-10">
+      <div class="animate-float inline-block mb-8">
+        <img src="./img/bus_auto.webp" alt="BuszApp" class="w-48 sm:w-60 mx-auto drop-shadow-2xl rounded-2xl" onerror="this.style.display='none'" />
+      </div>
+      <h2 class="text-4xl sm:text-5xl font-bold mb-5 leading-tight">Mobilidade Urbana<br/><span class="opacity-90">Inteligente e Conectada</span></h2>
+      <p class="text-lg opacity-90 max-w-2xl mx-auto mb-10">Rastreie ônibus em tempo real, gerencie seu cartão e avalie o serviço — tudo em um só lugar.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="register.html" class="bg-white text-yellow-600 px-8 py-3.5 rounded-2xl font-bold hover:shadow-2xl hover:-translate-y-1 transition-all">Começar agora</a>
+        <a href="login.html" class="bg-white/20 backdrop-blur border border-white/40 text-white px-8 py-3.5 rounded-2xl font-semibold hover:bg-white/30 transition">Já tenho conta</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-12">Funcionalidades</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="feature-card p-6 shadow-lg"><div class="bg-gradient-to-br from-yellow-400 to-orange-500 w-12 h-12 rounded-xl flex items-center justify-center mb-4"><i data-feather="map-pin" class="w-6 h-6 text-white"></i></div><h3 class="font-bold text-gray-800 dark:text-white mb-2">Rastreamento em Tempo Real</h3><p class="text-sm text-gray-500 dark:text-gray-400">Acompanhe ônibus no mapa com atualização automática e ETA para cada parada.</p></div>
+      <div class="feature-card p-6 shadow-lg"><div class="bg-gradient-to-br from-yellow-400 to-orange-500 w-12 h-12 rounded-xl flex items-center justify-center mb-4"><i data-feather="credit-card" class="w-6 h-6 text-white"></i></div><h3 class="font-bold text-gray-800 dark:text-white mb-2">Cartão Digital</h3><p class="text-sm text-gray-500 dark:text-gray-400">Recarregue via cartão, PIX ou boleto e consulte seu histórico de uso.</p></div>
+      <div class="feature-card p-6 shadow-lg"><div class="bg-gradient-to-br from-yellow-400 to-orange-500 w-12 h-12 rounded-xl flex items-center justify-center mb-4"><i data-feather="bell" class="w-6 h-6 text-white"></i></div><h3 class="font-bold text-gray-800 dark:text-white mb-2">Notificações Inteligentes</h3><p class="text-sm text-gray-500 dark:text-gray-400">Alertas de saldo baixo, atrasos e confirmações em tempo real.</p></div>
+      <div class="feature-card p-6 shadow-lg"><div class="bg-gradient-to-br from-yellow-400 to-orange-500 w-12 h-12 rounded-xl flex items-center justify-center mb-4"><i data-feather="star" class="w-6 h-6 text-white"></i></div><h3 class="font-bold text-gray-800 dark:text-white mb-2">Avaliação do Serviço</h3><p class="text-sm text-gray-500 dark:text-gray-400">Avalie pontualidade, limpeza, conforto e atendimento do transporte.</p></div>
+      <div class="feature-card p-6 shadow-lg"><div class="bg-gradient-to-br from-yellow-400 to-orange-500 w-12 h-12 rounded-xl flex items-center justify-center mb-4"><i data-feather="map" class="w-6 h-6 text-white"></i></div><h3 class="font-bold text-gray-800 dark:text-white mb-2">Rotas e Paradas</h3><p class="text-sm text-gray-500 dark:text-gray-400">Consulte rotas detalhadas e tempo estimado de chegada.</p></div>
+      <div class="feature-card p-6 shadow-lg"><div class="bg-gradient-to-br from-yellow-400 to-orange-500 w-12 h-12 rounded-xl flex items-center justify-center mb-4"><i data-feather="shield" class="w-6 h-6 text-white"></i></div><h3 class="font-bold text-gray-800 dark:text-white mb-2">Painel Administrativo</h3><p class="text-sm text-gray-500 dark:text-gray-400">Gestão completa de motoristas e frota para operadores.</p></div>
+    </div>
+  </section>
+
+  <section class="hero-bg py-16 text-center text-white">
+    <h2 class="text-3xl font-bold mb-4">Pronto para começar?</h2>
+    <p class="opacity-90 mb-8">Crie sua conta gratuita e transforme sua experiência no transporte público.</p>
+    <a href="register.html" class="bg-white text-yellow-600 px-10 py-3.5 rounded-2xl font-bold inline-block hover:shadow-xl hover:-translate-y-1 transition-all">Criar conta grátis</a>
+  </section>
+
+  <footer class="bg-gray-800 text-gray-400 text-center py-6 text-sm">
+    <p>© 2025 BuszApp — Sistema Inteligente de Mobilidade Urbana.</p>
+  </footer>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>

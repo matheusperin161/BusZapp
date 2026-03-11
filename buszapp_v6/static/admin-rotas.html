@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Gerenciar Rotas – BuszApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
+  <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon"/>
+  <link rel="stylesheet" href="./css/main.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    html,body{height:100%;margin:0;padding:0}
+    .route-tab{padding:8px 18px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;transition:all .2s;border:2px solid transparent;white-space:nowrap;flex-shrink:0}
+    .route-tab.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
+    .route-tab:not(.active){background:#fff;color:#374151;border-color:#e5e7eb}
+    .route-tab:not(.active):hover{border-color:#f59e0b;color:#f59e0b}
+    .dark .route-tab:not(.active){background:#2d3748;color:#e2e8f0;border-color:#4a5568}
+    .stop-row-admin{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.07);margin-bottom:8px;transition:box-shadow .2s}
+    .stop-row-admin:hover{box-shadow:0 4px 12px rgba(0,0,0,.12)}
+    .dark .stop-row-admin{background:#2d3748}
+    .order-badge{width:28px;height:28px;border-radius:8px;background:#fef3c7;color:#92400e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+    .btn-icon{padding:6px;border-radius:8px;cursor:pointer;transition:background .15s;border:none;background:transparent}
+    .btn-icon:hover{background:#f3f4f6}.dark .btn-icon:hover{background:#4a5568}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+    .modal-box{background:#fff;border-radius:20px;padding:28px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 60px rgba(0,0,0,.3);animation:slideUp .3s ease}
+    .dark .modal-box{background:#1e293b;color:#f1f5f9}
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .form-input{width:100%;padding:10px 14px;border-radius:10px;border:2px solid #e5e7eb;font-size:14px;outline:none;transition:border .2s;background:#fff}
+    .form-input:focus{border-color:#f59e0b}
+    .dark .form-input{background:#0f172a;border-color:#334155;color:#f1f5f9}
+    #pickMap,#pickMapRoute{width:100%;height:240px;border-radius:12px;cursor:crosshair}
+  </style>
+</head>
+<body class="bg-yellow-50 dark:bg-gray-900 min-h-screen flex flex-col">
+
+<header class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg sticky top-0 z-40">
+  <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="bg-white/20 p-2 rounded-xl"><i data-feather="map" class="w-5 h-5"></i></div>
+      <div>
+        <h1 class="text-lg font-bold">Gerenciar Rotas</h1>
+        <p class="text-xs opacity-80">Painel administrativo de paradas</p>
+      </div>
+    </div>
+    <button onclick="window.location.href='dashboard.html'" class="p-2 rounded-full hover:bg-white/20 transition">
+      <i data-feather="arrow-left" class="w-5 h-5"></i>
+    </button>
+  </div>
+</header>
+
+<main class="container mx-auto px-4 py-6 flex-grow">
+
+  <!-- Top bar: tabs + new route button -->
+  <div class="flex items-start justify-between gap-4 mb-5">
+    <div>
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Rotas Cadastradas</h2>
+      <div id="routeTabs" class="flex gap-2 flex-wrap">
+        <p class="text-gray-400 text-sm">Carregando…</p>
+      </div>
+    </div>
+    <button onclick="openNewRouteModal()"
+            class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2.5 rounded-xl transition text-sm flex-shrink-0 mt-8">
+      <i data-feather="plus-circle" class="w-4 h-4"></i> Nova Linha
+    </button>
+  </div>
+
+  <!-- Route content -->
+  <div id="routePanel" class="hidden">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 id="routeTitle" class="text-lg font-bold text-gray-900 dark:text-white"></h3>
+        <p id="routeSub" class="text-sm text-gray-500 dark:text-gray-400"></p>
+      </div>
+      <button onclick="openAddStopModal()"
+              class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2 rounded-xl transition text-sm">
+        <i data-feather="plus" class="w-4 h-4"></i> Nova Parada
+      </button>
+    </div>
+    <div id="stopsList" class="mb-4"></div>
+    <p class="text-xs text-gray-400 dark:text-gray-500">💡 Clique no mapa ao adicionar uma parada para preencher as coordenadas automaticamente.</p>
+  </div>
+
+</main>
+
+<!-- ── NEW ROUTE MODAL ── -->
+<div id="newRouteModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">Nova Linha</h3>
+      <button onclick="closeNewRouteModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">NÚMERO DA LINHA *</label>
+          <input id="rNum" type="text" placeholder="Ex: 6" class="form-input"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">TARIFA (R$) *</label>
+          <input id="rFare" type="number" step="0.01" placeholder="4.50" class="form-input"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">NOME DA LINHA *</label>
+        <input id="rName" type="text" placeholder="Ex: Centro - Bairro São Pedro" class="form-input"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">ORIGEM *</label>
+          <input id="rOrigin" type="text" placeholder="Terminal Central" class="form-input"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">DESTINO *</label>
+          <input id="rDest" type="text" placeholder="Bairro São Pedro" class="form-input"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-2 block">CLIQUE NO MAPA: primeiro Origem (🟡), depois Destino (🔴)</label>
+        <div id="pickMapRoute"></div>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+          <div>
+            <label class="text-xs font-semibold text-gray-500 mb-1 block">LAT ORIGEM</label>
+            <input id="rOriginLat" type="number" step="0.000001" class="form-input" placeholder="-27.10597"/>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-500 mb-1 block">LNG ORIGEM</label>
+            <input id="rOriginLon" type="number" step="0.000001" class="form-input" placeholder="-52.61336"/>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-500 mb-1 block">LAT DESTINO</label>
+            <input id="rDestLat" type="number" step="0.000001" class="form-input" placeholder="-27.07171"/>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-gray-500 mb-1 block">LNG DESTINO</label>
+            <input id="rDestLon" type="number" step="0.000001" class="form-input" placeholder="-52.63635"/>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">1º clique = origem · 2º clique = destino</p>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">MOTORISTA RESPONSÁVEL</label>
+        <select id="rDriver" class="form-input">
+          <option value="">Sem motorista atribuído</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">VEÍCULO PRINCIPAL</label>
+        <select id="rVehicle" class="form-input">
+          <option value="">Sem veículo atribuído</option>
+        </select>
+      </div>
+    </div>
+    <div id="newRouteError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeNewRouteModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+      <button onclick="saveNewRoute()" class="flex-1 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition">Criar Linha</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD/EDIT STOP MODAL ── -->
+<div id="stopModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h3 id="stopModalTitle" class="text-lg font-bold text-gray-900 dark:text-white">Nova Parada</h3>
+      <button onclick="closeStopModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">NOME DA PARADA *</label>
+        <input id="stopName" type="text" placeholder="Ex: Terminal Central" class="form-input"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">LATITUDE</label>
+          <input id="stopLat" type="number" step="0.000001" placeholder="-27.10597" class="form-input"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">LONGITUDE</label>
+          <input id="stopLng" type="number" step="0.000001" placeholder="-52.61336" class="form-input"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">ORDEM</label>
+        <input id="stopOrder" type="number" min="1" placeholder="1" class="form-input"/>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">CLIQUE NO MAPA PARA DEFINIR COORDENADAS</label>
+        <div id="pickMap"></div>
+        <p class="text-xs text-gray-400 mt-1">Clique no mapa para preencher lat/lng automaticamente</p>
+      </div>
+    </div>
+    <div id="stopError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeStopModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+      <button onclick="saveStop()" class="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold transition">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DELETE MODAL ── -->
+<div id="deleteModal" class="modal-overlay hidden">
+  <div class="modal-box max-w-sm">
+    <div class="text-center mb-4">
+      <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-feather="trash-2" class="w-7 h-7 text-red-500"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">Remover Parada?</h3>
+      <p id="deleteStopName" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition">Cancelar</button>
+      <button onclick="confirmDelete()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition">Remover</button>
+    </div>
+  </div>
+</div>
+
+<script src="./js/app.js"></script>
+<script>
+  let routes=[], selectedRoute=null, editingStop=null, deletingStop=null;
+  let pickMap=null, pickMarker=null;
+  let routePickMap=null, routeOriginMarker=null, routeDestMarker=null, routePickStep=0;
+
+  function esc(s=''){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+  // ── Load selects for new route modal ─────────────────────────────────────────
+  async function loadRouteSelects(){
+    try{
+      const [drivers,vehicles]=await Promise.all([API.get('/api/admin/drivers'),API.get('/api/admin/vehicles')]);
+      const dSel=document.getElementById('rDriver');
+      dSel.innerHTML='<option value="">Sem motorista atribuído</option>';
+      drivers.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=`${d.name} (${d.code})`;dSel.appendChild(o);});
+      const vSel=document.getElementById('rVehicle');
+      vSel.innerHTML='<option value="">Sem veículo atribuído</option>';
+      vehicles.filter(v=>v.status==='ativo').forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=`${v.brand} ${v.model} - ${v.plate}`;vSel.appendChild(o);});
+    }catch(e){}
+  }
+
+  // ── Load routes ────────────────────────────────────────────────────────────
+  async function loadRoutes(){
+    try{
+      const data=await API.get('/api/admin/routes');
+      routes=data;
+      renderTabs();
+      if(routes.length&&!selectedRoute)selectRoute(routes[0]);
+    }catch(e){
+      document.getElementById('routeTabs').innerHTML='<p class="text-red-400 text-sm">Erro ao carregar rotas. Certifique-se de que rodou o seed.py.</p>';
+    }
+  }
+
+  function renderTabs(){
+    const tabs=document.getElementById('routeTabs');
+    if(!routes.length){tabs.innerHTML='<p class="text-gray-400 text-sm">Nenhuma linha cadastrada ainda.</p>';return;}
+    tabs.innerHTML='';
+    routes.forEach(r=>{
+      const btn=document.createElement('button');
+      btn.className='route-tab'+(selectedRoute?.id===r.id?' active':'');
+      btn.textContent=`${r.route_name}`;
+      btn.addEventListener('click',()=>selectRoute(r));
+      tabs.appendChild(btn);
+    });
+    if(typeof feather!=='undefined')feather.replace();
+  }
+
+  function selectRoute(r){
+    selectedRoute=r;
+    renderTabs();
+    document.getElementById('routePanel').classList.remove('hidden');
+    document.getElementById('routeTitle').textContent=r.route_name;
+    const driverInfo = r.driver ? `🧑 ${r.driver.name} (${r.driver.code})` : '🧑 Sem motorista';
+    const vehicleInfo = r.vehicle ? `🚌 ${r.vehicle.model} — ${r.vehicle.plate}` : '🚌 Sem veículo';
+    document.getElementById('routeSub').textContent=`${r.stop_count} parada(s)  ·  ${driverInfo}  ·  ${vehicleInfo}`;
+    renderStops(r.stops||[]);
+  }
+
+  function renderStops(stops){
+    const list=document.getElementById('stopsList');
+    if(!stops.length){list.innerHTML='<p class="text-gray-400 text-center py-6">Nenhuma parada. Clique em "Nova Parada".</p>';return;}
+    const sorted=stops.slice().sort((a,b)=>a.order-b.order);
+    list.innerHTML=sorted.map(s=>`
+      <div class="stop-row-admin">
+        <div class="order-badge">${s.order}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">${esc(s.name)}</p>
+          <p class="text-xs text-gray-400">${s.latitude.toFixed(5)}, ${s.longitude.toFixed(5)}</p>
+        </div>
+        <div class="flex gap-1">
+          <button class="btn-icon text-blue-500" onclick="openEditStopModal(${s.id})" title="Editar">
+            <i data-feather="edit-2" class="w-4 h-4"></i>
+          </button>
+          <button class="btn-icon text-red-500" onclick="openDeleteModal(${s.id},'${esc(s.name)}')" title="Remover">
+            <i data-feather="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>`).join('');
+    if(typeof feather!=='undefined')feather.replace();
+  }
+
+  // ── NEW ROUTE MODAL ────────────────────────────────────────────────────────
+  function openNewRouteModal(){
+    ['rNum','rName','rOrigin','rDest','rFare','rOriginLat','rOriginLon','rDestLat','rDestLon']
+      .forEach(id=>document.getElementById(id).value='');
+    document.getElementById('rDriver').value='';
+    document.getElementById('rVehicle').value='';
+    document.getElementById('newRouteError').classList.add('hidden');
+    document.getElementById('newRouteModal').classList.remove('hidden');
+    routePickStep=0;
+    loadRouteSelects();
+    setTimeout(()=>{
+      if(routePickMap){routePickMap.remove();routePickMap=null;}
+      routeOriginMarker=null;routeDestMarker=null;
+      routePickMap=L.map('pickMapRoute').setView([-27.1060,-52.6134],13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}).addTo(routePickMap);
+      routePickMap.on('click',(e)=>{
+        const {lat,lng}=e.latlng;
+        if(routePickStep===0){
+          document.getElementById('rOriginLat').value=lat.toFixed(6);
+          document.getElementById('rOriginLon').value=lng.toFixed(6);
+          if(routeOriginMarker)routePickMap.removeLayer(routeOriginMarker);
+          routeOriginMarker=L.circleMarker([lat,lng],{radius:8,fillColor:'#f59e0b',color:'#fff',weight:2,fillOpacity:1}).addTo(routePickMap).bindTooltip('Origem').openTooltip();
+          routePickStep=1;
+        }else{
+          document.getElementById('rDestLat').value=lat.toFixed(6);
+          document.getElementById('rDestLon').value=lng.toFixed(6);
+          if(routeDestMarker)routePickMap.removeLayer(routeDestMarker);
+          routeDestMarker=L.circleMarker([lat,lng],{radius:8,fillColor:'#ef4444',color:'#fff',weight:2,fillOpacity:1}).addTo(routePickMap).bindTooltip('Destino').openTooltip();
+          routePickStep=0;
+        }
+      });
+      routePickMap.invalidateSize();
+    },150);
+  }
+
+  function closeNewRouteModal(){
+    document.getElementById('newRouteModal').classList.add('hidden');
+    if(routePickMap){routePickMap.remove();routePickMap=null;}
+  }
+
+  async function saveNewRoute(){
+    const errEl=document.getElementById('newRouteError');
+    const body={
+      route_number:document.getElementById('rNum').value.trim(),
+      route_name:document.getElementById('rName').value.trim(),
+      origin:document.getElementById('rOrigin').value.trim(),
+      destination:document.getElementById('rDest').value.trim(),
+      fare:document.getElementById('rFare').value,
+      origin_lat:document.getElementById('rOriginLat').value,
+      origin_lon:document.getElementById('rOriginLon').value,
+      dest_lat:document.getElementById('rDestLat').value,
+      dest_lon:document.getElementById('rDestLon').value,
+      driver_id:document.getElementById('rDriver').value||null,
+      vehicle_id:document.getElementById('rVehicle').value||null,
+    };
+    if(!body.route_number||!body.route_name||!body.origin||!body.destination||!body.fare||
+       !body.origin_lat||!body.origin_lon||!body.dest_lat||!body.dest_lon){
+      errEl.textContent='Preencha todos os campos e marque origem e destino no mapa.';
+      errEl.classList.remove('hidden');return;
+    }
+    try{
+      await API.post('/api/admin/routes',body);
+      Toast.success(`Linha ${body.route_number} criada com sucesso!`);
+      closeNewRouteModal();
+      await loadRoutes();
+    }catch(e){
+      errEl.textContent=e.message||'Erro ao criar linha.';
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  // ── ADD/EDIT STOP MODAL ────────────────────────────────────────────────────
+  function openAddStopModal(){
+    editingStop=null;
+    document.getElementById('stopModalTitle').textContent='Nova Parada';
+    document.getElementById('stopName').value='';
+    document.getElementById('stopLat').value='';
+    document.getElementById('stopLng').value='';
+    document.getElementById('stopOrder').value=(selectedRoute?.stop_count||0)+1;
+    document.getElementById('stopError').classList.add('hidden');
+    document.getElementById('stopModal').classList.remove('hidden');
+    initPickMap();
+  }
+
+  function openEditStopModal(stopId){
+    const stop=selectedRoute.stops.find(s=>s.id===stopId);
+    if(!stop)return;
+    editingStop=stop;
+    document.getElementById('stopModalTitle').textContent='Editar Parada';
+    document.getElementById('stopName').value=stop.name;
+    document.getElementById('stopLat').value=stop.latitude;
+    document.getElementById('stopLng').value=stop.longitude;
+    document.getElementById('stopOrder').value=stop.order;
+    document.getElementById('stopError').classList.add('hidden');
+    document.getElementById('stopModal').classList.remove('hidden');
+    initPickMap(stop.latitude,stop.longitude);
+  }
+
+  function closeStopModal(){
+    document.getElementById('stopModal').classList.add('hidden');
+    if(pickMap){pickMap.remove();pickMap=null;pickMarker=null;}
+  }
+
+  function initPickMap(lat,lng){
+    setTimeout(()=>{
+      if(pickMap){pickMap.remove();pickMap=null;pickMarker=null;}
+      const center=[lat||selectedRoute?.origin_lat||-27.1060,lng||selectedRoute?.origin_lon||-52.6134];
+      pickMap=L.map('pickMap').setView(center,14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}).addTo(pickMap);
+      if(lat&&lng){pickMarker=L.marker([lat,lng]).addTo(pickMap);}
+      pickMap.on('click',(e)=>{
+        const {lat,lng}=e.latlng;
+        document.getElementById('stopLat').value=lat.toFixed(6);
+        document.getElementById('stopLng').value=lng.toFixed(6);
+        if(pickMarker)pickMarker.setLatLng([lat,lng]);
+        else pickMarker=L.marker([lat,lng]).addTo(pickMap);
+      });
+      pickMap.invalidateSize();
+    },150);
+  }
+
+  async function saveStop(){
+    const name=document.getElementById('stopName').value.trim();
+    const lat=parseFloat(document.getElementById('stopLat').value);
+    const lng=parseFloat(document.getElementById('stopLng').value);
+    const order=parseInt(document.getElementById('stopOrder').value);
+    const errEl=document.getElementById('stopError');
+    if(!name||isNaN(lat)||isNaN(lng)||isNaN(order)){
+      errEl.textContent='Preencha todos os campos corretamente.';
+      errEl.classList.remove('hidden');return;
+    }
+    try{
+      if(editingStop){
+        await API.put(`/api/admin/routes/${selectedRoute.id}/stops/${editingStop.id}`,{name,latitude:lat,longitude:lng,order});
+        Toast.success('Parada atualizada!');
+      }else{
+        await API.post(`/api/admin/routes/${selectedRoute.id}/stops`,{name,latitude:lat,longitude:lng,order});
+        Toast.success('Parada adicionada!');
+      }
+      closeStopModal();
+      await reloadRoute();
+    }catch(e){
+      errEl.textContent=e.message||'Erro ao salvar.';
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  // ── DELETE MODAL ───────────────────────────────────────────────────────────
+  function openDeleteModal(stopId,stopName){
+    deletingStop=stopId;
+    document.getElementById('deleteStopName').textContent=stopName;
+    document.getElementById('deleteModal').classList.remove('hidden');
+  }
+  function closeDeleteModal(){document.getElementById('deleteModal').classList.add('hidden');deletingStop=null;}
+  async function confirmDelete(){
+    try{
+      await API.delete(`/api/admin/routes/${selectedRoute.id}/stops/${deletingStop}`);
+      Toast.success('Parada removida!');
+      closeDeleteModal();
+      await reloadRoute();
+    }catch(e){Toast.error('Erro ao remover.');}
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  async function reloadRoute(){
+    try{
+      const all=await API.get('/api/admin/routes');
+      routes=all;
+      selectedRoute=routes.find(r=>r.id===selectedRoute?.id)||routes[0]||null;
+      renderTabs();
+      if(selectedRoute)selectRoute(selectedRoute);
+    }catch(e){}
+  }
+
+  // ── Dark mode ──────────────────────────────────────────────────────────────
+  const saved=localStorage.getItem('theme'),prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&prefersDark))document.documentElement.classList.add('dark');
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    loadRoutes();
+    if(typeof feather!=='undefined')feather.replace();
+  });
+</script>
+</body>
+</html>
