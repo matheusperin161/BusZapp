@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Gerenciar Motoristas – BuszApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
+  <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon"/>
+  <link rel="stylesheet" href="./css/main.css"/>
+  <style>
+    .form-input{width:100%;padding:10px 14px;border-radius:10px;border:2px solid #e5e7eb;font-size:14px;outline:none;transition:border .2s;background:#fff}
+    .form-input:focus{border-color:#f59e0b}
+    .dark .form-input{background:#0f172a;border-color:#334155;color:#f1f5f9}
+    .driver-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.07);margin-bottom:8px;transition:box-shadow .2s}
+    .driver-row:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+    .dark .driver-row{background:#2d3748}
+    .btn-icon{padding:7px;border-radius:8px;cursor:pointer;transition:background .15s;border:none;background:transparent}
+    .btn-icon:hover{background:#f3f4f6}.dark .btn-icon:hover{background:#4a5568}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+    .modal-box{background:#fff;border-radius:20px;padding:28px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 60px rgba(0,0,0,.3);animation:slideUp .3s ease}
+    .dark .modal-box{background:#1e293b;color:#f1f5f9}
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+    .badge-green{background:#dcfce7;color:#166534}.badge-red{background:#fee2e2;color:#991b1b}.badge-yellow{background:#fef3c7;color:#92400e}
+    .dark .badge-green{background:#14532d;color:#86efac}.dark .badge-red{background:#7f1d1d;color:#fca5a5}.dark .badge-yellow{background:#78350f;color:#fde68a}
+  </style>
+</head>
+<body class="bg-yellow-50 dark:bg-gray-900 min-h-screen flex flex-col">
+
+<header class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg sticky top-0 z-40">
+  <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="bg-white/20 p-2 rounded-xl"><i data-feather="users" class="w-5 h-5"></i></div>
+      <div>
+        <h1 class="text-lg font-bold">Gerenciar Motoristas</h1>
+        <p class="text-xs opacity-80">Administre os motoristas da frota</p>
+      </div>
+    </div>
+    <button onclick="window.location.href='dashboard.html'" class="p-2 rounded-full hover:bg-white/20 transition">
+      <i data-feather="arrow-left" class="w-5 h-5"></i>
+    </button>
+  </div>
+</header>
+
+<main class="container mx-auto px-4 py-6 flex-grow">
+  <!-- Top bar -->
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">Motoristas Cadastrados</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" id="driverCount">Carregando…</p>
+    </div>
+    <button onclick="openModal()"
+            class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2.5 rounded-xl transition text-sm">
+      <i data-feather="plus" class="w-4 h-4"></i> Novo Motorista
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="relative mb-5">
+    <i data-feather="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-yellow-500 pointer-events-none"></i>
+    <input id="searchInput" type="text" placeholder="Buscar por nome ou CPF…"
+           oninput="filterDrivers(this.value)"
+           class="form-input pl-10"/>
+  </div>
+
+  <!-- Driver list -->
+  <div id="driverList">
+    <p class="text-gray-400 text-center py-10">Carregando motoristas…</p>
+  </div>
+</main>
+
+<!-- ADD/EDIT MODAL -->
+<div id="driverModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h3 id="modalTitle" class="text-lg font-bold text-gray-900 dark:text-white">Novo Motorista</h3>
+      <button onclick="closeModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">NOME COMPLETO *</label>
+        <input id="dName" type="text" placeholder="Ex: João da Silva" class="form-input"/>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">EMAIL *</label>
+        <input id="dEmail" type="email" placeholder="joao@empresa.com" class="form-input"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">CPF *</label>
+          <input id="dCpf" type="text" placeholder="000.000.000-00" maxlength="14" class="form-input"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">CNH *</label>
+          <input id="dCnh" type="text" placeholder="00000000000" maxlength="11" class="form-input"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">LINHA DO ÔNIBUS *</label>
+        <select id="dBusLine" class="form-input">
+          <option value="">Selecione a linha…</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">CÓDIGO DO MOTORISTA *</label>
+        <input id="dCode" type="text" placeholder="Ex: MTR12345" class="form-input"/>
+      </div>
+      <div id="passwordSection">
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">SENHA DE ACESSO <span id="passwordRequired">*</span></label>
+        <div class="relative">
+          <input id="dPassword" type="password" placeholder="Senha para login do motorista" class="form-input pr-10"/>
+          <button type="button" onclick="togglePassVis()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <i data-feather="eye" class="w-4 h-4" id="eyeIcon"></i>
+          </button>
+        </div>
+        <p id="passwordHint" class="text-xs text-gray-400 mt-1 hidden">Deixe em branco para manter a senha atual</p>
+      </div>
+    </div>
+    <div id="modalError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+      <button onclick="saveDriver()" class="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold transition">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div id="deleteModal" class="modal-overlay hidden">
+  <div class="modal-box max-w-sm">
+    <div class="text-center mb-4">
+      <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-feather="trash-2" class="w-7 h-7 text-red-500"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">Remover Motorista?</h3>
+      <p id="deleteDriverName" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition">Cancelar</button>
+      <button onclick="confirmDelete()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition">Remover</button>
+    </div>
+  </div>
+</div>
+
+<script src="./js/app.js"></script>
+<script>
+  let allDrivers=[], editingId=null, deletingId=null;
+  function esc(s=''){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+  async function loadDrivers(){
+    try{
+      allDrivers=await API.get('/api/admin/drivers');
+      renderDrivers(allDrivers);
+    }catch(e){
+      document.getElementById('driverList').innerHTML='<p class="text-red-400 text-center py-8">Erro ao carregar motoristas.</p>';
+    }
+  }
+
+  function renderDrivers(list){
+    const el=document.getElementById('driverList');
+    document.getElementById('driverCount').textContent=`${list.length} motorista(s) cadastrado(s)`;
+    if(!list.length){
+      el.innerHTML=`<div class="text-center py-12 text-gray-400 dark:text-gray-500">
+        <i data-feather="users" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+        <p class="font-semibold">Nenhum motorista cadastrado</p>
+        <p class="text-sm mt-1">Clique em "Novo Motorista" para começar</p>
+      </div>`;
+      if(typeof feather!=='undefined')feather.replace();return;
+    }
+    el.innerHTML=list.map(d=>`
+      <div class="driver-row">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center text-white font-bold flex-shrink-0 text-sm">
+          ${esc(d.name.charAt(0).toUpperCase())}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-gray-900 dark:text-white text-sm">${esc(d.name)}</p>
+          <p class="text-xs text-gray-400 truncate">${esc(d.email)} · CPF: ${esc(d.cpf)}</p>
+          <p class="text-xs text-gray-400">CNH: ${esc(d.cnh)} · Cód: ${esc(d.code)}</p>
+        </div>
+        <div class="flex-shrink-0 text-right hidden sm:block">
+          <span class="badge badge-yellow">${esc(d.bus_line)}</span>
+        </div>
+        <div class="flex gap-1 flex-shrink-0">
+          <button class="btn-icon text-blue-500" onclick="openEditModal(${d.id})" title="Editar">
+            <i data-feather="edit-2" class="w-4 h-4"></i>
+          </button>
+          <button class="btn-icon text-red-500" onclick="openDeleteModal(${d.id},'${esc(d.name)}')" title="Remover">
+            <i data-feather="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>`).join('');
+    if(typeof feather!=='undefined')feather.replace();
+  }
+
+  function filterDrivers(q){
+    const f=q.toLowerCase().trim();
+    renderDrivers(f?allDrivers.filter(d=>d.name.toLowerCase().includes(f)||d.cpf.includes(f)):allDrivers);
+  }
+
+  async function loadBusLines(){
+    try{
+      const routes=await API.get('/api/routes');
+      const sel=document.getElementById('dBusLine');
+      sel.innerHTML='<option value="">Selecione a linha…</option>';
+      routes.forEach(r=>{
+        const o=document.createElement('option');
+        o.value=`${r.route_number} - ${r.route_name}`;
+        o.textContent=`${r.route_number} - ${r.route_name}`;
+        sel.appendChild(o);
+      });
+    }catch(e){}
+  }
+
+  function openModal(){
+    editingId=null;
+    document.getElementById('modalTitle').textContent='Novo Motorista';
+    ['dName','dEmail','dCpf','dCnh','dCode','dPassword'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('dBusLine').value='';
+    document.getElementById('modalError').classList.add('hidden');
+    document.getElementById('passwordRequired').textContent='*';
+    document.getElementById('passwordHint').classList.add('hidden');
+    document.getElementById('driverModal').classList.remove('hidden');
+    if(typeof feather!=='undefined')feather.replace();
+  }
+
+  async function openEditModal(id){
+    try{
+      const d=await API.get(`/api/admin/drivers/${id}`);
+      editingId=id;
+      document.getElementById('modalTitle').textContent='Editar Motorista';
+      document.getElementById('dName').value=d.name;
+      document.getElementById('dEmail').value=d.email;
+      document.getElementById('dCpf').value=d.cpf;
+      document.getElementById('dCnh').value=d.cnh;
+      document.getElementById('dCode').value=d.code;
+      document.getElementById('dPassword').value='';
+      document.getElementById('passwordRequired').textContent='(opcional)';
+      document.getElementById('passwordHint').classList.remove('hidden');
+      // Try to match bus_line select
+      const sel=document.getElementById('dBusLine');
+      let found=false;
+      for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===d.bus_line){sel.selectedIndex=i;found=true;break;}}
+      if(!found){const o=document.createElement('option');o.value=d.bus_line;o.textContent=d.bus_line;sel.appendChild(o);sel.value=d.bus_line;}
+      document.getElementById('modalError').classList.add('hidden');
+      document.getElementById('driverModal').classList.remove('hidden');
+      if(typeof feather!=='undefined')feather.replace();
+    }catch(e){Toast.error('Erro ao carregar motorista.');}
+  }
+
+  function closeModal(){document.getElementById('driverModal').classList.add('hidden');}
+
+  function togglePassVis(){
+    const inp=document.getElementById('dPassword');
+    const icon=document.getElementById('eyeIcon');
+    if(inp.type==='password'){inp.type='text';icon.setAttribute('data-feather','eye-off');}
+    else{inp.type='password';icon.setAttribute('data-feather','eye');}
+    if(typeof feather!=='undefined')feather.replace();
+  }
+
+  async function saveDriver(){
+    const password=document.getElementById('dPassword').value;
+    const body={
+      name:document.getElementById('dName').value.trim(),
+      email:document.getElementById('dEmail').value.trim(),
+      cpf:document.getElementById('dCpf').value.trim(),
+      cnh:document.getElementById('dCnh').value.trim(),
+      bus_line:document.getElementById('dBusLine').value,
+      code:document.getElementById('dCode').value.trim(),
+    };
+    if(password) body.password=password;
+    const errEl=document.getElementById('modalError');
+    const baseFields=['name','email','cpf','cnh','bus_line','code'];
+    if(baseFields.some(k=>!body[k])){errEl.textContent='Preencha todos os campos obrigatórios.';errEl.classList.remove('hidden');return;}
+    if(!editingId && !password){errEl.textContent='A senha de acesso é obrigatória para novos motoristas.';errEl.classList.remove('hidden');return;}
+    try{
+      if(editingId){await API.put(`/api/admin/drivers/${editingId}`,body);Toast.success('Motorista atualizado!');}
+      else{await API.post('/api/admin/drivers',body);Toast.success('Motorista cadastrado!');}
+      closeModal();loadDrivers();
+    }catch(e){errEl.textContent=e.message||'Erro ao salvar.';errEl.classList.remove('hidden');}
+  }
+
+  function openDeleteModal(id,name){
+    deletingId=id;
+    document.getElementById('deleteDriverName').textContent=name;
+    document.getElementById('deleteModal').classList.remove('hidden');
+  }
+  function closeDeleteModal(){document.getElementById('deleteModal').classList.add('hidden');deletingId=null;}
+  async function confirmDelete(){
+    try{await API.delete(`/api/admin/drivers/${deletingId}`);Toast.success('Motorista removido!');closeDeleteModal();loadDrivers();}
+    catch(e){Toast.error('Erro ao remover.');}
+  }
+
+  // Dark mode
+  const saved=localStorage.getItem('theme'),prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  if(saved==='dark'||(saved===null&&prefersDark))document.documentElement.classList.add('dark');
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    loadBusLines();loadDrivers();
+    if(typeof feather!=='undefined')feather.replace();
+  });
+</script>
+</body>
+</html>

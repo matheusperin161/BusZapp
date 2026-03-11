@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – BuszApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
+  <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <style>
+    .balance-card {
+      background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+      border-radius: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .balance-card::before, .balance-card::after {
+      content:''; position:absolute; border-radius:50%;
+      background: rgba(255,255,255,0.1);
+    }
+    .balance-card::before { width:200px;height:200px; top:-80px;right:-60px; }
+    .balance-card::after  { width:140px;height:140px; bottom:-50px;left:-40px; }
+
+    .action-btn {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      padding:16px 12px; border-radius:14px; cursor:pointer;
+      background:white; transition:all .25s; border:none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .dark .action-btn { background:#2d3748; }
+    .action-btn:hover { transform:translateY(-4px); box-shadow:0 10px 28px rgba(245,158,11,0.2); }
+    .action-btn .icon-wrap {
+      width:48px;height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#fbbf24,#f59e0b);
+    }
+    .action-btn span { font-size:12px; font-weight:600; color:#92400e; }
+    .dark .action-btn span { color:#fde68a; }
+
+    /* Transaction list */
+    .tx-item {
+      display:flex; align-items:center; gap:12px; padding:12px 0;
+      border-bottom:1px solid #fef3c7;
+    }
+    .dark .tx-item { border-bottom-color:#4a5568; }
+    .tx-item:last-child { border-bottom:none; }
+
+    /* History modal */
+    .modal-overlay {
+      position:fixed;inset:0;background:rgba(0,0,0,.5);
+      z-index:2000;display:none;align-items:center;justify-content:center;
+      backdrop-filter:blur(2px);
+    }
+    .modal-overlay.active { display:flex; }
+    .modal-box {
+      background:white;border-radius:18px;
+      max-width:700px;width:90%;max-height:80vh;overflow-y:auto;
+      box-shadow:0 25px 60px rgba(0,0,0,.25);
+    }
+    .dark .modal-box { background:#1e293b; }
+  </style>
+</head>
+<body class="bg-yellow-50 dark:bg-gray-900 min-h-screen">
+
+  <!-- Sidebar Overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <!-- Menu Toggle -->
+  <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+    <i data-feather="menu" class="w-6 h-6"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
+    <a id="sidebarDrivers" href="add-driver.html" class="sidebar-item hidden">
+      <i data-feather="users"></i><span>Gerenciar Motoristas</span>
+    </a>
+    <a id="sidebarFleet" href="add-vehicle.html" class="sidebar-item hidden">
+      <i data-feather="truck"></i><span>Gerenciar Frota</span>
+    </a>
+    <a id="sidebarRoutes" href="admin-rotas.html" class="sidebar-item hidden">
+      <i data-feather="map"></i><span>Gerenciar Rotas</span>
+    </a>
+    <a id="sidebarHistory" href="#" class="sidebar-item hidden">
+      <i data-feather="clock"></i><span>Histórico de Recarga</span>
+    </a>
+    <a href="rating.html" class="sidebar-item">
+      <i data-feather="star"></i><span>Avaliação</span>
+    </a>
+    <button onclick="logout()" class="sidebar-item w-full text-left">
+      <i data-feather="log-out"></i><span>Sair</span>
+    </button>
+  </nav>
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3 pl-12">
+        <div class="bg-white/20 backdrop-blur p-2 rounded-xl">
+          <i data-feather="bus" class="w-7 h-7"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold">BuszApp</h1>
+          <p class="text-xs opacity-80">Painel de Controle</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 relative">
+        <button id="themeToggle" onclick="DarkMode.toggle();updateThemeIcon()"
+                class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema" aria-label="Alternar tema">
+          <i data-feather="moon" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Notifications -->
+        <div class="relative">
+          <button id="notificationButton" class="p-2.5 rounded-xl hover:bg-white/20 transition relative" aria-label="Notificações">
+            <i data-feather="bell" class="w-5 h-5"></i>
+            <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-yellow-500"></span>
+          </button>
+          <div id="notificationDropdown" class="hidden absolute right-0 top-full mt-2 w-80
+               bg-white dark:bg-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <h3 class="font-semibold text-gray-800 dark:text-white text-sm">Notificações</h3>
+              <button id="markAllAsRead" class="text-xs text-yellow-600 dark:text-yellow-400 hover:underline">Marcar todas lidas</button>
+            </div>
+            <div id="notificationList" class="max-h-72 overflow-y-auto">
+              <p id="noNotificationsMessage" class="text-sm text-gray-400 p-4 text-center">Nenhuma notificação.</p>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="window.location.href='profile.html'"
+                class="p-2.5 rounded-xl hover:bg-white/20 transition" aria-label="Perfil">
+          <i data-feather="user" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="container mx-auto px-4 py-8 max-w-5xl">
+
+    <!-- Balance Card -->
+    <div class="balance-card text-white p-8 shadow-2xl mb-8 animate-fade-in-up">
+      <div class="relative z-10">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="text-sm font-medium opacity-80 flex items-center gap-1.5 mb-2">
+              <i data-feather="credit-card" class="w-4 h-4"></i> Saldo do Cartão
+            </p>
+            <p id="cardBalance" class="text-5xl font-bold">R$ 0,00</p>
+            <p class="text-xs opacity-70 mt-1">Atualizado agora</p>
+          </div>
+          <div class="bg-white/20 p-4 rounded-2xl">
+            <i data-feather="bus" class="w-10 h-10"></i>
+          </div>
+        </div>
+
+        <div id="welcomeMsg" class="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2 text-sm w-fit">
+          <i data-feather="user" class="w-4 h-4"></i>
+          <span>Bem-vindo!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-3 gap-4 mb-8 animate-fade-in-up">
+      <button class="action-btn" onclick="window.location.href='recarga.html'">
+        <div class="icon-wrap"><i data-feather="plus-circle" class="w-6 h-6 text-white"></i></div>
+        <span>Recarregar</span>
+      </button>
+      <button class="action-btn" onclick="window.location.href='acompanhamento.html'">
+        <div class="icon-wrap"><i data-feather="map-pin" class="w-6 h-6 text-white"></i></div>
+        <span>Rastrear</span>
+      </button>
+      <button class="action-btn" onclick="window.location.href='rating.html'">
+        <div class="icon-wrap"><i data-feather="star" class="w-6 h-6 text-white"></i></div>
+        <span>Avaliar</span>
+      </button>
+    </div>
+
+    <!-- Transactions -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 animate-fade-in-up">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
+          <i data-feather="list" class="w-5 h-5 text-yellow-500"></i> Últimas transações
+        </h2>
+        <button onclick="openHistoryModal()" class="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">Ver todas</button>
+      </div>
+      <div id="transactionList">
+        <p class="text-sm text-gray-400 text-center py-4">Carregando…</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- History Modal -->
+  <div id="historyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Histórico de transações">
+    <div class="modal-box">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h3 class="font-bold text-gray-800 dark:text-white">Histórico de Transações</h3>
+        <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white" aria-label="Fechar">
+          <i data-feather="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="historyList" class="p-6"></div>
+    </div>
+  </div>
+
+  <script src="./js/app.js"></script>
+  <script src="./js/notifications.js"></script>
+  <script>
+    // ── Init ──────────────────────────────────────────────────────────────────
+    async function init() {
+      const user = await checkAuth(true);
+      if (!user) return;
+
+      document.getElementById('welcomeMsg').innerHTML =
+        `<i data-feather="user" class="w-4 h-4"></i><span>Olá, <strong>${escapeHtml(user.username)}</strong>!</span>`;
+      if (typeof feather !== 'undefined') feather.replace();
+
+      if (user.role === 'admin') {
+        document.getElementById('sidebarDrivers').classList.remove('hidden');
+        document.getElementById('sidebarFleet').classList.remove('hidden');
+        document.getElementById('sidebarRoutes').classList.remove('hidden');
+      }
+
+      await loadBalance();
+      await loadRecentTransactions();
+
+      setInterval(loadBalance, 30_000);
+
+      // History sidebar link
+      document.getElementById('sidebarHistory').classList.remove('hidden');
+      document.getElementById('sidebarHistory').addEventListener('click', e => {
+        e.preventDefault();
+        openHistoryModal();
+      });
+    }
+
+    // ── Balance ───────────────────────────────────────────────────────────────
+    async function loadBalance() {
+      try {
+        const { balance } = await API.get('/api/balance');
+        document.getElementById('cardBalance').textContent = formatCurrency(balance);
+        if (window.NotificationSystem) window.NotificationSystem.checkLowBalance(balance);
+      } catch { /* handled by checkAuth */ }
+    }
+
+    // ── Transactions ──────────────────────────────────────────────────────────
+    async function loadRecentTransactions() {
+      const list = document.getElementById('transactionList');
+      try {
+        const txs = await API.get('/api/transactions');
+        renderTransactions(txs.slice(0, 5), list);
+      } catch {
+        list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Não foi possível carregar.</p>';
+      }
+    }
+
+    function renderTransactions(txs, container) {
+      if (!txs.length) {
+        container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Nenhuma transação encontrada.</p>';
+        return;
+      }
+      container.innerHTML = txs.map(tx => {
+        const isPositive = tx.amount > 0;
+        const color = isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400';
+        const icon  = isPositive ? 'arrow-up-circle' : 'arrow-down-circle';
+        return `
+          <div class="tx-item">
+            <i data-feather="${icon}" class="w-5 h-5 flex-shrink-0 ${color}"></i>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-800 dark:text-white truncate">${escapeHtml(tx.description || '—')}</p>
+              <p class="text-xs text-gray-400">${formatDate(tx.created_at)}</p>
+            </div>
+            <span class="${color} font-semibold text-sm">${isPositive ? '+' : ''}${formatCurrency(tx.amount)}</span>
+          </div>
+        `;
+      }).join('');
+      if (typeof feather !== 'undefined') feather.replace();
+    }
+
+    // ── History Modal ─────────────────────────────────────────────────────────
+    async function openHistoryModal() {
+      document.getElementById('historyModal').classList.add('active');
+      document.getElementById('sidebar')?.classList.remove('open');
+      const list = document.getElementById('historyList');
+      list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Carregando…</p>';
+      try {
+        const txs = await API.get('/api/transactions');
+        renderTransactions(txs, list);
+      } catch {
+        list.innerHTML = '<p class="text-sm text-red-400 text-center py-4">Erro ao carregar histórico.</p>';
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').classList.remove('active');
+    }
+
+    document.getElementById('historyModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('historyModal')) closeHistoryModal();
+    });
+
+    // ── Theme Icon ────────────────────────────────────────────────────────────
+    function updateThemeIcon() {
+      const btn = document.getElementById('themeToggle');
+      const isDark = DarkMode.isDark();
+      btn.innerHTML = isDark
+        ? '<i data-feather="sun" class="w-5 h-5"></i>'
+        : '<i data-feather="moon" class="w-5 h-5"></i>';
+      if (typeof feather !== 'undefined') feather.replace();
+    }
+
+    // ── Refresh on focus ──────────────────────────────────────────────────────
+    window.addEventListener('focus', loadBalance);
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
+      updateThemeIcon();
+    });
+
+    function escapeHtml(str = '') {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>

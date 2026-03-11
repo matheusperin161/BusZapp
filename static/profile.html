@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meu Perfil - Mobilidade Urbana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
+    <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon" />
+    <style>
+      /* Estilos para o tema escuro */
+      .dark .bg-yellow-50 {
+        background-color: #1a202c;
+      }
+      .dark .bg-white {
+        background-color: #2d3748;
+      }
+      .dark .text-yellow-800 {
+        color: #f7fafc;
+      }
+      .dark .text-yellow-600 {
+        color: #a0aec0;
+      }
+      .dark .border-yellow-200 {
+        border-color: #4a5568;
+      }
+
+      /* Animações personalizadas */
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-slide-in-up {
+        animation: slideInUp 0.6s ease-out;
+      }
+
+      /* Card moderno */
+      .card-modern {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .card-modern:hover {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .dark .card-modern {
+        background: #2d3748;
+      }
+
+      /* Input moderno */
+      .input-modern {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: 2px solid #fef3c7;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .input-modern:focus {
+        outline: none;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+      }
+
+      .dark .input-modern {
+        background-color: rgba(45, 55, 72, 0.8);
+        border-color: #4a5568;
+        color: #f7fafc;
+      }
+
+      .dark .input-modern:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+      }
+
+      /* Botão moderno */
+      .btn-primary {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(245, 158, 11, 0.4);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      /* Header gradient */
+      .header-gradient {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      }
+
+      .dark .header-gradient {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      }
+
+      /* Profile avatar */
+      .profile-avatar {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+      }
+
+      /* Info card */
+      .info-card {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
+        border-left: 4px solid #f59e0b;
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .dark .info-card {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
+      }
+
+      /* Section title */
+      .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dark .section-title {
+        color: #f7fafc;
+      }
+    </style>
+  </head>
+  <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="header-gradient text-white shadow-lg sticky top-0 z-40">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <button
+            onclick="goBack()"
+            class="p-2 rounded-full hover:bg-white/20 transition"
+            title="Voltar"
+          >
+            <i data-feather="arrow-left" class="w-6 h-6"></i>
+          </button>
+          <div class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
+            <i data-feather="user" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">Meu Perfil</h1>
+            <p class="text-xs opacity-90">Gerencie suas informações pessoais</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 flex-grow">
+      <!-- Profile Header -->
+      <div class="card-modern p-8 mb-8 animate-slide-in-up">
+        <div class="flex flex-col md:flex-row items-center gap-6">
+          <div class="profile-avatar">
+            <i data-feather="user" class="w-16 h-16 text-white"></i>
+          </div>
+          <div class="flex-1 text-center md:text-left">
+            <h2 id="userName" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Carregando...
+            </h2>
+            <p id="userEmail" class="text-lg text-gray-600 dark:text-gray-400 mb-2">
+              Carregando...
+            </p>
+            <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+              <span class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm font-medium">
+                <i data-feather="check-circle" class="w-4 h-4"></i>
+                Conta Ativa
+              </span>
+              <span class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium">
+                <i data-feather="shield" class="w-4 h-4"></i>
+                Verificado
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Form -->
+        <div class="lg:col-span-2 animate-slide-in-up" style="animation-delay: 0.1s;">
+          <!-- Personal Information -->
+          <div class="card-modern p-8 mb-8">
+            <h3 class="section-title">
+              <i data-feather="edit-2" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
+              Informações Pessoais
+            </h3>
+            <form id="profileForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Nome de Usuário
+                </label>
+                <input
+                  type="text"
+                  id="usernameInput"
+                  class="input-modern w-full"
+                  placeholder="Carregando..."
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  E-mail
+                </label>
+                <input
+                  type="email"
+                  id="emailInput"
+                  class="input-modern w-full"
+                  placeholder="Carregando..."
+                />
+              </div>
+
+              <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-4">
+                  <i data-feather="lock" class="w-4 h-4 inline mr-2"></i>
+                  Alterar Senha
+                </h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Deixe em branco para manter a senha atual
+                </p>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Nova Senha
+                  </label>
+                  <input
+                    type="password"
+                    id="passwordInput"
+                    class="input-modern w-full"
+                    placeholder="Digite uma nova senha (opcional)"
+                  />
+                </div>
+
+                <div class="mt-4">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Confirmar Nova Senha
+                  </label>
+                  <input
+                    type="password"
+                    id="confirmPasswordInput"
+                    class="input-modern w-full"
+                    placeholder="Confirme a nova senha"
+                  />
+                </div>
+              </div>
+
+              <div class="pt-6 flex gap-3">
+                <button
+                  type="button"
+                  id="updateProfileBtn"
+                  onclick="updateProfile()"
+                  class="btn-primary flex-1 flex items-center justify-center gap-2"
+                >
+                  <i data-feather="save" class="w-5 h-5"></i>
+                  Salvar Alterações
+                </button>
+                <button
+                  type="button"
+                  onclick="resetForm()"
+                  class="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+
+              <!-- Messages -->
+              <div
+                id="successMessage"
+                class="hidden mt-4 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-800 dark:text-green-300 px-4 py-3 rounded-lg flex items-center gap-2"
+              >
+                <i data-feather="check-circle" class="w-5 h-5"></i>
+                <span id="successText"></span>
+              </div>
+              <div
+                id="errorMessage"
+                class="hidden mt-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-300 px-4 py-3 rounded-lg flex items-center gap-2"
+              >
+                <i data-feather="alert-circle" class="w-5 h-5"></i>
+                <span id="errorText"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 animate-slide-in-up" style="animation-delay: 0.2s;">
+          <!-- Card Information -->
+          <div class="card-modern p-8 mb-8">
+            <h3 class="section-title">
+              <i data-feather="credit-card" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
+              Cartão de Transporte
+            </h3>
+            <div class="space-y-4">
+              <div class="info-card">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Número do Cartão</p>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">**** **** **** 1234</p>
+              </div>
+
+              <div class="info-card">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Saldo Atual</p>
+                <p id="currentBalance" class="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  Carregando...
+                </p>
+              </div>
+
+              <div class="info-card">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Tipo de Cartão</p>
+                <p class="text-gray-900 dark:text-white font-medium">Estudante</p>
+              </div>
+
+              <div class="info-card">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Última Recarga</p>
+                <p class="text-gray-900 dark:text-white font-medium">20/12/2024 - R$ 30,00</p>
+              </div>
+
+              <button
+                onclick="window.location.href='recarga.html'"
+                class="btn-primary w-full flex items-center justify-center gap-2 mt-4"
+              >
+                <i data-feather="plus-circle" class="w-5 h-5"></i>
+                Recarregar Cartão
+              </button>
+            </div>
+          </div>
+
+          <!-- Usage Statistics -->
+          <div class="card-modern p-8">
+            <h3 class="section-title">
+              <i data-feather="bar-chart-2" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
+              Estatísticas
+            </h3>
+            <div class="space-y-4">
+              <div class="info-card">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Viagens este mês</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">42</p>
+              </div>
+
+              <div class="info-card">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Gasto médio mensal</p>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">R$ 85,00</p>
+              </div>
+
+              <div class="info-card">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Linha mais utilizada</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">Linha 001 - Centro</p>
+              </div>
+
+              <div class="info-card bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-l-green-500">
+                <p class="text-xs text-green-700 dark:text-green-300 mb-1">Economia com desconto</p>
+                <p class="text-xl font-bold text-green-700 dark:text-green-300">R$ 42,50</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      feather.replace();
+
+      function goBack() {
+        window.history.back();
+      }
+
+      function resetForm() {
+        document.getElementById('usernameInput').value = '';
+        document.getElementById('emailInput').value = '';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('confirmPasswordInput').value = '';
+        hideMessages();
+        loadUserProfile();
+      }
+
+      // Função para carregar dados do perfil
+      async function loadUserProfile() {
+        try {
+          const response = await fetch('/api/auth/profile', {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+
+            // Atualizar elementos da página
+            document.getElementById('userName').textContent = data.username;
+            document.getElementById('userEmail').textContent = data.email;
+            document.getElementById('usernameInput').value = data.username;
+            document.getElementById('emailInput').value = data.email;
+            
+            // Atualizar saldo do cartão
+            if (data.card_balance !== undefined) {
+              document.getElementById('currentBalance').textContent = `R$ ${parseFloat(data.card_balance).toFixed(2).replace('.', ',')}`;
+            }
+          } else if (response.status === 401) {
+            // Usuário não autenticado, redirecionar para login
+            window.location.href = 'login.html';
+          } else {
+            showError('Erro ao carregar dados do perfil');
+          }
+        } catch (error) {
+          console.error('Erro ao carregar perfil:', error);
+          showError('Erro de conexão ao carregar perfil');
+        }
+      }
+
+      // Função para atualizar perfil
+      async function updateProfile() {
+        const username = document.getElementById('usernameInput').value;
+        const email = document.getElementById('emailInput').value;
+        const password = document.getElementById('passwordInput').value;
+        const confirmPassword = document.getElementById('confirmPasswordInput').value;
+        const updateBtn = document.getElementById('updateProfileBtn');
+
+        // Limpar mensagens
+        hideMessages();
+
+        // Validações
+        if (!username.trim() || !email.trim()) {
+          showError('Nome de usuário e e-mail são obrigatórios');
+          return;
+        }
+
+        if (password && password !== confirmPassword) {
+          showError('As senhas não coincidem');
+          return;
+        }
+
+        if (password && password.length < 6) {
+          showError('A senha deve ter pelo menos 6 caracteres');
+          return;
+        }
+
+        // Desabilitar botão durante a atualização
+        updateBtn.disabled = true;
+        updateBtn.innerHTML = '<i data-feather="loader" class="w-5 h-5 mr-2 animate-spin"></i>Salvando...';
+        feather.replace();
+
+        try {
+          const requestData = {
+            username: username.trim(),
+            email: email.trim(),
+          };
+
+          // Incluir senha apenas se foi fornecida
+          if (password) {
+            requestData.password = password;
+          }
+
+          const response = await fetch('/api/auth/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(requestData),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showSuccess('Perfil atualizado com sucesso!');
+
+            // Atualizar elementos da página
+            document.getElementById('userName').textContent = data.username;
+            document.getElementById('userEmail').textContent = data.email;
+
+            // Limpar campos de senha
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('confirmPasswordInput').value = '';
+          } else {
+            showError(data.error || 'Erro ao atualizar perfil');
+          }
+        } catch (error) {
+          console.error('Erro:', error);
+          showError('Erro de conexão. Tente novamente.');
+        } finally {
+          // Reabilitar botão
+          updateBtn.disabled = false;
+          updateBtn.innerHTML = '<i data-feather="save" class="w-5 h-5 mr-2"></i>Salvar Alterações';
+          feather.replace();
+        }
+      }
+
+      // Funções auxiliares para mensagens
+      function showSuccess(message) {
+        const successDiv = document.getElementById('successMessage');
+        const successText = document.getElementById('successText');
+        successText.textContent = message;
+        successDiv.classList.remove('hidden');
+
+        // Esconder após 5 segundos
+        setTimeout(() => {
+          successDiv.classList.add('hidden');
+        }, 5000);
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        errorText.textContent = message;
+        errorDiv.classList.remove('hidden');
+      }
+
+      function hideMessages() {
+        document.getElementById('successMessage').classList.add('hidden');
+        document.getElementById('errorMessage').classList.add('hidden');
+      }
+
+      // Carregar dados do perfil quando a página carregar
+      document.addEventListener('DOMContentLoaded', function() {
+        loadUserProfile();
+      });
+    </script>
+
+    <script>
+      // Script de inicialização do tema
+      function applyTheme(isDark) {
+        const html = document.documentElement;
+        if (isDark) {
+          html.classList.add('dark');
+          html.classList.remove('light');
+        } else {
+          html.classList.remove('dark');
+          html.classList.add('light');
+        }
+        feather.replace();
+      }
+
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      let isDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
+      applyTheme(isDark);
+    </script>
+  </body>
+</html>
