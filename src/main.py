@@ -3,12 +3,14 @@ import os
 from flask import Flask, send_from_directory
 from flask_socketio import SocketIO
 from flask_cors import CORS
+from flask_migrate import Migrate
 
 from src.models import db
 from src.config import config
 
 
 socketio = SocketIO()
+migrate = Migrate()
 
 
 def create_app(env: str = 'default') -> Flask:
@@ -20,6 +22,7 @@ def create_app(env: str = 'default') -> Flask:
     # Extensions
     CORS(app, supports_credentials=True)
     db.init_app(app)
+    migrate.init_app(app, db)   # habilita flask db init/migrate/upgrade
     socketio.init_app(app, cors_allowed_origins='*')
 
     # Register blueprints
