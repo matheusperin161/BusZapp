@@ -11,6 +11,7 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default='user', nullable=False)  # 'user' | 'admin'
     card_balance = db.Column(db.Float, default=0.0, nullable=False)
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     transactions = db.relationship('Transaction', backref='user', lazy='dynamic', cascade='all, delete-orphan')
@@ -27,6 +28,7 @@ class User(db.Model):
             'email': self.email,
             'role': self.role,
             'card_balance': self.card_balance,
+            'email_verified': self.email_verified,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -245,3 +247,66 @@ class Vehicle(db.Model):
             'driver_name': self.driver.name if self.driver else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
+
+
+class PasswordResetToken(db.Model):
+    """Token de redefinição de senha com expiração."""
+    __tablename__ = 'password_reset_token'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    token      = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used       = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('reset_tokens', lazy='dynamic'))
+
+    def is_valid(self):
+        return not self.used and self.expires_at > datetime.utcnow()
+
+
+class DriverIncident(db.Model):
+    """Ocorrência registrada pelo motorista durante o trajeto."""
+    __tablename__ = 'driver_incident'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    driver_id  = db.Column(db.Integer, db.ForeignKey('driver.id', ondelete='CASCADE'), nullable=False)
+    bus_number = db.Column(db.String(20), nullable=True)
+    route_id   = db.Column(db.Integer, db.ForeignKey('bus_route.id'), nullable=True)
+    type       = db.Column(db.String(30), nullable=False)  # 'atraso' | 'pane' | 'acidente' | 'outro'
+    description = db.Column(db.Text, nullable=True)
+    status     = db.Column(db.String(20), default='aberto', nullable=False)  # 'aberto' | 'resolvido'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    driver = db.relationship('Driver', backref=db.backref('incidents', lazy='dynamic'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'driver_id': self.driver_id,
+            'driver_name': self.driver.name if self.driver else None,
+            'bus_number': self.bus_number,
+            'route_id': self.route_id,
+            'type': self.type,
+            'description': self.description,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class EmailVerificationToken(db.Model):
+    """Token de verificação de e-mail para novos cadastros."""
+    __tablename__ = 'email_verification_token'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    token      = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used       = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('verification_tokens', lazy='dynamic'))
+
+    def is_valid(self):
+        return not self.used and self.expires_at > datetime.utcnow()

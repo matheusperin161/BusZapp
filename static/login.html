@@ -145,7 +145,17 @@
         submitBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
         setTimeout(() => window.location.href = res.redirect || 'dashboard.html', 600);
       } catch (err) {
-        errorBox.textContent = err.data?.error || 'E-mail ou senha inválidos.';
+        const data = err.data || {};
+        if (data.not_verified) {
+          // E-mail não verificado — mostrar opção de reenvio
+          errorBox.innerHTML = `
+            ${data.error}<br>
+            <button onclick="resendVerification('${data.email}')"
+              style="margin-top:8px;text-decoration:underline;background:none;border:none;cursor:pointer;color:inherit;font-size:inherit"
+              id="resendBtn">Reenviar link de verificação</button>`;
+        } else {
+          errorBox.textContent = data.error || 'E-mail ou senha inválidos.';
+        }
         errorBox.classList.remove('hidden');
         errorBox.classList.add('shake');
         setTimeout(() => errorBox.classList.remove('shake'), 400);
@@ -153,6 +163,19 @@
         btnLabel.textContent = 'Entrar';
       }
     });
+
+    async function resendVerification(email) {
+      const btn = document.getElementById('resendBtn');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+      try {
+        await API.post('/api/auth/resend-verification', { email });
+        btn.textContent = '✅ Link enviado! Verifique seu e-mail.';
+      } catch(e) {
+        btn.textContent = 'Erro — tente novamente';
+        btn.disabled = false;
+      }
+    }
   </script>
 </body>
 </html>

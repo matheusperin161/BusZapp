@@ -459,6 +459,63 @@
         padding-top: 36px;
       }
     }
+
+    /* ── Ocorrências ── */
+    .incident-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .incident-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 8px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg2);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .incident-btn:hover { border-color: var(--accent); background: rgba(0,198,255,0.07); }
+    .incident-btn .inc-icon { font-size: 1.4rem; }
+    .incident-btn.atraso:hover   { border-color: var(--yellow); background: rgba(255,234,0,0.07); }
+    .incident-btn.pane:hover     { border-color: #ff9600;       background: rgba(255,150,0,0.07); }
+    .incident-btn.acidente:hover { border-color: var(--red);    background: rgba(255,23,68,0.07); }
+    .incident-btn.outro:hover    { border-color: var(--accent);  background: rgba(0,198,255,0.07); }
+
+    .incident-desc {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .incident-desc:focus { border-color: var(--accent); }
+    .incident-desc::placeholder { color: var(--muted); }
+
+    .btn-incident-send {
+      background: linear-gradient(135deg, #ff9600, #ff5722);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(255,87,34,0.3);
+    }
+    .btn-incident-send:hover { box-shadow: 0 6px 22px rgba(255,87,34,0.45); }
+    .btn-incident-send:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
   </style>
 </head>
 <body>
@@ -556,6 +613,35 @@
     </button>
     <button class="btn btn-stop" id="btn-stop" onclick="stopTrip()" style="display:none">
       ⏹ Encerrar Trajeto
+    </button>
+  </div>
+
+
+  <!-- Ocorrências -->
+  <div class="card" id="incident-card" style="display:none">
+    <div class="card-title">Registrar Ocorrência</div>
+    <div class="incident-grid">
+      <button class="incident-btn atraso"   onclick="selectIncident('atraso')"   id="inc-atraso">
+        <span class="inc-icon">⏰</span><span>Atraso</span>
+      </button>
+      <button class="incident-btn pane"     onclick="selectIncident('pane')"     id="inc-pane">
+        <span class="inc-icon">🔧</span><span>Pane mecânica</span>
+      </button>
+      <button class="incident-btn acidente" onclick="selectIncident('acidente')" id="inc-acidente">
+        <span class="inc-icon">⚠️</span><span>Acidente</span>
+      </button>
+      <button class="incident-btn outro"    onclick="selectIncident('outro')"    id="inc-outro">
+        <span class="inc-icon">📋</span><span>Outro</span>
+      </button>
+    </div>
+    <textarea
+      class="incident-desc"
+      id="incident-desc"
+      rows="2"
+      placeholder="Descrição opcional da ocorrência..."
+    ></textarea>
+    <button class="btn btn-incident-send" id="btn-incident-send" onclick="sendIncident()" disabled style="margin-top:10px">
+      📢 Enviar Ocorrência
     </button>
   </div>
 
@@ -825,6 +911,7 @@
 
     setStatus(true, 'Transmitindo');
     log(`🚌 Trajeto iniciado: ${selectedRoute.name} | ${selectedSchedule.departure_time}`, 'success');
+    document.getElementById('incident-card').style.display = 'block';
 
     // Start sending
     sendInterval = setInterval(sendLocation, SEND_INTERVAL_MS);
@@ -850,8 +937,71 @@
     document.getElementById('btn-start').disabled = !selectedSchedule;
 
     setStatus(false, 'Offline');
+    document.getElementById('incident-card').style.display = 'none';
     log(`⏹ Trajeto encerrado. Total: ${sendCount} atualizações enviadas.`, 'warn');
     sendCount = 0;
+  }
+
+
+  // ── Ocorrências ──────────────────────────────────────────────────────────
+  let selectedIncidentType = null;
+
+  function selectIncident(type) {
+    selectedIncidentType = type;
+    // visual feedback
+    document.querySelectorAll('.incident-btn').forEach(b => {
+      b.style.opacity = '0.4';
+    });
+    document.getElementById('inc-' + type).style.opacity = '1';
+    document.getElementById('inc-' + type).style.borderColor = 'var(--accent)';
+    document.getElementById('btn-incident-send').disabled = false;
+  }
+
+  async function sendIncident() {
+    if (!selectedIncidentType || !selectedSchedule) return;
+
+    const desc = document.getElementById('incident-desc').value.trim();
+    const btn  = document.getElementById('btn-incident-send');
+    btn.disabled = true;
+    btn.textContent = '⏳ Enviando...';
+
+    const driverId = localStorage.getItem('driver_id') || null;
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/incidents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          driver_id:   driverId,
+          bus_number:  selectedSchedule.bus_number,
+          route_id:    selectedRoute?.id || null,
+          type:        selectedIncidentType,
+          description: desc || null,
+        }),
+      });
+
+      if (res.ok) {
+        log(`📢 Ocorrência "${selectedIncidentType}" enviada — passageiros notificados`, 'success');
+        // Reset
+        selectedIncidentType = null;
+        document.querySelectorAll('.incident-btn').forEach(b => {
+          b.style.opacity = '';
+          b.style.borderColor = '';
+        });
+        document.getElementById('incident-desc').value = '';
+        btn.disabled = true;
+        btn.textContent = '📢 Enviar Ocorrência';
+      } else {
+        const data = await res.json();
+        log(`Erro ao enviar ocorrência: ${data.error || 'desconhecido'}`, 'error');
+        btn.disabled = false;
+        btn.textContent = '📢 Enviar Ocorrência';
+      }
+    } catch (e) {
+      log('Sem conexão ao enviar ocorrência', 'error');
+      btn.disabled = false;
+      btn.textContent = '📢 Enviar Ocorrência';
+    }
   }
 
   // ── Init ─────────────────────────────────────────────────────────────────

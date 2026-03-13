@@ -156,3 +156,91 @@ def get_ratings_stats():
         'average_comfort': round(avgs.comfort or 0, 2),
         'average_service': round(avgs.service or 0, 2),
     })
+
+
+# ── Ocorrências do Motorista ────────────────────────────────────────────────
+
+@bus_bp.route('/incidents', methods=['POST'])
+def create_incident():
+    """Motorista registra uma ocorrência durante o trajeto."""
+    from src.models.user import Driver, DriverIncident
+
+    data = request.get_json() or {}
+    driver_id   = data.get('driver_id')
+    bus_number  = data.get('bus_number', '').strip()
+    route_id    = data.get('route_id')
+    inc_type    = data.get('type', '').strip()
+    description = data.get('description', '').strip()
+
+    VALID_TYPES = ('atraso', 'pane', 'acidente', 'outro')
+
+    if not driver_id or not inc_type:
+        return jsonify({'error': 'driver_id e type são obrigatórios'}), 400
+    if inc_type not in VALID_TYPES:
+        return jsonify({'error': f'Tipo inválido. Use: {", ".join(VALID_TYPES)}'}), 400
+
+    driver = db.session.get(Driver, driver_id)
+    if not driver:
+        return jsonify({'error': 'Motorista não encontrado'}), 404
+
+    incident = DriverIncident(
+        driver_id=driver_id,
+        bus_number=bus_number or None,
+        route_id=route_id or None,
+        type=inc_type,
+        description=description or None,
+    )
+    db.session.add(incident)
+
+    # Notifica todos os usuários sobre o tipo de ocorrência
+    type_labels = {
+        'atraso': 'Atraso na linha',
+        'pane':   'Pane mecânica',
+        'acidente': 'Acidente na via',
+        'outro':  'Ocorrência na linha',
+    }
+    title = type_labels.get(inc_type, 'Ocorrência')
+    msg_parts = [f'Motorista {driver.name} registrou: {title}.']
+    if bus_number:
+        msg_parts.append(f'Ônibus {bus_number}.')
+    if description:
+        msg_parts.append(description)
+
+    from src.models.user import User
+    users = User.query.filter_by(role='user').all()
+    for user in users:
+        db.session.add(Notification(
+            user_id=user.id,
+            title=title,
+            message=' '.join(msg_parts),
+        ))
+
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Ocorrência registrada com sucesso', 'incident': incident.to_dict()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Erro ao registrar ocorrência'}), 500
+
+
+@bus_bp.route('/incidents', methods=['GET'])
+def list_incidents():
+    """Admin lista todas as ocorrências."""
+    from src.models.user import DriverIncident
+    status = request.args.get('status')
+    query = DriverIncident.query.order_by(DriverIncident.created_at.desc())
+    if status:
+        query = query.filter_by(status=status)
+    return jsonify([i.to_dict() for i in query.limit(100).all()])
+
+
+@bus_bp.route('/incidents/<int:incident_id>/resolve', methods=['POST'])
+def resolve_incident(incident_id):
+    """Admin marca uma ocorrência como resolvida."""
+    from src.models.user import DriverIncident
+    incident = db.session.get(DriverIncident, incident_id)
+    if not incident:
+        return jsonify({'error': 'Ocorrência não encontrada'}), 404
+    incident.status = 'resolvido'
+    db.session.commit()
+    return jsonify({'message': 'Ocorrência resolvida', 'incident': incident.to_dict()})

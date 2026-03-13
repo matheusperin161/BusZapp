@@ -38,7 +38,13 @@
 <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen flex flex-col">
 
 <header class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg sticky top-0 z-50">
-  <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+  <div class="container mx-auto px-4 py-3 flex items-center gap-3">
+    <button id="backBtn" onclick="goBack()" class="p-2 rounded-full hover:bg-white/20 transition hidden">
+      <i data-feather="arrow-left" class="w-5 h-5"></i>
+    </button>
+    <button id="homeBtn" onclick="window.location.href='dashboard.html'" class="p-2 rounded-full hover:bg-white/20 transition">
+      <i data-feather="arrow-left" class="w-5 h-5"></i>
+    </button>
     <div class="flex items-center gap-3">
       <div class="bg-white/20 p-2 rounded-xl"><i data-feather="map-pin" class="w-5 h-5"></i></div>
       <div>
@@ -46,12 +52,6 @@
         <p class="text-xs opacity-80" id="headerSub">Rastreie em tempo real</p>
       </div>
     </div>
-    <button id="backBtn" onclick="goBack()" class="p-2 rounded-full hover:bg-white/20 transition hidden">
-      <i data-feather="arrow-left" class="w-5 h-5"></i>
-    </button>
-    <button id="homeBtn" onclick="window.location.href='dashboard.html'" class="p-2 rounded-full hover:bg-white/20 transition">
-      <i data-feather="arrow-left" class="w-5 h-5"></i>
-    </button>
   </div>
 </header>
 

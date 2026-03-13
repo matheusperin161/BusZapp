@@ -356,7 +356,14 @@
   <body class="bg-yellow-50 min-h-screen">
     <!-- Header -->
     <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-lg sticky top-0 z-40">
-      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="container mx-auto px-4 py-4 flex items-center gap-3">
+        <button
+          onclick="window.location.href='dashboard.html'"
+          class="p-2 rounded-full hover:bg-white/20 transition"
+          title="Voltar"
+        >
+          <i data-feather="arrow-left" class="w-6 h-6"></i>
+        </button>
         <div class="flex items-center space-x-3">
           <div class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
             <i data-feather="credit-card" class="w-7 h-7"></i>
@@ -366,13 +373,6 @@
             <p class="text-xs opacity-90">Recarregue seu transporte</p>
           </div>
         </div>
-        <button
-          onclick="window.location.href='dashboard.html'"
-          class="p-2 rounded-full hover:bg-white/20 transition"
-          title="Voltar"
-        >
-          <i data-feather="arrow-left" class="w-6 h-6"></i>
-        </button>
       </div>
     </header>
 
