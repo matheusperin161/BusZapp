@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Ambiente virtual
+venv/
+.venv/
+env/
+.env/
+
+# Variáveis de ambiente (NUNCA subir no git)
+.env
+
+# Banco de dados SQLite (não mais utilizado)
+*.db
+*.sqlite
+*.sqlite3
+src/instance/
+
+# Logs
+*.log
+logs/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
