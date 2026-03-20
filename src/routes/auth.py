@@ -303,3 +303,16 @@ def reset_password():
     except Exception:
         db.session.rollback()
         return jsonify({'error': 'Erro ao redefinir senha'}), 500
+
+
+@auth_bp.route('/driver/me', methods=['GET'])
+def driver_me():
+    """Retorna dados do motorista logado na sessão atual."""
+    from src.models.user import Driver
+    driver_id = session.get('driver_id')
+    if not driver_id:
+        return jsonify({'error': 'Não autenticado'}), 401
+    driver = db.session.get(Driver, driver_id)
+    if not driver:
+        return jsonify({'error': 'Motorista não encontrado'}), 404
+    return jsonify(driver.to_dict())

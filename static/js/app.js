@@ -88,6 +88,8 @@ async function requireAdmin() {
 
 async function logout() {
   await API.post('/api/auth/logout').catch(() => {});
+  localStorage.removeItem('buszapp_user_id');
+  localStorage.removeItem('driver_id');
   window.location.href = '/login.html';
 }
 

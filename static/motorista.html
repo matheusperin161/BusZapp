@@ -620,6 +620,13 @@
   <!-- Ocorrências -->
   <div class="card" id="incident-card" style="display:none">
     <div class="card-title">Registrar Ocorrência</div>
+
+    <!-- Preview da linha e horário ativos -->
+    <div id="incident-context" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-size:0.8rem;color:var(--muted)">
+      <span style="font-size:1rem">🚌</span>
+      <span id="incident-context-text">—</span>
+    </div>
+
     <div class="incident-grid">
       <button class="incident-btn atraso"   onclick="selectIncident('atraso')"   id="inc-atraso">
         <span class="inc-icon">⏰</span><span>Atraso</span>
@@ -638,10 +645,10 @@
       class="incident-desc"
       id="incident-desc"
       rows="2"
-      placeholder="Descrição opcional da ocorrência..."
+      placeholder="Descrição adicional (opcional)..."
     ></textarea>
     <button class="btn btn-incident-send" id="btn-incident-send" onclick="sendIncident()" disabled style="margin-top:10px">
-      📢 Enviar Ocorrência
+      📢 Alertar Passageiros
     </button>
   </div>
 
@@ -912,6 +919,12 @@
     setStatus(true, 'Transmitindo');
     log(`🚌 Trajeto iniciado: ${selectedRoute.name} | ${selectedSchedule.departure_time}`, 'success');
     document.getElementById('incident-card').style.display = 'block';
+    document.getElementById('incident-context-text').textContent =
+      `${selectedRoute.name} — Ônibus ${selectedSchedule.bus_number} | Saída ${selectedSchedule.departure_time}`;
+
+    // Popular contexto no card de ocorrências
+    document.getElementById('incident-context-text').textContent =
+      `Linha ${selectedRoute.number} — ${selectedRoute.name} | Horário ${selectedSchedule.departure_time} | Ônibus ${selectedSchedule.bus_number}`;
 
     // Start sending
     sendInterval = setInterval(sendLocation, SEND_INTERVAL_MS);
@@ -960,28 +973,42 @@
   async function sendIncident() {
     if (!selectedIncidentType || !selectedSchedule) return;
 
-    const desc = document.getElementById('incident-desc').value.trim();
-    const btn  = document.getElementById('btn-incident-send');
+    const desc   = document.getElementById('incident-desc').value.trim();
+    const btn    = document.getElementById('btn-incident-send');
     btn.disabled = true;
     btn.textContent = '⏳ Enviando...';
 
     const driverId = localStorage.getItem('driver_id') || null;
+
+    // Monta mensagem completa com linha e horário
+    const typeLabels = {
+      atraso:   'Atraso na linha',
+      pane:     'Pane mecânica',
+      acidente: 'Acidente na via',
+      outro:    'Ocorrência na linha',
+    };
+    const routeInfo = selectedRoute ? `Linha ${selectedRoute.number} — ${selectedRoute.name}` : '';
+    const timeInfo  = selectedSchedule.departure_time ? `Horário ${selectedSchedule.departure_time}` : '';
 
     try {
       const res = await fetch(`${SERVER_URL}/api/incidents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          driver_id:   driverId,
-          bus_number:  selectedSchedule.bus_number,
-          route_id:    selectedRoute?.id || null,
-          type:        selectedIncidentType,
-          description: desc || null,
+          driver_id:    driverId ? parseInt(driverId) : null,
+          bus_number:   selectedSchedule.bus_number || '',
+          route_id:     selectedRoute?.id || null,
+          route_name:   selectedRoute?.name || '',
+          route_number: selectedRoute?.number || '',
+          schedule_time: selectedSchedule.departure_time || '',
+          type:         selectedIncidentType,
+          description:  desc || '',
         }),
       });
 
       if (res.ok) {
-        log(`📢 Ocorrência "${selectedIncidentType}" enviada — passageiros notificados`, 'success');
+        const label = typeLabels[selectedIncidentType] || 'Ocorrência';
+        log(`📢 "${label}" enviado — passageiros notificados`, 'success');
         // Reset
         selectedIncidentType = null;
         document.querySelectorAll('.incident-btn').forEach(b => {
@@ -990,23 +1017,34 @@
         });
         document.getElementById('incident-desc').value = '';
         btn.disabled = true;
-        btn.textContent = '📢 Enviar Ocorrência';
+        btn.textContent = '📢 Alertar Passageiros';
       } else {
         const data = await res.json();
         log(`Erro ao enviar ocorrência: ${data.error || 'desconhecido'}`, 'error');
         btn.disabled = false;
-        btn.textContent = '📢 Enviar Ocorrência';
+        btn.textContent = '📢 Alertar Passageiros';
       }
     } catch (e) {
       log('Sem conexão ao enviar ocorrência', 'error');
       btn.disabled = false;
-      btn.textContent = '📢 Enviar Ocorrência';
+      btn.textContent = '📢 Alertar Passageiros';
     }
   }
 
   // ── Init ─────────────────────────────────────────────────────────────────
   document.getElementById('server-url').addEventListener('change', loadRoutes);
-  window.addEventListener('load', loadRoutes);
+  window.addEventListener('load', async () => {
+    // Buscar driver_id da sessão no servidor (fonte confiável)
+    try {
+      const res  = await fetch(`${SERVER_URL}/api/auth/driver/me`, { credentials: 'include' });
+      if (res.ok) {
+        const driver = await res.json();
+        localStorage.setItem('driver_id', driver.id);
+        localStorage.setItem('buszapp_user_id', 'd_' + driver.id);
+      }
+    } catch (e) { /* usa localStorage se já tiver */ }
+    loadRoutes();
+  });
 
   // Warn on close if active
   window.addEventListener('beforeunload', e => {

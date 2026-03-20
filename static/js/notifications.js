@@ -7,7 +7,7 @@ const NOTIF_CONFIG = {
   MIN_BALANCE:        5.00,
   MAX_STORED:         50,
   EXPIRY_MS:          7 * 24 * 60 * 60 * 1000, // 7 days
-  STORAGE_KEY:        'buszapp_notifications',
+  STORAGE_KEY:        'buszapp_notifications', // base — sufixo _userId adicionado dinamicamente
   DELAY_INTERVAL_MS:  60_000,
   ENABLE_DESKTOP:     true,
 };
@@ -90,9 +90,15 @@ class NotificationManager {
   getByType(type)       { return this._items.filter(n => n.type === type); }
 
   // Internal
+  _storageKey() {
+    // Chave separada por usuário para evitar vazamento entre contas
+    const uid = localStorage.getItem('buszapp_user_id') || 'guest';
+    return `${NOTIF_CONFIG.STORAGE_KEY}_${uid}`;
+  }
+
   _load() {
     try {
-      const raw = localStorage.getItem(NOTIF_CONFIG.STORAGE_KEY);
+      const raw = localStorage.getItem(this._storageKey());
       if (raw) {
         const parsed = JSON.parse(raw);
         const cutoff = Date.now() - NOTIF_CONFIG.EXPIRY_MS;
@@ -105,7 +111,7 @@ class NotificationManager {
 
   _save() {
     try {
-      localStorage.setItem(NOTIF_CONFIG.STORAGE_KEY, JSON.stringify(this._items));
+      localStorage.setItem(this._storageKey(), JSON.stringify(this._items));
     } catch { /* ignore */ }
   }
 
@@ -118,18 +124,15 @@ class NotificationManager {
     el.dataset.notifId = n.id;
     el.className = `notification-item ${n.type}${n.read ? '' : ' unread'}`;
     el.innerHTML = `
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1.5">
-            <span class="flex-shrink-0">${TYPE_ICONS[n.type] ?? TYPE_ICONS.info}</span>
-            <p class="notification-title font-semibold text-sm truncate">${escapeHtml(n.title)}</p>
-          </div>
-          <p class="notification-message text-xs mt-0.5 text-gray-600 dark:text-gray-400">${escapeHtml(n.message)}</p>
-          <p class="notification-time text-xs mt-1 text-gray-400">${n.time}</p>
+      <div class="notif-header">
+        <div class="notif-icon-title">
+          <span class="notif-icon">${TYPE_ICONS[n.type] ?? TYPE_ICONS.info}</span>
+          <p class="notification-title">${escapeHtml(n.title)}</p>
         </div>
-        <button data-close="${n.id}" class="flex-shrink-0 text-gray-400 hover:text-gray-700 text-sm leading-none"
-                aria-label="Fechar">✕</button>
+        <button data-close="${n.id}" class="notif-close-btn" aria-label="Fechar">✕</button>
       </div>
+      <p class="notification-message">${escapeHtml(n.message)}</p>
+      <p class="notification-time">${n.time}</p>
     `;
 
     el.querySelector('[data-close]').addEventListener('click', e => {
@@ -182,8 +185,11 @@ async function syncNotificationsFromAPI() {
     list.forEach(item => {
       const alreadyAdded = notificationManager._items.some(n => n.options?.backendId === item.id);
       if (alreadyAdded) return;
-      const type = item.title.includes('Recarga') ? 'success'
-                 : item.title.includes('Atraso')  ? 'line_delay'
+      const type = item.title.includes('Recarga')   ? 'success'
+                 : item.title.includes('Atraso')    ? 'line_delay'
+                 : item.title.includes('Pane')      ? 'warning'
+                 : item.title.includes('Acidente')  ? 'error'
+                 : item.title.includes('Saldo')     ? 'low_balance'
                  : 'info';
       notificationManager.add(item.title, item.message, type, { backendId: item.id });
     });
@@ -268,6 +274,10 @@ function initNotifications() {
   syncNotificationsFromAPI();
 
   setInterval(checkLineDelays, NOTIF_CONFIG.DELAY_INTERVAL_MS);
+
+  // Polling: busca novas notificações do backend a cada 30s
+  // Garante que alertas do motorista apareçam sem precisar recarregar
+  setInterval(syncNotificationsFromAPI, 30_000);
 }
 
 // ── Exports ───────────────────────────────────────────────────────────────────

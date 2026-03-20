@@ -141,6 +141,9 @@
           email:    document.getElementById('email').value.trim(),
           password: document.getElementById('password').value,
         });
+        // Salvar ID no localStorage para isolar notificações por usuário
+        if (res.user)   localStorage.setItem('buszapp_user_id', 'u_' + res.user.id);
+        if (res.driver) { localStorage.setItem('buszapp_user_id', 'd_' + res.driver.id); localStorage.setItem('driver_id', res.driver.id); }
         btnLabel.textContent = 'Sucesso! Redirecionando…';
         submitBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
         setTimeout(() => window.location.href = res.redirect || 'dashboard.html', 600);
