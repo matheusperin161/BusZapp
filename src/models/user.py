@@ -11,8 +11,12 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default='user', nullable=False)  # 'user' | 'admin'
     card_balance = db.Column(db.Float, default=0.0, nullable=False)
+    card_number = db.Column(db.String(25), nullable=True)
+    card_holder = db.Column(db.String(100), nullable=True)
+    card_type = db.Column(db.String(30), nullable=True)  # cidadao | normal | estudante | idoso | acompanhante | carteiro | colaborador | pcd
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
 
     transactions = db.relationship('Transaction', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     notifications = db.relationship('Notification', backref='user', lazy='dynamic', cascade='all, delete-orphan')

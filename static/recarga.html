@@ -86,6 +86,16 @@
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         box-shadow: 0 20px 60px rgba(0,0,0,.5);
       }
+      /* ——— Card type color variants ——— */
+      .bus-card.type-cidadao    { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 20px 60px rgba(251,191,36,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-normal     { background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); box-shadow: 0 20px 60px rgba(74,222,128,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-estudante  { background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%); box-shadow: 0 20px 60px rgba(96,165,250,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-idoso      { background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%); box-shadow: 0 20px 60px rgba(251,146,60,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-acompanhante { background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%); box-shadow: 0 20px 60px rgba(192,132,252,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-carteiro   { background: linear-gradient(135deg, #f87171 0%, #dc2626 100%); box-shadow: 0 20px 60px rgba(248,113,113,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-colaborador { background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%); box-shadow: 0 20px 60px rgba(34,211,238,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-pcd        { background: linear-gradient(135deg, #f472b6 0%, #db2777 100%); box-shadow: 0 20px 60px rgba(244,114,182,.4), 0 4px 12px rgba(0,0,0,.15); }
+
       .chip {
         width: 44px; height: 34px;
         background: linear-gradient(135deg, #fef3c7, #fcd34d);
@@ -202,18 +212,26 @@
       .type-btn {
         border: 2px solid #e5e7eb;
         border-radius: 12px;
-        padding: 12px;
+        padding: 10px 8px;
         cursor: pointer;
         transition: all .3s ease;
         background: white;
         text-align: center;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
       }
       .dark .type-btn { background: #374151; border-color: #4b5563; color: #f9fafb; }
-      .type-btn:hover { border-color: #6366f1; transform: translateY(-2px); }
-      .type-btn.active { border-color: #6366f1; background-color: #eef2ff; color: #4338ca; }
-      .dark .type-btn.active { background-color: rgba(99,102,241,.2); border-color: #818cf8; color: #a5b4fc; }
+      .type-btn:hover { transform: translateY(-2px); }
+      /* per-type active colors */
+      .type-btn[data-type="cidadao"].active    { border-color: #d97706; background-color: #fef3c7; color: #92400e; }
+      .type-btn[data-type="normal"].active     { border-color: #16a34a; background-color: #dcfce7; color: #14532d; }
+      .type-btn[data-type="estudante"].active  { border-color: #2563eb; background-color: #dbeafe; color: #1e3a8a; }
+      .type-btn[data-type="idoso"].active      { border-color: #ea580c; background-color: #ffedd5; color: #7c2d12; }
+      .type-btn[data-type="acompanhante"].active { border-color: #9333ea; background-color: #f3e8ff; color: #581c87; }
+      .type-btn[data-type="carteiro"].active   { border-color: #dc2626; background-color: #fee2e2; color: #7f1d1d; }
+      .type-btn[data-type="colaborador"].active { border-color: #0891b2; background-color: #cffafe; color: #164e63; }
+      .type-btn[data-type="pcd"].active        { border-color: #db2777; background-color: #fce7f3; color: #831843; }
+      .dark .type-btn.active { opacity: .9; }
 
       /* ——— Primary buttons ——— */
       .btn-finalize {
@@ -355,14 +373,6 @@
 
         <!-- Two action options -->
         <div class="grid grid-cols-2 gap-4 mb-6">
-          <!-- Recharge -->
-          <div class="option-card recharge-card" onclick="showView('viewRecharge')">
-            <div class="option-icon bg-green-100">
-              <i data-feather="refresh-cw" class="w-7 h-7 text-green-600"></i>
-            </div>
-            <p class="font-bold text-gray-900 dark:text-white text-base">Recarregar</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Adicionar saldo ao cartão</p>
-          </div>
 
           <!-- Register card -->
           <div class="option-card register-card" onclick="showView('viewRegister')">
@@ -372,6 +382,16 @@
             <p class="font-bold text-gray-900 dark:text-white text-base">Cadastrar Cartão</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Registrar novo cartão</p>
           </div>
+
+          <!-- Recharge -->
+          <div class="option-card recharge-card" onclick="showView('viewRecharge')">
+            <div class="option-icon bg-green-100">
+              <i data-feather="refresh-cw" class="w-7 h-7 text-green-600"></i>
+            </div>
+            <p class="font-bold text-gray-900 dark:text-white text-base">Recarregar</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Adicionar saldo ao cartão</p>
+          </div>
+          
         </div>
 
         <!-- Last recharge info -->
@@ -554,19 +574,15 @@
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 <i data-feather="tag" class="w-4 h-4 inline mr-1 text-indigo-500"></i> Tipo de Cartão
               </label>
-              <div class="grid grid-cols-3 gap-3">
-                <button type="button" class="type-btn" onclick="selectCardType('normal', this)">
-                  <span class="text-2xl mb-1 block">🚌</span>
-                  Normal
-                </button>
-                <button type="button" class="type-btn" onclick="selectCardType('estudante', this)">
-                  <span class="text-2xl mb-1 block">🎓</span>
-                  Estudante
-                </button>
-                <button type="button" class="type-btn" onclick="selectCardType('idoso', this)">
-                  <span class="text-2xl mb-1 block">🌟</span>
-                  Idoso
-                </button>
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <button type="button" class="type-btn" data-type="cidadao" onclick="selectCardType('cidadao', this)">🏙️ Cidadão</button>
+                <button type="button" class="type-btn" data-type="normal" onclick="selectCardType('normal', this)">🟢 Normal</button>
+                <button type="button" class="type-btn" data-type="estudante" onclick="selectCardType('estudante', this)">🎓 Estudante</button>
+                <button type="button" class="type-btn" data-type="idoso" onclick="selectCardType('idoso', this)">👴 Idoso</button>
+                <button type="button" class="type-btn" data-type="acompanhante" onclick="selectCardType('acompanhante', this)">🤝 Acompanhante</button>
+                <button type="button" class="type-btn" data-type="carteiro" onclick="selectCardType('carteiro', this)">📬 Carteiro</button>
+                <button type="button" class="type-btn" data-type="colaborador" onclick="selectCardType('colaborador', this)">💼 Colaborador</button>
+                <button type="button" class="type-btn" data-type="pcd" onclick="selectCardType('pcd', this)">♿ PCD</button>
               </div>
             </div>
 
@@ -763,6 +779,39 @@
         selectedCardType = type;
         document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        // update visual card color
+        applyCardTypeColor(type);
+      }
+
+      const CARD_TYPE_LABELS = {
+        cidadao: 'Cidadão', normal: 'Normal (VT)', estudante: 'Estudante',
+        idoso: 'Idoso', acompanhante: 'Acompanhante', carteiro: 'Carteiro',
+        colaborador: 'Colaborador', pcd: 'Portador de Necess. Esp.'
+      };
+
+      function applyCardTypeColor(type) {
+        const card = document.querySelector('.bus-card');
+        // remove all type classes
+        ['cidadao','normal','estudante','idoso','acompanhante','carteiro','colaborador','pcd']
+          .forEach(t => card.classList.remove('type-' + t));
+        if (type) card.classList.add('type-' + type);
+      }
+
+      function applyCardData(data) {
+        if (data.card_number) {
+          const last4 = data.card_number.replace(/\s/g, '').slice(-4);
+          document.getElementById('cardNumberDisplay').textContent = `**** **** **** ${last4}`;
+        }
+        if (data.card_holder) {
+          document.getElementById('cardHolderDisplay').textContent = data.card_holder.split(' ')[0].toUpperCase();
+        }
+        if (data.card_type) {
+          document.getElementById('cardTypeDisplay').textContent = CARD_TYPE_LABELS[data.card_type] || data.card_type;
+          applyCardTypeColor(data.card_type);
+        }
+        if (data.card_balance !== undefined) {
+          document.getElementById('currentBalance').textContent = `R$ ${parseFloat(data.card_balance).toFixed(2).replace('.', ',')}`;
+        }
       }
 
       async function cadastrarCartao() {
@@ -790,10 +839,10 @@
             const last4 = num.replace(/\s/g, '').slice(-4);
             document.getElementById('cardNumberDisplay').textContent = `**** **** **** ${last4}`;
             document.getElementById('cardHolderDisplay').textContent = name.split(' ')[0].toUpperCase();
-            const typeMap = { normal: 'Normal', estudante: 'Estudante', idoso: 'Idoso' };
-            document.getElementById('cardTypeDisplay').textContent = typeMap[selectedCardType] || selectedCardType;
+            document.getElementById('cardTypeDisplay').textContent = CARD_TYPE_LABELS[selectedCardType] || selectedCardType;
+            applyCardTypeColor(selectedCardType);
 
-            // Store locally
+            // Store locally as fallback
             localStorage.setItem('registered_card', JSON.stringify({ number: num, name, type: selectedCardType }));
 
             showSuccess('Cartão cadastrado com sucesso!');
@@ -901,16 +950,31 @@
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       applyTheme(savedTheme === 'dark' || (savedTheme === null && prefersDark));
 
-      /* ——— Load card from localStorage (if registered) ——— */
-      const saved = localStorage.getItem('registered_card');
-      if (saved) {
-        const card = JSON.parse(saved);
-        const last4 = card.number.replace(/\s/g, '').slice(-4);
-        document.getElementById('cardNumberDisplay').textContent = `**** **** **** ${last4}`;
-        document.getElementById('cardHolderDisplay').textContent = card.name.split(' ')[0].toUpperCase();
-        const typeMap = { normal: 'Normal', estudante: 'Estudante', idoso: 'Idoso' };
-        document.getElementById('cardTypeDisplay').textContent = typeMap[card.type] || card.type;
-      }
+      /* ——— Load card info from API on page load ——— */
+      (async () => {
+        try {
+          const res = await fetch('/api/card/info', { credentials: 'include' });
+          if (res.ok) {
+            const data = await res.json();
+            applyCardData(data);
+            // sync localStorage
+            if (data.card_number) {
+              localStorage.setItem('registered_card', JSON.stringify({
+                number: data.card_number,
+                name: data.card_holder || '',
+                type: data.card_type || ''
+              }));
+            }
+            return;
+          }
+        } catch (_) { /* offline fallback below */ }
+        // fallback: localStorage
+        const saved = localStorage.getItem('registered_card');
+        if (saved) {
+          const card = JSON.parse(saved);
+          applyCardData({ card_number: card.number, card_holder: card.name, card_type: card.type });
+        }
+      })();
     </script>
   </body>
 </html>

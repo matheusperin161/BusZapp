@@ -11,6 +11,7 @@ card_bp = Blueprint('card', __name__, url_prefix='/api')
 
 VALID_PAYMENT_METHODS = ('cartao', 'pix', 'boleto')
 LOW_BALANCE_THRESHOLD = 5.0
+VALID_CARD_TYPES = ('cidadao', 'normal', 'estudante', 'idoso', 'acompanhante', 'carteiro', 'colaborador', 'pcd')
 
 
 @card_bp.route('/balance', methods=['GET'])
@@ -66,6 +67,57 @@ def recharge_card():
         'new_balance': user.card_balance,
         'transaction': transaction.to_dict(),
         'payment_info': payment_info,
+    }), 200
+
+@card_bp.route('/card/register', methods=['POST'])
+@login_required
+def register_card():
+    data = request.get_json() or {}
+    card_number = data.get('card_number', '').strip()
+    holder_name = data.get('holder_name', '').strip()
+    card_type   = data.get('card_type', '').strip().lower()
+
+    if not card_number:
+        return jsonify({'error': 'Número do cartão é obrigatório'}), 400
+    if not holder_name:
+        return jsonify({'error': 'Nome do titular é obrigatório'}), 400
+    if card_type not in VALID_CARD_TYPES:
+        return jsonify({'error': f'Tipo de cartão inválido. Tipos válidos: {", ".join(VALID_CARD_TYPES)}'}), 400
+
+    user = db.session.get(User, session['user_id'])
+    if not user:
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+
+    user.card_number = card_number
+    user.card_holder = holder_name
+    user.card_type   = card_type
+    db.session.commit()
+
+    create_notification(
+        user.id,
+        'Cartão Cadastrado',
+        f'Seu cartão do tipo "{card_type}" foi cadastrado com sucesso.',
+    )
+
+    return jsonify({
+        'message': 'Cartão cadastrado com sucesso',
+        'card_number': card_number,
+        'card_holder': holder_name,
+        'card_type': card_type,
+    }), 200
+
+
+@card_bp.route('/card/info', methods=['GET'])
+@login_required
+def get_card_info():
+    user = db.session.get(User, session['user_id'])
+    if not user:
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+    return jsonify({
+        'card_number': user.card_number,
+        'card_holder': user.card_holder,
+        'card_type':   user.card_type,
+        'card_balance': user.card_balance,
     }), 200
 
 
