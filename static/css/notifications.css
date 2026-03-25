@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* =========================================================
    BuszApp – Notification Component Styles
    ========================================================= */
@@ -52,3 +53,155 @@
 #notificationButton.has-unread #notificationBadge {
   animation: pulse 1.5s ease-in-out infinite;
 }
+=======
+/* =========================================================
+   BuszApp – Notification Component Styles
+   ========================================================= */
+
+@keyframes notifSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* ── Dropdown container ── */
+#notificationDropdown {
+  min-width: 320px;
+  max-width: 360px;
+}
+
+/* ── Lista scrollável ── */
+#notificationList {
+  padding: 6px 0;
+}
+
+/* ── Item ── */
+.notification-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  margin: 2px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  animation: notifSlideIn 0.22s ease-out both;
+  border-left: 3px solid transparent;
+}
+
+.notification-item.unread {
+  background: rgba(251, 191, 36, 0.07);
+  border-left-color: #f59e0b;
+}
+
+.notification-item:hover {
+  background: rgba(251, 191, 36, 0.13);
+}
+
+.dark .notification-item.unread {
+  background: rgba(251, 191, 36, 0.10);
+}
+.dark .notification-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Tipos coloridos ── */
+.notification-item.success.unread    { border-left-color: #10b981; background: rgba(16,185,129,0.07); }
+.notification-item.line_delay.unread { border-left-color: #f97316; background: rgba(249,115,22,0.07); }
+.notification-item.warning.unread    { border-left-color: #eab308; background: rgba(234,179,8,0.07); }
+.notification-item.error.unread      { border-left-color: #ef4444; background: rgba(239,68,68,0.07); }
+.notification-item.low_balance.unread{ border-left-color: #6366f1; background: rgba(99,102,241,0.07); }
+
+/* ── Linha superior: ícone + título + botão fechar ── */
+.notification-item .notif-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.notification-item .notif-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item .notif-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.notification-title {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: #1f2937;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dark .notification-title { color: #f9fafb; }
+
+.notif-close-btn {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.notif-close-btn:hover {
+  color: #6b7280;
+  background: rgba(0,0,0,0.06);
+}
+.dark .notif-close-btn:hover {
+  color: #d1d5db;
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Mensagem ── */
+.notification-message {
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.45;
+  padding-left: 22px; /* alinha com o título (após ícone) */
+}
+.dark .notification-message { color: #9ca3af; }
+
+/* ── Horário ── */
+.notification-time {
+  font-size: 0.68rem;
+  color: #d1d5db;
+  padding-left: 22px;
+  margin-top: 1px;
+}
+.dark .notification-time { color: #6b7280; }
+
+/* ── Badge pulse quando há não-lidos ── */
+#notificationButton.has-unread #notificationBadge {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+/* ── Empty state ── */
+#noNotificationsMessage {
+  padding: 24px 16px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.82rem;
+}
+>>>>>>> 6988765b77058ced83e73d2a884e0ff7bfc5086a

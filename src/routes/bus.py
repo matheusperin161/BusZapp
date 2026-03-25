@@ -166,11 +166,21 @@ def create_incident():
     from src.models.user import Driver, DriverIncident
 
     data = request.get_json() or {}
-    driver_id   = data.get('driver_id')
-    bus_number  = data.get('bus_number', '').strip()
-    route_id    = data.get('route_id')
-    inc_type    = data.get('type', '').strip()
-    description = data.get('description', '').strip()
+
+    # Bug fix: driver_id pode vir como string do localStorage — converter para int
+    try:
+        driver_id = int(data.get('driver_id') or 0) or None
+    except (TypeError, ValueError):
+        driver_id = None
+
+    # Bug fix: campos de texto podem vir como None — usar '' como fallback seguro
+    bus_number    = (data.get('bus_number')    or '').strip()
+    route_id      = data.get('route_id')
+    route_name    = (data.get('route_name')    or '').strip()
+    route_number  = (data.get('route_number')  or '').strip()
+    schedule_time = (data.get('schedule_time') or '').strip()
+    inc_type      = (data.get('type')          or '').strip()
+    description   = (data.get('description')   or '').strip()
 
     VALID_TYPES = ('atraso', 'pane', 'acidente', 'outro')
 
@@ -192,27 +202,36 @@ def create_incident():
     )
     db.session.add(incident)
 
-    # Notifica todos os usuários sobre o tipo de ocorrência
+    # Monta título e mensagem da notificação
     type_labels = {
-        'atraso': 'Atraso na linha',
-        'pane':   'Pane mecânica',
+        'atraso':   'Atraso na linha',
+        'pane':     'Pane mecânica',
         'acidente': 'Acidente na via',
-        'outro':  'Ocorrência na linha',
+        'outro':    'Ocorrência na linha',
     }
     title = type_labels.get(inc_type, 'Ocorrência')
-    msg_parts = [f'Motorista {driver.name} registrou: {title}.']
+
+    parts = []
+    if route_number and route_name:
+        parts.append(f'Linha {route_number} — {route_name}.')
+    elif route_number:
+        parts.append(f'Linha {route_number}.')
+    if schedule_time:
+        parts.append(f'Saída das {schedule_time}.')
     if bus_number:
-        msg_parts.append(f'Ônibus {bus_number}.')
+        parts.append(f'Ônibus {bus_number}.')
     if description:
-        msg_parts.append(description)
+        parts.append(description)
+
+    message = ' '.join(parts) if parts else f'Reportado pelo motorista {driver.name}.'
 
     from src.models.user import User
-    users = User.query.filter_by(role='user').all()
+    users = User.query.filter(User.role.in_(['user', 'admin'])).all()
     for user in users:
         db.session.add(Notification(
             user_id=user.id,
             title=title,
-            message=' '.join(msg_parts),
+            message=message,
         ))
 
     try:

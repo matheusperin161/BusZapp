@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1019,3 +1020,1064 @@
 
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#0f1923" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>BuszApp — Motorista</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a1520;
+      --bg2: #0f1e2e;
+      --card: #132030;
+      --border: #1e3448;
+      --accent: #00c6ff;
+      --accent2: #0072ff;
+      --green: #00e676;
+      --red: #ff1744;
+      --yellow: #ffea00;
+      --text: #e8f4fd;
+      --muted: #5a7a94;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background pattern ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,114,255,0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 90% 80%, rgba(0,198,255,0.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,21,32,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo span { color: var(--text); -webkit-text-fill-color: var(--text); }
+
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    .status-dot.online {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ── Main container ── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px 16px 100px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Config section ── */
+    .config-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    select option {
+      background: #1a2f42;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-start {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(0,114,255,0.35);
+    }
+
+    .btn-start:hover {
+      box-shadow: 0 6px 28px rgba(0,114,255,0.5);
+    }
+
+    .btn-stop {
+      background: linear-gradient(135deg, #ff1744, #c62828);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(255,23,68,0.35);
+    }
+
+    .btn-stop:hover {
+      box-shadow: 0 6px 28px rgba(255,23,68,0.5);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── Active trip card ── */
+    .trip-card {
+      background: linear-gradient(135deg, rgba(0,198,255,0.08), rgba(0,114,255,0.05));
+      border: 1px solid rgba(0,198,255,0.25);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .trip-card.visible { display: block; }
+
+    .trip-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .trip-badge {
+      background: rgba(0,230,118,0.15);
+      color: var(--green);
+      border: 1px solid rgba(0,230,118,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .trip-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse-dot 1.5s infinite;
+    }
+
+    .trip-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .trip-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stat-box {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ── GPS accuracy bar ── */
+    .gps-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .gps-icon {
+      font-size: 1.1rem;
+    }
+
+    .gps-info {
+      flex: 1;
+    }
+
+    .gps-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .gps-accuracy {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .gps-accuracy.good { color: var(--green); }
+    .gps-accuracy.medium { color: var(--yellow); }
+    .gps-accuracy.bad { color: var(--red); }
+
+    /* ── Log ── */
+    .log-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .log-list::-webkit-scrollbar { width: 4px; }
+    .log-list::-webkit-scrollbar-track { background: transparent; }
+    .log-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .log-item {
+      display: flex;
+      gap: 10px;
+      font-size: 0.8rem;
+      padding: 8px 10px;
+      background: var(--bg2);
+      border-radius: 8px;
+      animation: slide-in 0.3s ease;
+    }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-time {
+      color: var(--muted);
+      flex-shrink: 0;
+      font-size: 0.72rem;
+      padding-top: 1px;
+    }
+
+    .log-msg { color: var(--text); }
+    .log-msg.success { color: var(--green); }
+    .log-msg.error { color: var(--red); }
+    .log-msg.warn { color: var(--yellow); }
+
+    /* ── Server URL config ── */
+    .url-toggle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      user-select: none;
+    }
+
+    .url-toggle:hover { color: var(--accent); }
+
+    .url-section {
+      display: none;
+    }
+
+    .url-section.open { display: block; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 30px 0 10px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .empty-state .icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    /* ── Schedule list ── */
+    .schedule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .schedule-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .schedule-item:hover { border-color: var(--accent); }
+
+    .schedule-item.selected {
+      border-color: var(--accent);
+      background: rgba(0,198,255,0.07);
+    }
+
+    .schedule-time {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .schedule-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .schedule-period {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .period-manha { background: rgba(255,234,0,0.12); color: var(--yellow); }
+    .period-tarde { background: rgba(255,150,0,0.12); color: #ff9600; }
+    .period-noite { background: rgba(100,80,255,0.12); color: #9c8cff; }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 4px 0 16px;
+    }
+
+    /* ── Responsive desktop ── */
+    @media (min-width: 768px) {
+      main {
+        max-width: 520px;
+        padding-top: 36px;
+      }
+    }
+
+    /* ── Ocorrências ── */
+    .incident-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .incident-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 8px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg2);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .incident-btn:hover { border-color: var(--accent); background: rgba(0,198,255,0.07); }
+    .incident-btn .inc-icon { font-size: 1.4rem; }
+    .incident-btn.atraso:hover   { border-color: var(--yellow); background: rgba(255,234,0,0.07); }
+    .incident-btn.pane:hover     { border-color: #ff9600;       background: rgba(255,150,0,0.07); }
+    .incident-btn.acidente:hover { border-color: var(--red);    background: rgba(255,23,68,0.07); }
+    .incident-btn.outro:hover    { border-color: var(--accent);  background: rgba(0,198,255,0.07); }
+
+    .incident-desc {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .incident-desc:focus { border-color: var(--accent); }
+    .incident-desc::placeholder { color: var(--muted); }
+
+    .btn-incident-send {
+      background: linear-gradient(135deg, #ff9600, #ff5722);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(255,87,34,0.3);
+    }
+    .btn-incident-send:hover { box-shadow: 0 6px 22px rgba(255,87,34,0.45); }
+    .btn-incident-send:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Busz<span>App</span> <span style="font-size:0.75rem;font-weight:400;opacity:0.5;-webkit-text-fill-color:rgba(232,244,253,0.5)">motorista</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:0.75rem;color:var(--muted)" id="status-label">Offline</span>
+    <div class="status-dot" id="status-dot"></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Server config -->
+  <div class="card">
+    <div class="url-toggle" onclick="toggleUrl()" id="url-toggle">
+      ⚙️ Configurar servidor <span id="url-arrow">▼</span>
+    </div>
+    <div class="url-section" id="url-section">
+      <label for="server-url">URL do servidor</label>
+      <input type="text" id="server-url" placeholder="http://localhost:8080" value="http://localhost:8080" />
+      <div style="margin-top:8px;font-size:0.75rem;color:var(--muted)">
+        Coloque o IP ou domínio do seu servidor Flask
+      </div>
+    </div>
+  </div>
+
+  <!-- Seleção de rota -->
+  <div class="card" id="route-card">
+    <div class="card-title">Selecionar rota</div>
+    <div class="config-row">
+      <div>
+        <label for="route-select">Linha</label>
+        <select id="route-select" onchange="loadSchedules()">
+          <option value="">Carregando rotas...</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Horários -->
+  <div class="card" id="schedules-card" style="display:none">
+    <div class="card-title">Escolha seu horário</div>
+    <div class="schedule-list" id="schedule-list">
+      <div class="empty-state">
+        <span class="icon">🕐</span>
+        Selecione uma rota para ver os horários
+      </div>
+    </div>
+  </div>
+
+  <!-- Trajeto ativo -->
+  <div class="trip-card" id="trip-card">
+    <div class="trip-header">
+      <div>
+        <div class="trip-name" id="trip-name">—</div>
+        <div class="trip-sub" id="trip-sub">—</div>
+      </div>
+      <div class="trip-badge">EM ROTA</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">Latitude</div>
+        <div class="stat-value" id="stat-lat">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Longitude</div>
+        <div class="stat-value" id="stat-lon">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Velocidade</div>
+        <div class="stat-value" id="stat-speed">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Envios</div>
+        <div class="stat-value" id="stat-sends">0</div>
+      </div>
+    </div>
+
+    <div class="gps-row">
+      <div class="gps-icon">📡</div>
+      <div class="gps-info">
+        <div class="gps-label">Precisão GPS</div>
+        <div class="gps-accuracy" id="gps-accuracy">Aguardando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botões de ação -->
+  <div style="display:flex;flex-direction:column;gap:10px" id="action-area">
+    <button class="btn btn-start" id="btn-start" onclick="startTrip()" disabled>
+      🚌 Iniciar Trajeto
+    </button>
+    <button class="btn btn-stop" id="btn-stop" onclick="stopTrip()" style="display:none">
+      ⏹ Encerrar Trajeto
+    </button>
+  </div>
+
+
+  <!-- Ocorrências -->
+  <div class="card" id="incident-card" style="display:none">
+    <div class="card-title">Registrar Ocorrência</div>
+
+    <!-- Preview da linha e horário ativos -->
+    <div id="incident-context" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-size:0.8rem;color:var(--muted)">
+      <span style="font-size:1rem">🚌</span>
+      <span id="incident-context-text">—</span>
+    </div>
+
+    <div class="incident-grid">
+      <button class="incident-btn atraso"   onclick="selectIncident('atraso')"   id="inc-atraso">
+        <span class="inc-icon">⏰</span><span>Atraso</span>
+      </button>
+      <button class="incident-btn pane"     onclick="selectIncident('pane')"     id="inc-pane">
+        <span class="inc-icon">🔧</span><span>Pane mecânica</span>
+      </button>
+      <button class="incident-btn acidente" onclick="selectIncident('acidente')" id="inc-acidente">
+        <span class="inc-icon">⚠️</span><span>Acidente</span>
+      </button>
+      <button class="incident-btn outro"    onclick="selectIncident('outro')"    id="inc-outro">
+        <span class="inc-icon">📋</span><span>Outro</span>
+      </button>
+    </div>
+    <textarea
+      class="incident-desc"
+      id="incident-desc"
+      rows="2"
+      placeholder="Descrição adicional (opcional)..."
+    ></textarea>
+    <button class="btn btn-incident-send" id="btn-incident-send" onclick="sendIncident()" disabled style="margin-top:10px">
+      📢 Alertar Passageiros
+    </button>
+  </div>
+
+  <!-- Log -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Registro de atividade</div>
+    <ul class="log-list" id="log-list">
+      <li class="log-item">
+        <span class="log-time">—</span>
+        <span class="log-msg">Aguardando início...</span>
+      </li>
+    </ul>
+  </div>
+
+</main>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────
+  let SERVER_URL = 'http://localhost:8080';
+  let selectedRoute = null;
+  let selectedSchedule = null;
+  let watchId = null;
+  let sendInterval = null;
+  let lastPosition = null;
+  let sendCount = 0;
+  let isActive = false;
+  const SEND_INTERVAL_MS = 5000;
+
+  // ── URL toggle ──────────────────────────────────────────────────────────
+  function toggleUrl() {
+    const section = document.getElementById('url-section');
+    const arrow = document.getElementById('url-arrow');
+    section.classList.toggle('open');
+    arrow.textContent = section.classList.contains('open') ? '▲' : '▼';
+  }
+
+  // ── Log ─────────────────────────────────────────────────────────────────
+  function log(msg, type = '') {
+    const list = document.getElementById('log-list');
+    const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const li = document.createElement('li');
+    li.className = 'log-item';
+    li.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${type}">${msg}</span>`;
+    list.prepend(li);
+    // keep max 30 items
+    while (list.children.length > 30) list.removeChild(list.lastChild);
+  }
+
+  // ── Status dot ──────────────────────────────────────────────────────────
+  function setStatus(online, label) {
+    const dot = document.getElementById('status-dot');
+    const lbl = document.getElementById('status-label');
+    dot.className = 'status-dot' + (online ? ' online' : '');
+    lbl.textContent = label;
+  }
+
+  // ── Load routes ─────────────────────────────────────────────────────────
+  async function loadRoutes() {
+    SERVER_URL = document.getElementById('server-url').value.replace(/\/$/, '');
+    const sel = document.getElementById('route-select');
+    sel.innerHTML = '<option value="">Carregando...</option>';
+    try {
+      const res = await fetch(`${SERVER_URL}/api/routes`);
+      const data = await res.json();
+      if (!data.length) {
+        sel.innerHTML = '<option value="">Nenhuma rota encontrada</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">Selecione uma rota...</option>';
+      data.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.dataset.routeNumber = r.route_number;
+        opt.dataset.name = r.route_name;
+        opt.textContent = `${r.route_number} — ${r.route_name}`;
+        sel.appendChild(opt);
+      });
+      log('Rotas carregadas com sucesso', 'success');
+    } catch (e) {
+      sel.innerHTML = '<option value="">Erro ao carregar rotas</option>';
+      log('Erro ao conectar ao servidor. Verifique a URL.', 'error');
+    }
+  }
+
+  // ── Load schedules ───────────────────────────────────────────────────────
+  async function loadSchedules() {
+    const sel = document.getElementById('route-select');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) {
+      document.getElementById('schedules-card').style.display = 'none';
+      document.getElementById('btn-start').disabled = true;
+      selectedRoute = null;
+      selectedSchedule = null;
+      return;
+    }
+
+    selectedRoute = {
+      id: opt.value,
+      number: opt.dataset.routeNumber,
+      name: opt.dataset.name,
+    };
+
+    const card = document.getElementById('schedules-card');
+    const list = document.getElementById('schedule-list');
+    card.style.display = 'block';
+    list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Carregando horários...</div>';
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/route/${selectedRoute.number}/schedules`);
+      const data = await res.json();
+      renderSchedules(data);
+    } catch (e) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Erro ao carregar horários</div>';
+      log('Erro ao carregar horários', 'error');
+    }
+  }
+
+  function renderSchedules(schedules) {
+    const list = document.getElementById('schedule-list');
+    if (!schedules.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">🕐</span>Nenhum horário disponível</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    schedules.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'schedule-item';
+      div.dataset.id = s.id;
+      div.dataset.busId = s.bus_id;
+      div.dataset.busNumber = s.bus_number;
+      div.dataset.time = s.departure_time;
+      div.dataset.period = s.period || '';
+
+      const periodClass = {
+        'Manhã': 'period-manha',
+        'Tarde': 'period-tarde',
+        'Noite': 'period-noite',
+      }[s.period] || 'period-manha';
+
+      div.innerHTML = `
+        <div>
+          <div class="schedule-time">${s.departure_time}</div>
+          <div class="schedule-meta">Ônibus ${s.bus_number}</div>
+        </div>
+        <span class="schedule-period ${periodClass}">${s.period || '—'}</span>
+      `;
+
+      div.onclick = () => selectSchedule(div, s);
+      list.appendChild(div);
+    });
+  }
+
+  function selectSchedule(el, schedule) {
+    document.querySelectorAll('.schedule-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSchedule = schedule;
+    document.getElementById('btn-start').disabled = false;
+    log(`Horário selecionado: ${schedule.departure_time} — Ônibus ${schedule.bus_number}`);
+  }
+
+  // ── GPS ─────────────────────────────────────────────────────────────────
+  function startGPS() {
+    if (!navigator.geolocation) {
+      log('GPS não suportado neste dispositivo', 'error');
+      return false;
+    }
+
+    watchId = navigator.geolocation.watchPosition(
+      pos => {
+        lastPosition = pos;
+        const acc = pos.coords.accuracy;
+        const accEl = document.getElementById('gps-accuracy');
+        if (acc <= 20) {
+          accEl.textContent = `±${acc.toFixed(0)}m — Ótimo`;
+          accEl.className = 'gps-accuracy good';
+        } else if (acc <= 50) {
+          accEl.textContent = `±${acc.toFixed(0)}m — Bom`;
+          accEl.className = 'gps-accuracy medium';
+        } else {
+          accEl.textContent = `±${acc.toFixed(0)}m — Ruim`;
+          accEl.className = 'gps-accuracy bad';
+        }
+
+        document.getElementById('stat-lat').textContent = pos.coords.latitude.toFixed(5);
+        document.getElementById('stat-lon').textContent = pos.coords.longitude.toFixed(5);
+
+        const spd = pos.coords.speed;
+        document.getElementById('stat-speed').textContent = spd != null ? `${(spd * 3.6).toFixed(0)} km/h` : '—';
+      },
+      err => {
+        log(`Erro GPS: ${err.message}`, 'error');
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+    );
+    return true;
+  }
+
+  function stopGPS() {
+    if (watchId != null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+  }
+
+  // ── Send location ────────────────────────────────────────────────────────
+  async function sendLocation() {
+    if (!lastPosition || !selectedSchedule) return;
+
+    SERVER_URL = document.getElementById('server-url').value.replace(/\/$/, '');
+
+    const payload = {
+      bus_id: selectedSchedule.bus_id,
+      bus_number: selectedSchedule.bus_number,
+      latitude: lastPosition.coords.latitude,
+      longitude: lastPosition.coords.longitude,
+      route_id: selectedRoute?.id,
+    };
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/update_location`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        sendCount++;
+        document.getElementById('stat-sends').textContent = sendCount;
+        setStatus(true, 'Transmitindo');
+        if (sendCount % 5 === 0) log(`📍 ${sendCount} atualizações enviadas`, 'success');
+      } else {
+        log(`Erro ao enviar localização (${res.status})`, 'error');
+        setStatus(false, 'Erro');
+      }
+    } catch (e) {
+      log('Sem conexão com o servidor', 'error');
+      setStatus(false, 'Sem conexão');
+    }
+  }
+
+  // ── Start / Stop ─────────────────────────────────────────────────────────
+  function startTrip() {
+    if (!selectedRoute || !selectedSchedule) {
+      log('Selecione uma rota e horário primeiro', 'warn');
+      return;
+    }
+
+    const gpsOk = startGPS();
+    if (!gpsOk) return;
+
+    isActive = true;
+    sendCount = 0;
+
+    // UI
+    document.getElementById('route-card').style.opacity = '0.4';
+    document.getElementById('schedules-card').style.opacity = '0.4';
+    document.getElementById('route-card').style.pointerEvents = 'none';
+    document.getElementById('schedules-card').style.pointerEvents = 'none';
+
+    document.getElementById('trip-name').textContent = selectedRoute.name;
+    document.getElementById('trip-sub').textContent = `${selectedSchedule.departure_time} — Ônibus ${selectedSchedule.bus_number}`;
+    document.getElementById('trip-card').classList.add('visible');
+
+    document.getElementById('btn-start').style.display = 'none';
+    document.getElementById('btn-stop').style.display = 'flex';
+
+    setStatus(true, 'Transmitindo');
+    log(`🚌 Trajeto iniciado: ${selectedRoute.name} | ${selectedSchedule.departure_time}`, 'success');
+    document.getElementById('incident-card').style.display = 'block';
+    document.getElementById('incident-context-text').textContent =
+      `${selectedRoute.name} — Ônibus ${selectedSchedule.bus_number} | Saída ${selectedSchedule.departure_time}`;
+
+    // Popular contexto no card de ocorrências
+    document.getElementById('incident-context-text').textContent =
+      `Linha ${selectedRoute.number} — ${selectedRoute.name} | Horário ${selectedSchedule.departure_time} | Ônibus ${selectedSchedule.bus_number}`;
+
+    // Start sending
+    sendInterval = setInterval(sendLocation, SEND_INTERVAL_MS);
+    // Send immediately
+    setTimeout(sendLocation, 1000);
+  }
+
+  function stopTrip() {
+    isActive = false;
+    stopGPS();
+    clearInterval(sendInterval);
+    sendInterval = null;
+
+    // UI
+    document.getElementById('trip-card').classList.remove('visible');
+    document.getElementById('route-card').style.opacity = '';
+    document.getElementById('schedules-card').style.opacity = '';
+    document.getElementById('route-card').style.pointerEvents = '';
+    document.getElementById('schedules-card').style.pointerEvents = '';
+
+    document.getElementById('btn-stop').style.display = 'none';
+    document.getElementById('btn-start').style.display = 'flex';
+    document.getElementById('btn-start').disabled = !selectedSchedule;
+
+    setStatus(false, 'Offline');
+    document.getElementById('incident-card').style.display = 'none';
+    log(`⏹ Trajeto encerrado. Total: ${sendCount} atualizações enviadas.`, 'warn');
+    sendCount = 0;
+  }
+
+
+  // ── Ocorrências ──────────────────────────────────────────────────────────
+  let selectedIncidentType = null;
+
+  function selectIncident(type) {
+    selectedIncidentType = type;
+    // visual feedback
+    document.querySelectorAll('.incident-btn').forEach(b => {
+      b.style.opacity = '0.4';
+    });
+    document.getElementById('inc-' + type).style.opacity = '1';
+    document.getElementById('inc-' + type).style.borderColor = 'var(--accent)';
+    document.getElementById('btn-incident-send').disabled = false;
+  }
+
+  async function sendIncident() {
+    if (!selectedIncidentType || !selectedSchedule) return;
+
+    const desc   = document.getElementById('incident-desc').value.trim();
+    const btn    = document.getElementById('btn-incident-send');
+    btn.disabled = true;
+    btn.textContent = '⏳ Enviando...';
+
+    const driverId = localStorage.getItem('driver_id') || null;
+
+    // Monta mensagem completa com linha e horário
+    const typeLabels = {
+      atraso:   'Atraso na linha',
+      pane:     'Pane mecânica',
+      acidente: 'Acidente na via',
+      outro:    'Ocorrência na linha',
+    };
+    const routeInfo = selectedRoute ? `Linha ${selectedRoute.number} — ${selectedRoute.name}` : '';
+    const timeInfo  = selectedSchedule.departure_time ? `Horário ${selectedSchedule.departure_time}` : '';
+
+    try {
+      const res = await fetch(`${SERVER_URL}/api/incidents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          driver_id:    driverId ? parseInt(driverId) : null,
+          bus_number:   selectedSchedule.bus_number || '',
+          route_id:     selectedRoute?.id || null,
+          route_name:   selectedRoute?.name || '',
+          route_number: selectedRoute?.number || '',
+          schedule_time: selectedSchedule.departure_time || '',
+          type:         selectedIncidentType,
+          description:  desc || '',
+        }),
+      });
+
+      if (res.ok) {
+        const label = typeLabels[selectedIncidentType] || 'Ocorrência';
+        log(`📢 "${label}" enviado — passageiros notificados`, 'success');
+        // Reset
+        selectedIncidentType = null;
+        document.querySelectorAll('.incident-btn').forEach(b => {
+          b.style.opacity = '';
+          b.style.borderColor = '';
+        });
+        document.getElementById('incident-desc').value = '';
+        btn.disabled = true;
+        btn.textContent = '📢 Alertar Passageiros';
+      } else {
+        const data = await res.json();
+        log(`Erro ao enviar ocorrência: ${data.error || 'desconhecido'}`, 'error');
+        btn.disabled = false;
+        btn.textContent = '📢 Alertar Passageiros';
+      }
+    } catch (e) {
+      log('Sem conexão ao enviar ocorrência', 'error');
+      btn.disabled = false;
+      btn.textContent = '📢 Alertar Passageiros';
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  document.getElementById('server-url').addEventListener('change', loadRoutes);
+  window.addEventListener('load', async () => {
+    // Buscar driver_id da sessão no servidor (fonte confiável)
+    try {
+      const res  = await fetch(`${SERVER_URL}/api/auth/driver/me`, { credentials: 'include' });
+      if (res.ok) {
+        const driver = await res.json();
+        localStorage.setItem('driver_id', driver.id);
+        localStorage.setItem('buszapp_user_id', 'd_' + driver.id);
+      }
+    } catch (e) { /* usa localStorage se já tiver */ }
+    loadRoutes();
+  });
+
+  // Warn on close if active
+  window.addEventListener('beforeunload', e => {
+    if (isActive) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+</script>
+
+</body>
+</html>
+>>>>>>> 6988765b77058ced83e73d2a884e0ff7bfc5086a
