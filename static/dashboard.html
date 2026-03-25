@@ -119,14 +119,35 @@
             <i data-feather="bell" class="w-5 h-5"></i>
             <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-yellow-500"></span>
           </button>
-          <div id="notificationDropdown" class="hidden absolute right-0 top-full mt-2 w-80
-               bg-white dark:bg-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden border border-gray-100 dark:border-gray-700">
-            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-              <h3 class="font-semibold text-gray-800 dark:text-white text-sm">Notificações</h3>
-              <button id="markAllAsRead" class="text-xs text-yellow-600 dark:text-yellow-400 hover:underline">Marcar todas lidas</button>
+          <div id="notificationDropdown" class="hidden absolute right-0 top-full mt-3 w-96
+               bg-white dark:bg-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden
+               border border-gray-100 dark:border-gray-700"
+               style="max-width: calc(100vw - 1rem);">
+            <!-- Dropdown Header -->
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+                  <i data-feather="bell" class="w-4 h-4 text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 dark:text-white text-base">Notificações</h3>
+              </div>
+              <button id="markAllAsRead"
+                      class="text-xs font-medium text-yellow-600 dark:text-yellow-400
+                             bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40
+                             px-3 py-1.5 rounded-lg transition">
+                Marcar lidas
+              </button>
             </div>
-            <div id="notificationList" class="max-h-72 overflow-y-auto">
-              <p id="noNotificationsMessage" class="text-sm text-gray-400 p-4 text-center">Nenhuma notificação.</p>
+            <!-- Notification list -->
+            <div id="notificationList" class="max-h-80 overflow-y-auto py-1">
+              <!-- Empty state -->
+              <div id="noNotificationsMessage" class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
+                  <i data-feather="bell-off" class="w-6 h-6 text-gray-400"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sem notificações</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Você está em dia!</p>
+              </div>
             </div>
           </div>
         </div>
@@ -285,8 +306,10 @@
 
     // ── History Modal ─────────────────────────────────────────────────────────
     async function openHistoryModal() {
-      document.getElementById('historyModal').classList.add('active');
+      // Close sidebar AND its blur overlay before opening the modal
       document.getElementById('sidebar')?.classList.remove('open');
+      document.getElementById('sidebarOverlay')?.classList.remove('visible');
+      document.getElementById('historyModal').classList.add('active');
       const list = document.getElementById('historyList');
       list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Carregando…</p>';
       try {
@@ -299,10 +322,17 @@
 
     function closeHistoryModal() {
       document.getElementById('historyModal').classList.remove('active');
+      // Also ensure the sidebar overlay is hidden (belt-and-suspenders fix)
+      document.getElementById('sidebarOverlay')?.classList.remove('visible');
     }
 
     document.getElementById('historyModal').addEventListener('click', e => {
       if (e.target === document.getElementById('historyModal')) closeHistoryModal();
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeHistoryModal();
     });
 
     // ── Theme Icon ────────────────────────────────────────────────────────────
