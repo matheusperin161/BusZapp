@@ -71,25 +71,27 @@
   </button>
 
   <!-- Sidebar -->
-  <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
-    <a id="sidebarDrivers" href="add-driver.html" class="sidebar-item hidden">
+  <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
+    <a id="sidebarDrivers" href="add-driver.html" class="sidebar-item hidden gap-3">
       <i data-feather="users"></i><span>Gerenciar Motoristas</span>
     </a>
-    <a id="sidebarFleet" href="add-vehicle.html" class="sidebar-item hidden">
+    <a id="sidebarFleet" href="add-vehicle.html" class="sidebar-item hidden gap-3">
       <i data-feather="truck"></i><span>Gerenciar Frota</span>
     </a>
-    <a id="sidebarRoutes" href="admin-rotas.html" class="sidebar-item hidden">
+    <a id="sidebarRoutes" href="admin-rotas.html" class="sidebar-item hidden gap-3">
       <i data-feather="map"></i><span>Gerenciar Rotas</span>
     </a>
-    <a id="sidebarHistory" href="#" class="sidebar-item hidden">
+    <a id="sidebarHistory" href="#" class="sidebar-item hidden gap-3">
       <i data-feather="clock"></i><span>Histórico de Recarga</span>
     </a>
-    <a href="rating.html" class="sidebar-item">
+    <a href="rating.html" class="sidebar-item gap-3">
       <i data-feather="star"></i><span>Avaliação</span>
     </a>
-    <button onclick="logout()" class="sidebar-item w-full text-left">
-      <i data-feather="log-out"></i><span>Sair</span>
-    </button>
+      <div class="mt-auto">
+        <button onclick="logout()" class="sidebar-item gap-3">
+          <i data-feather="log-out"></i><span>Sair</span>
+        </button>
+      </div>
   </nav>
 
   <!-- Header -->

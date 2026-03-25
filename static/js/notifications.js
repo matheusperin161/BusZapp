@@ -12,15 +12,6 @@ const NOTIF_CONFIG = {
   ENABLE_DESKTOP:     true,
 };
 
-const TYPE_ICONS = {
-  line_delay:  '🚌',
-  low_balance: '💳',
-  success:     '✓',
-  warning:     '⚠️',
-  error:       '✕',
-  info:        'ℹ️',
-};
-
 // ── Notification Model ────────────────────────────────────────────────────────
 
 class AppNotification {
@@ -121,7 +112,6 @@ class NotificationManager {
       <div class="flex items-start justify-between gap-2">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5">
-            <span class="flex-shrink-0">${TYPE_ICONS[n.type] ?? TYPE_ICONS.info}</span>
             <p class="notification-title font-semibold text-sm truncate">${escapeHtml(n.title)}</p>
           </div>
           <p class="notification-message text-xs mt-0.5 text-gray-600 dark:text-gray-400">${escapeHtml(n.message)}</p>

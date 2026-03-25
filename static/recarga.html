@@ -377,9 +377,45 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-      <!-- Card de Recarga Principal -->
-      <div id="mainForm" class="max-w-2xl mx-auto animate-slide-in-up">
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Coluna Esquerda: Informações do Cartão -->
+        <div class="lg:col-span-1 animate-slide-in-up">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <i data-feather="credit-card" class="w-6 h-6 text-orange-600 dark:text-orange-400"></i>
+              Cartão de Transporte
+            </h3>
+            <div class="space-y-4">
+              <div class="bg-yellow-50 dark:bg-gray-700 p-4 rounded-xl">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Número do Cartão</p>
+                <p class="text-lg font-bold text-gray-900 dark:text-white">**** **** **** 1234</p>
+              </div>
+
+              <div class="bg-yellow-50 dark:bg-gray-700 p-4 rounded-xl">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Saldo Atual</p>
+                <p id="currentBalance" class="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  Carregando...
+                </p>
+              </div>
+
+              <div class="bg-yellow-50 dark:bg-gray-700 p-4 rounded-xl">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Tipo de Cartão</p>
+                <p class="text-gray-900 dark:text-white font-medium">Estudante</p>
+              </div>
+
+              <div class="bg-yellow-50 dark:bg-gray-700 p-4 rounded-xl">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Última Recarga</p>
+                <p class="text-gray-900 dark:text-white font-medium">20/12/2024 - R$ 30,00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Coluna Direita: Formulário de Recarga -->
+        <div class="lg:col-span-2">
+          <!-- Card de Recarga Principal -->
+          <div id="mainForm" class="max-w-2xl mx-auto animate-slide-in-up" style="animation-delay: 0.1s;">
         <div class="card-recarga p-8 mb-8">
           <div class="flex items-center justify-between mb-6">
             <div>
@@ -603,6 +639,8 @@
           </div>
         </div>
       </div>
+      </div> <!-- Fecha lg:col-span-2 -->
+      </div> <!-- Fecha grid -->
     </main>
 
     <script>
