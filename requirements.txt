@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Flask>=3.0.0
 Flask-SQLAlchemy>=3.1.0
 Flask-CORS>=4.0.0
@@ -9,7 +8,6 @@ Werkzeug>=3.0.0
 python-dotenv>=1.0.0
 requests>=2.31.0
 psycopg2-binary>=2.9.9
-=======
 Flask>=3.0.0
 Flask-SQLAlchemy>=3.1.0
 Flask-CORS>=4.0.0
@@ -22,4 +20,3 @@ requests>=2.31.0
 psycopg2-binary>=2.9.9
 gunicorn>=21.2.0
 eventlet>=0.35.0
->>>>>>> 6988765b77058ced83e73d2a884e0ff7bfc5086a
