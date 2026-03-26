@@ -403,7 +403,7 @@
             </div>
             <div>
               <p class="text-xs text-gray-500 dark:text-gray-400">Última Recarga</p>
-              <p class="font-semibold text-gray-900 dark:text-white text-sm">20/12/2024 — R$ 30,00</p>
+              <p id="lastRechargeInfo" class="font-semibold text-gray-900 dark:text-white text-sm">Carregando...</p>
             </div>
           </div>
           <i data-feather="chevron-right" class="w-5 h-5 text-gray-400"></i>
@@ -743,6 +743,17 @@
 
             showView('viewRechargeSuccess');
             window.dispatchEvent(new Event('rechargeCompleted'));
+
+            // Atualiza o bloco de última recarga imediatamente
+            const lastRechargeEl = document.getElementById('lastRechargeInfo');
+            if (lastRechargeEl) {
+              const now = new Date();
+              const formatted = now.toLocaleDateString('pt-BR', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+              });
+              const amountFmt = selectedAmount.toFixed(2).replace('.', ',');
+              lastRechargeEl.textContent = `${formatted} — R$ ${amountFmt}`;
+            }
           } else {
             showError('Erro ao processar recarga: ' + data.error);
           }
@@ -955,6 +966,31 @@
           const card = JSON.parse(saved);
           applyCardData({ card_number: card.number, card_holder: card.name, card_type: card.type });
         }
+      })();
+
+      /* ——— Load last recharge from API ——— */
+      (async () => {
+        const el = document.getElementById('lastRechargeInfo');
+        try {
+          const res = await fetch('/api/transactions', { credentials: 'include' });
+          if (res.ok) {
+            const transactions = await res.json();
+            // Pega só recargas (transaction_type === 'recharge'), já vem ordenado por data desc
+            const lastRecharge = transactions.find(t => t.transaction_type === 'recharge');
+            if (lastRecharge) {
+              const date = new Date(lastRecharge.created_at);
+              const formatted = date.toLocaleDateString('pt-BR', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+              });
+              const amount = Math.abs(parseFloat(lastRecharge.amount)).toFixed(2).replace('.', ',');
+              el.textContent = `${formatted} — R$ ${amount}`;
+            } else {
+              el.textContent = 'Nenhuma recarga encontrada';
+            }
+            return;
+          }
+        } catch (_) { /* sem conexão */ }
+        el.textContent = 'Indisponível no momento';
       })();
     </script>
   </body>
