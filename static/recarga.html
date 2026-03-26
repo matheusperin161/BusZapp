@@ -469,11 +469,6 @@
               <div class="font-semibold text-gray-900 dark:text-white text-sm">PIX</div>
               <div class="text-xs text-gray-600 dark:text-gray-400">Instantâneo</div>
             </button>
-            <button id="boleto-button" onclick="selectPaymentMethod('boleto')" class="btn-payment payment-method-btn">
-              <i data-feather="file-text" class="w-7 h-7 mx-auto mb-1"></i>
-              <div class="font-semibold text-gray-900 dark:text-white text-sm">Boleto</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400">Até 3 dias</div>
-            </button>
           </div>
 
           <!-- Card fields -->
@@ -505,18 +500,6 @@
               <i data-feather="check-circle" class="w-5 h-5 text-green-600"></i> PIX — Pagamento Instantâneo
             </h4>
             <p class="text-green-800 dark:text-gray-300 text-sm">Após confirmar, você receberá um QR Code para escanear e completar o pagamento.</p>
-          </div>
-
-          <!-- Boleto info -->
-          <div id="boleto-fields" class="hidden p-5 bg-blue-50 dark:bg-gray-700 rounded-xl mb-4">
-            <h4 class="font-semibold text-blue-900 dark:text-white mb-2 flex items-center gap-2">
-              <i data-feather="file-text" class="w-5 h-5 text-blue-600"></i> Boleto Bancário
-            </h4>
-            <ul class="text-blue-800 dark:text-gray-300 text-sm space-y-1">
-              <li class="flex items-center gap-2"><i data-feather="check" class="w-4 h-4"></i> Vencimento em 3 dias úteis</li>
-              <li class="flex items-center gap-2"><i data-feather="check" class="w-4 h-4"></i> Pagamento em qualquer banco</li>
-              <li class="flex items-center gap-2"><i data-feather="check" class="w-4 h-4"></i> Confirmação em até 2 dias úteis</li>
-            </ul>
           </div>
         </div>
 
@@ -685,7 +668,7 @@
 
       function selectPaymentMethod(method) {
         selectedPaymentMethod = method;
-        ['cartao-fields', 'pix-fields', 'boleto-fields'].forEach(id => {
+        ['cartao-fields', 'pix-fields'].forEach(id => {
           document.getElementById(id).classList.add('hidden');
         });
         document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('active'));
@@ -695,10 +678,7 @@
         } else if (method === 'pix') {
           document.getElementById('pix-fields').classList.remove('hidden');
           document.getElementById('pix-button').classList.add('active');
-        } else if (method === 'boleto') {
-          document.getElementById('boleto-fields').classList.remove('hidden');
-          document.getElementById('boleto-button').classList.add('active');
-        }
+        } 
         checkFormCompletion();
         feather.replace();
       }

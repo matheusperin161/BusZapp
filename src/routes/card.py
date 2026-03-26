@@ -9,7 +9,7 @@ from src.utils.auth import login_required
 
 card_bp = Blueprint('card', __name__, url_prefix='/api')
 
-VALID_PAYMENT_METHODS = ('cartao', 'pix', 'boleto')
+VALID_PAYMENT_METHODS = ('cartao', 'pix')
 LOW_BALANCE_THRESHOLD = 5.0
 VALID_CARD_TYPES = ('cidadao', 'normal', 'estudante', 'idoso', 'acompanhante', 'carteiro', 'colaborador', 'pcd')
 
@@ -124,19 +124,11 @@ def get_card_info():
 def _build_payment_info(method: str, tx_suffix: str, amount: float) -> dict:
     if method == 'cartao':
         return {'method': 'Cartão de Crédito', 'status': 'Aprovado', 'transaction_id': f'CARD_{tx_suffix}'}
-    if method == 'pix':
-        return {
-            'method': 'PIX',
-            'status': 'Aprovado',
-            'transaction_id': f'PIX_{tx_suffix}',
-            'qr_code': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-        }
-    # boleto
     return {
-        'method': 'Boleto Bancário',
+        'method': 'PIX',
         'status': 'Aprovado',
-        'transaction_id': f'BOL_{tx_suffix}',
-        'barcode': '23793.39001 60000.000001 00000.000000 1 84770000010000',
+        'transaction_id': f'PIX_{tx_suffix}',
+        'qr_code': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
     }
 
 
