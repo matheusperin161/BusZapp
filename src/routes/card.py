@@ -88,6 +88,10 @@ def register_card():
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
+    # Enforce 1 card per user
+    if user.card_number and user.card_number.strip():
+        return jsonify({'error': 'Você já possui um cartão cadastrado. Cada usuário pode ter apenas 1 cartão.'}), 409
+
     user.card_number = card_number
     user.card_holder = holder_name
     user.card_type   = card_type
