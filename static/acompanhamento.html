@@ -269,7 +269,7 @@
     }
 
     currentStops=stops;
-    drawRoute(stops, selectedRoute._color);
+    await drawRoute(stops, selectedRoute._color);
     drawStops(stops);
     renderStopList(stops);
     map.fitBounds(L.latLngBounds(stops.map(s=>[s.lat,s.lng])),{padding:[40,40]});
@@ -280,9 +280,30 @@
   }
 
   // ── Map drawing ────────────────────────────────────────────────────────────
-  function drawRoute(stops,color){
-    routeLine=L.polyline(stops.map(s=>[s.lat,s.lng]),{
-      color:color||'#f59e0b',weight:5,opacity:.85,dashArray:'12 8',lineJoin:'round'
+  async function drawRoute(stops,color){
+    // Fallback: straight lines between stops
+    let coords=stops.map(s=>[s.lat,s.lng]);
+
+    if(stops.length>=2){
+      try{
+        // OSRM public routing API — returns geometry following actual roads
+        const waypoints=stops.map(s=>`${s.lng},${s.lat}`).join(';');
+        const res=await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${waypoints}?overview=full&geometries=geojson`,
+          {signal:AbortSignal.timeout(8000)}
+        );
+        const data=await res.json();
+        if(data.routes&&data.routes[0]){
+          // GeoJSON uses [lon,lat] — flip to [lat,lon] for Leaflet
+          coords=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+        }
+      }catch(e){
+        // OSRM unavailable — fallback already set
+      }
+    }
+
+    routeLine=L.polyline(coords,{
+      color:color||'#f59e0b',weight:5,opacity:.85,lineJoin:'round'
     }).addTo(map);
   }
 
