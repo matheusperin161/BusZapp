@@ -1,540 +1,630 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Meu Perfil - Mobilidade Urbana</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    
-    <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon" />
-    <style>
-      /* Estilos para o tema escuro */
-      .dark .bg-yellow-50 {
-        background-color: #1a202c;
-      }
-      .dark .bg-white {
-        background-color: #2d3748;
-      }
-      .dark .text-yellow-800 {
-        color: #f7fafc;
-      }
-      .dark .text-yellow-600 {
-        color: #a0aec0;
-      }
-      .dark .border-yellow-200 {
-        border-color: #4a5568;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil — BuszApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
+  <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <style>
+    .balance-card {
+      background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+      border-radius: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .balance-card::before {
+      content: ''; position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      width: 160px; height: 160px; top: -60px; right: -40px;
+    }
+    .balance-card::after {
+      content: ''; position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+      width: 100px; height: 100px; bottom: -30px; left: -20px;
+    }
 
-      /* Animações personalizadas */
-      @keyframes slideInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
+    .stat-card {
+      background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(249,115,22,0.05));
+      border-left: 4px solid #f59e0b;
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.15); }
+    .dark .stat-card { background: rgba(245,158,11,0.06); }
 
-      .animate-slide-in-up {
-        animation: slideInUp 0.6s ease-out;
-      }
+    .input-modern {
+      background-color: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
+      width: 100%;
+      color: #1f2937;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .input-modern:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+    }
+    .dark .input-modern {
+      background-color: #1f2937;
+      border-color: #374151;
+      color: #f9fafb;
+    }
+    .dark .input-modern:focus {
+      border-color: #f59e0b;
+    }
 
-      /* Card moderno */
-      .card-modern {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-      }
+    .avatar-ring {
+      background: linear-gradient(135deg, #fbbf24, #f97316);
+      border-radius: 50%;
+      padding: 4px;
+      display: inline-flex;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .avatar-inner {
+      background: white;
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .dark .avatar-inner { background: #1e293b; }
+    .avatar-inner img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .avatar-overlay {
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .avatar-ring:hover .avatar-overlay {
+      background: rgba(0,0,0,0.45);
+    }
+    .avatar-overlay span {
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .avatar-ring:hover .avatar-overlay span { opacity: 1; }
+    .avatar-uploading { pointer-events: none; opacity: 0.6; }
+  </style>
+</head>
+<body class="bg-yellow-50 dark:bg-gray-900 min-h-screen">
 
-      .card-modern:hover {
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        transform: translateY(-2px);
-      }
+  <!-- Sidebar Overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-      .dark .card-modern {
-        background: #2d3748;
-      }
+  <!-- Menu Toggle -->
+  <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+    <i data-feather="menu" class="w-6 h-6"></i>
+  </button>
 
-      /* Input moderno */
-      .input-modern {
-        background-color: rgba(255, 255, 255, 0.95);
-        border: 2px solid #fef3c7;
-        border-radius: 12px;
-        padding: 12px 16px;
-        font-size: 16px;
-        transition: all 0.3s ease;
-      }
+  <!-- Sidebar -->
+  <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
+    <a href="dashboard.html" class="sidebar-item gap-3">
+      <i data-feather="home"></i><span>Página Inicial</span>
+    </a>
+    <a id="sidebarDrivers" href="add-driver.html" class="sidebar-item hidden gap-3">
+      <i data-feather="users"></i><span>Gerenciar Motoristas</span>
+    </a>
+    <a id="sidebarFleet" href="add-vehicle.html" class="sidebar-item hidden gap-3">
+      <i data-feather="truck"></i><span>Gerenciar Frota</span>
+    </a>
+    <a id="sidebarRoutes" href="admin-rotas.html" class="sidebar-item hidden gap-3">
+      <i data-feather="map"></i><span>Gerenciar Rotas</span>
+    </a>
+    <a href="rating.html" class="sidebar-item gap-3">
+      <i data-feather="star"></i><span>Avaliação</span>
+    </a>
+    <a href="profile.html" class="sidebar-item gap-3 bg-white/20">
+      <i data-feather="user"></i><span>Meu Perfil</span>
+    </a>
+    <div class="mt-auto">
+      <button onclick="logout()" class="sidebar-item gap-3 w-full text-left">
+        <i data-feather="log-out"></i><span>Sair</span>
+      </button>
+    </div>
+  </nav>
 
-      .input-modern:focus {
-        outline: none;
-        border-color: #f59e0b;
-        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-      }
-
-      .dark .input-modern {
-        background-color: rgba(45, 55, 72, 0.8);
-        border-color: #4a5568;
-        color: #f7fafc;
-      }
-
-      .dark .input-modern:focus {
-        border-color: #f59e0b;
-        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
-      }
-
-      /* Botão moderno */
-      .btn-primary {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px rgba(245, 158, 11, 0.4);
-      }
-
-      .btn-primary:active {
-        transform: translateY(0);
-      }
-
-      /* Header gradient */
-      .header-gradient {
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-      }
-
-      .dark .header-gradient {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      }
-
-      /* Profile avatar */
-      .profile-avatar {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
-      }
-
-      /* Info card */
-      .info-card {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
-        border-left: 4px solid #f59e0b;
-        border-radius: 12px;
-        padding: 16px;
-      }
-
-      .dark .info-card {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
-      }
-
-      /* Section title */
-      .section-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .dark .section-title {
-        color: #f7fafc;
-      }
-    </style>
-  </head>
-  <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="header-gradient text-white shadow-lg sticky top-0 z-40">
-      <div class="container mx-auto px-4 py-4 flex items-center">
-        <div class="flex items-center space-x-3">
-          <button
-            onclick="goBack()"
-            class="p-2 rounded-full hover:bg-white/20 transition"
-            title="Voltar"
-          >
-            <i data-feather="arrow-left" class="w-6 h-6"></i>
-          </button>
-          <div class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
-            <i data-feather="user" class="w-7 h-7"></i>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold">Meu Perfil</h1>
-            <p class="text-xs opacity-90">Gerencie suas informações pessoais</p>
-          </div>
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3 pl-12">
+        <div class="bg-white/20 backdrop-blur p-2 rounded-xl">
+          <i data-feather="user" class="w-7 h-7"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold">Meu Perfil</h1>
+          <p class="text-xs opacity-80">Gerencie suas informações</p>
         </div>
       </div>
-    </header>
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" onclick="DarkMode.toggle(); updateThemeIcon()"
+                class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema" aria-label="Alternar tema">
+          <i data-feather="moon" class="w-5 h-5"></i>
+        </button>
+        <button onclick="window.location.href='dashboard.html'"
+                class="p-2.5 rounded-xl hover:bg-white/20 transition" aria-label="Voltar">
+          <i data-feather="arrow-left" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8 flex-grow">
-      <!-- Profile Header -->
-      <div class="card-modern p-8 mb-8 animate-slide-in-up">
-        <div class="flex flex-col md:flex-row items-center gap-6">
-          <div class="profile-avatar">
-            <i data-feather="user" class="w-16 h-16 text-white"></i>
+  <!-- Main -->
+  <main class="container mx-auto px-4 py-8 max-w-5xl">
+
+    <!-- Profile Banner -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 mb-8 animate-fade-in-up">
+      <div class="flex flex-col md:flex-row items-center gap-6">
+        <!-- Avatar clicável -->
+        <input type="file" id="avatarInput" accept="image/png,image/jpeg,image/webp,image/gif"
+               class="hidden" onchange="uploadAvatar(this)" />
+        <div class="avatar-ring" id="avatarRing" onclick="document.getElementById('avatarInput').click()" title="Clique para alterar foto">
+          <div class="avatar-inner" id="avatarInner">
+            <i data-feather="user" class="w-12 h-12 text-yellow-500" id="avatarIcon"></i>
+            <img id="avatarImg" src="" alt="Foto de perfil" class="hidden" />
           </div>
-          <div class="flex-1 text-center md:text-left">
-            <h2 id="userName" class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Carregando...
-            </h2>
-            <p id="userEmail" class="text-lg text-gray-600 dark:text-gray-400 mb-2">
-              Carregando...
-            </p>
-            <div class="flex flex-wrap gap-3 justify-center md:justify-start">
-              <span class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm font-medium">
-                <i data-feather="check-circle" class="w-4 h-4"></i>
-                Conta Ativa
-              </span>
-              <span class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium">
-                <i data-feather="shield" class="w-4 h-4"></i>
-                Verificado
-              </span>
+          <div class="avatar-overlay">
+            <span>📷<br>Alterar<br>foto</span>
+          </div>
+        </div>
+        <div class="flex-1 text-center md:text-left">
+          <h2 id="userName" class="text-3xl font-bold text-gray-900 dark:text-white mb-1">—</h2>
+          <p id="userEmail" class="text-gray-500 dark:text-gray-400 mb-3">—</p>
+          <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+            <span id="badgeVerified" class="hidden inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
+              <i data-feather="check-circle" class="w-3.5 h-3.5"></i> Verificado
+            </span>
+            <span id="badgeRole" class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-sm font-medium">
+              <i data-feather="shield" class="w-3.5 h-3.5"></i> <span id="roleLabel">Usuário</span>
+            </span>
+            <span id="memberSince" class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm font-medium">
+              <i data-feather="calendar" class="w-3.5 h-3.5"></i> <span id="memberSinceText">—</span>
+            </span>
+          </div>
+        </div>
+        <!-- Saldo -->
+        <div class="balance-card text-white p-5 min-w-[180px] text-center flex-shrink-0 relative z-10">
+          <p class="text-xs opacity-80 mb-1 flex items-center justify-center gap-1">
+            <i data-feather="credit-card" class="w-3.5 h-3.5"></i> Saldo
+          </p>
+          <p id="cardBalance" class="text-3xl font-bold relative z-10">R$ 0,00</p>
+          <a href="recarga.html" class="text-xs opacity-70 mt-1 block hover:opacity-100 underline relative z-10">Recarregar →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Form -->
+      <div class="lg:col-span-2 animate-fade-in-up">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 mb-6">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-6">
+            <i data-feather="edit-2" class="w-5 h-5 text-yellow-500"></i>
+            Informações Pessoais
+          </h3>
+          <form id="profileForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">
+                Nome de Usuário
+              </label>
+              <input type="text" id="usernameInput" class="input-modern" placeholder="Seu nome de usuário" />
             </div>
-          </div>
-        </div>
-      </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">
+                E-mail
+              </label>
+              <input type="email" id="emailInput" class="input-modern" placeholder="Seu e-mail" />
+            </div>
 
-      <!-- Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Form -->
-        <div class="lg:col-span-2 animate-slide-in-up" style="animation-delay: 0.1s;">
-          <!-- Personal Information -->
-          <div class="card-modern p-8 mb-8">
-            <h3 class="section-title">
-              <i data-feather="edit-2" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-              Informações Pessoais
-            </h3>
-            <form id="profileForm" class="space-y-4">
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Nome de Usuário
-                </label>
-                <input
-                  type="text"
-                  id="usernameInput"
-                  class="input-modern w-full"
-                  placeholder="Carregando..."
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  E-mail
-                </label>
-                <input
-                  type="email"
-                  id="emailInput"
-                  class="input-modern w-full"
-                  placeholder="Carregando..."
-                />
-              </div>
-
-              <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-4">
-                  <i data-feather="lock" class="w-4 h-4 inline mr-2"></i>
-                  Alterar Senha
-                </h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Deixe em branco para manter a senha atual
-                </p>
-
+            <div class="pt-5 border-t border-gray-100 dark:border-gray-700">
+              <h4 class="font-semibold text-gray-800 dark:text-white mb-1 flex items-center gap-2">
+                <i data-feather="lock" class="w-4 h-4 text-yellow-500"></i> Alterar Senha
+              </h4>
+              <p class="text-xs text-gray-400 mb-4">Deixe em branco para manter a senha atual</p>
+              <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">
                     Nova Senha
                   </label>
-                  <input
-                    type="password"
-                    id="passwordInput"
-                    class="input-modern w-full"
-                    placeholder="Digite uma nova senha (opcional)"
-                  />
+                  <input type="password" id="passwordInput" class="input-modern" placeholder="Nova senha (opcional)" />
                 </div>
-
-                <div class="mt-4">
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">
                     Confirmar Nova Senha
                   </label>
-                  <input
-                    type="password"
-                    id="confirmPasswordInput"
-                    class="input-modern w-full"
-                    placeholder="Confirme a nova senha"
-                  />
+                  <input type="password" id="confirmPasswordInput" class="input-modern" placeholder="Confirme a nova senha" />
                 </div>
               </div>
+            </div>
 
-              <div class="pt-6 flex gap-3">
-                <button
-                  type="button"
-                  id="updateProfileBtn"
-                  onclick="updateProfile()"
-                  class="btn-primary flex-1 flex items-center justify-center gap-2"
-                >
-                  <i data-feather="save" class="w-5 h-5"></i>
-                  Salvar Alterações
-                </button>
-                <button
-                  type="button"
-                  onclick="resetForm()"
-                  class="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                >
-                  Cancelar
-                </button>
-              </div>
+            <div class="pt-4 flex gap-3">
+              <button type="button" id="updateProfileBtn" onclick="updateProfile()"
+                      class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-white
+                             bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600
+                             shadow-md hover:shadow-lg transition-all">
+                <i data-feather="save" class="w-5 h-5"></i> Salvar Alterações
+              </button>
+              <button type="button" onclick="resetForm()"
+                      class="flex-1 py-3 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white
+                             font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                Cancelar
+              </button>
+            </div>
 
-              <!-- Messages -->
-              <div
-                id="successMessage"
-                class="hidden mt-4 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-800 dark:text-green-300 px-4 py-3 rounded-lg flex items-center gap-2"
-              >
-                <i data-feather="check-circle" class="w-5 h-5"></i>
-                <span id="successText"></span>
-              </div>
-              <div
-                id="errorMessage"
-                class="hidden mt-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-300 px-4 py-3 rounded-lg flex items-center gap-2"
-              >
-                <i data-feather="alert-circle" class="w-5 h-5"></i>
-                <span id="errorText"></span>
-              </div>
-            </form>
-          </div>
+            <!-- Feedback messages -->
+            <div id="successMessage" class="hidden mt-2 bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700
+                 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl flex items-center gap-2 text-sm">
+              <i data-feather="check-circle" class="w-4 h-4 flex-shrink-0"></i>
+              <span id="successText"></span>
+            </div>
+            <div id="errorMessage" class="hidden mt-2 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700
+                 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl flex items-center gap-2 text-sm">
+              <i data-feather="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
+              <span id="errorText"></span>
+            </div>
+          </form>
         </div>
+      </div>
 
-        <!-- Sidebar -->
-        <div class="lg:col-span-1 animate-slide-in-up" style="animation-delay: 0.2s;">
-          <!-- Card Information -->
-          
+      <!-- Sidebar stats -->
+      <div class="lg:col-span-1 animate-fade-in-up flex flex-col gap-6">
 
-          <!-- Usage Statistics -->
-          <div class="card-modern p-8">
-            <h3 class="section-title">
-              <i data-feather="bar-chart-2" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-              Estatísticas
-            </h3>
-            <div class="space-y-4">
-              <div class="info-card">
-                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Viagens este mês</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">42</p>
-              </div>
-
-              <div class="info-card">
-                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Gasto médio mensal</p>
-                <p class="text-lg font-bold text-gray-900 dark:text-white">R$ 85,00</p>
-              </div>
-
-              <div class="info-card">
-                <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Linha mais utilizada</p>
-                <p class="text-sm font-medium text-gray-900 dark:text-white">Linha 001 - Centro</p>
-              </div>
-
-              <div class="info-card bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-l-green-500">
-                <p class="text-xs text-green-700 dark:text-green-300 mb-1">Economia com desconto</p>
-                <p class="text-xl font-bold text-green-700 dark:text-green-300">R$ 42,50</p>
-              </div>
+        <!-- Estatísticas reais -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-5">
+            <i data-feather="bar-chart-2" class="w-5 h-5 text-yellow-500"></i>
+            Estatísticas
+          </h3>
+          <div class="space-y-3" id="statsContainer">
+            <div class="stat-card">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Viagens este mês</p>
+              <p id="statViagens" class="text-2xl font-bold text-gray-900 dark:text-white">—</p>
+            </div>
+            <div class="stat-card">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Gasto no mês</p>
+              <p id="statGasto" class="text-xl font-bold text-gray-900 dark:text-white">—</p>
+            </div>
+            <div class="stat-card">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Linha mais usada</p>
+              <p id="statLinha" class="text-sm font-semibold text-gray-900 dark:text-white truncate">—</p>
+            </div>
+            <div class="stat-card" style="border-left-color:#10b981">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total recarregado</p>
+              <p id="statRecargas" class="text-xl font-bold text-green-600 dark:text-green-400">—</p>
             </div>
           </div>
         </div>
+
+        <!-- Ações rápidas -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+            <i data-feather="zap" class="w-5 h-5 text-yellow-500"></i>
+            Ações Rápidas
+          </h3>
+          <div class="flex flex-col gap-2">
+            <a href="recarga.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-300">
+              <div class="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                <i data-feather="credit-card" class="w-4 h-4 text-yellow-600"></i>
+              </div>
+              <span class="text-sm font-medium">Recarregar cartão</span>
+            </a>
+            <a href="acompanhamento.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-300">
+              <div class="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                <i data-feather="map-pin" class="w-4 h-4 text-yellow-600"></i>
+              </div>
+              <span class="text-sm font-medium">Rastrear ônibus</span>
+            </a>
+            <a href="rating.html"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-300">
+              <div class="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                <i data-feather="star" class="w-4 h-4 text-yellow-600"></i>
+              </div>
+              <span class="text-sm font-medium">Avaliar viagem</span>
+            </a>
+            <button id="removePhotoBtn" onclick="removeAvatar()" class="hidden
+               flex items-center gap-3 p-3 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-900/10 transition text-orange-500 dark:text-orange-400 w-full text-left">
+              <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
+                <i data-feather="trash-2" class="w-4 h-4 text-orange-500"></i>
+              </div>
+              <span class="text-sm font-medium">Remover foto</span>
+            </button>
+            <button onclick="logout()"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 transition text-red-500 dark:text-red-400 w-full text-left">
+              <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                <i data-feather="log-out" class="w-4 h-4 text-red-500"></i>
+              </div>
+              <span class="text-sm font-medium">Sair da conta</span>
+            </button>
+          </div>
+        </div>
+
       </div>
-    </main>
+    </div>
+  </main>
 
-    <script>
-      feather.replace();
+  <script src="./js/app.js"></script>
+  <script>
+    // ── Theme ─────────────────────────────────────────────────────────────────
+    function updateThemeIcon() {
+      const btn = document.getElementById('themeToggle');
+      const isDark = DarkMode.isDark();
+      btn.innerHTML = isDark
+        ? '<i data-feather="sun" class="w-5 h-5"></i>'
+        : '<i data-feather="moon" class="w-5 h-5"></i>';
+      if (typeof feather !== 'undefined') feather.replace();
+    }
 
-      function goBack() {
-        window.history.back();
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function fmtCurrency(v) {
+      return 'R$ ' + parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    }
+
+    function escapeHtml(str = '') {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // ── Avatar helpers ────────────────────────────────────────────────────────
+    function setAvatar(url) {
+      const img  = document.getElementById('avatarImg');
+      const icon = document.getElementById('avatarIcon');
+      if (url) {
+        img.src = url + '?t=' + Date.now(); // cache-bust
+        img.classList.remove('hidden');
+        icon.classList.add('hidden');
+        document.getElementById('removePhotoBtn').classList.remove('hidden');
+      } else {
+        img.classList.add('hidden');
+        icon.classList.remove('hidden');
+        document.getElementById('removePhotoBtn').classList.add('hidden');
+      }
+    }
+
+    async function uploadAvatar(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      if (file.size > 3 * 1024 * 1024) {
+        showError('Imagem muito grande. Máximo 3 MB.');
+        input.value = '';
+        return;
       }
 
-      function resetForm() {
-        document.getElementById('usernameInput').value = '';
-        document.getElementById('emailInput').value = '';
-        document.getElementById('passwordInput').value = '';
-        document.getElementById('confirmPasswordInput').value = '';
-        hideMessages();
-        loadUserProfile();
+      const ring = document.getElementById('avatarRing');
+      ring.classList.add('avatar-uploading');
+
+      const form = new FormData();
+      form.append('picture', file);
+
+      try {
+        const res = await fetch('/api/auth/profile/picture', {
+          method: 'POST',
+          credentials: 'include',
+          body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erro no upload');
+        setAvatar(data.profile_picture);
+        showSuccess('Foto atualizada com sucesso!');
+      } catch (e) {
+        showError(e.message);
+      } finally {
+        ring.classList.remove('avatar-uploading');
+        input.value = '';
       }
+    }
 
-      // Função para carregar dados do perfil
-      async function loadUserProfile() {
-        try {
-          const response = await fetch('/api/auth/profile', {
-            method: 'GET',
-            credentials: 'include',
-          });
+    async function removeAvatar() {
+      if (!confirm('Remover sua foto de perfil?')) return;
+      try {
+        const res = await fetch('/api/auth/profile/picture', {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Erro ao remover foto');
+        setAvatar(null);
+        showSuccess('Foto removida.');
+      } catch (e) {
+        showError(e.message);
+      }
+    }
 
-          if (response.ok) {
-            const data = await response.json();
+    // ── Load profile ──────────────────────────────────────────────────────────
+    async function loadUserProfile() {
+      try {
+        const data = await API.get('/api/auth/profile');
 
-            // Atualizar elementos da página
-            document.getElementById('userName').textContent = data.username;
-            document.getElementById('userEmail').textContent = data.email;
-            document.getElementById('usernameInput').value = data.username;
-            document.getElementById('emailInput').value = data.email;
-            
-            // Atualizar saldo do cartão
-            if (data.card_balance !== undefined) {
-              document.getElementById('currentBalance').textContent = `R$ ${parseFloat(data.card_balance).toFixed(2).replace('.', ',')}`;
-            }
-          } else if (response.status === 401) {
-            // Usuário não autenticado, redirecionar para login
-            window.location.href = 'login.html';
-          } else {
-            showError('Erro ao carregar dados do perfil');
-          }
-        } catch (error) {
-          console.error('Erro ao carregar perfil:', error);
-          showError('Erro de conexão ao carregar perfil');
+        document.getElementById('userName').textContent      = data.username;
+        document.getElementById('userEmail').textContent     = data.email;
+        document.getElementById('usernameInput').value       = data.username;
+        document.getElementById('emailInput').value          = data.email;
+        document.getElementById('cardBalance').textContent   = fmtCurrency(data.card_balance);
+        document.getElementById('memberSinceText').textContent = 'Membro desde ' + fmtDate(data.created_at);
+        setAvatar(data.profile_picture || null);
+
+        if (data.email_verified) {
+          document.getElementById('badgeVerified').classList.remove('hidden');
         }
-      }
 
-      // Função para atualizar perfil
-      async function updateProfile() {
-        const username = document.getElementById('usernameInput').value;
-        const email = document.getElementById('emailInput').value;
-        const password = document.getElementById('passwordInput').value;
-        const confirmPassword = document.getElementById('confirmPasswordInput').value;
-        const updateBtn = document.getElementById('updateProfileBtn');
+        const roleMap = { admin: 'Administrador', user: 'Usuário' };
+        document.getElementById('roleLabel').textContent = roleMap[data.role] || data.role;
 
-        // Limpar mensagens
-        hideMessages();
-
-        // Validações
-        if (!username.trim() || !email.trim()) {
-          showError('Nome de usuário e e-mail são obrigatórios');
-          return;
+        if (data.role === 'admin') {
+          document.getElementById('sidebarDrivers').classList.remove('hidden');
+          document.getElementById('sidebarFleet').classList.remove('hidden');
+          document.getElementById('sidebarRoutes').classList.remove('hidden');
         }
 
-        if (password && password !== confirmPassword) {
-          showError('As senhas não coincidem');
-          return;
-        }
-
-        if (password && password.length < 6) {
-          showError('A senha deve ter pelo menos 6 caracteres');
-          return;
-        }
-
-        // Desabilitar botão durante a atualização
-        updateBtn.disabled = true;
-        updateBtn.innerHTML = '<i data-feather="loader" class="w-5 h-5 mr-2 animate-spin"></i>Salvando...';
-        feather.replace();
-
-        try {
-          const requestData = {
-            username: username.trim(),
-            email: email.trim(),
-          };
-
-          // Incluir senha apenas se foi fornecida
-          if (password) {
-            requestData.password = password;
-          }
-
-          const response = await fetch('/api/auth/profile', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify(requestData),
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            showSuccess('Perfil atualizado com sucesso!');
-
-            // Atualizar elementos da página
-            document.getElementById('userName').textContent = data.username;
-            document.getElementById('userEmail').textContent = data.email;
-
-            // Limpar campos de senha
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('confirmPasswordInput').value = '';
-          } else {
-            showError(data.error || 'Erro ao atualizar perfil');
-          }
-        } catch (error) {
-          console.error('Erro:', error);
-          showError('Erro de conexão. Tente novamente.');
-        } finally {
-          // Reabilitar botão
-          updateBtn.disabled = false;
-          updateBtn.innerHTML = '<i data-feather="save" class="w-5 h-5 mr-2"></i>Salvar Alterações';
-          feather.replace();
-        }
+        if (typeof feather !== 'undefined') feather.replace();
+      } catch (e) {
+        window.location.href = 'login.html';
       }
+    }
 
-      // Funções auxiliares para mensagens
-      function showSuccess(message) {
-        const successDiv = document.getElementById('successMessage');
-        const successText = document.getElementById('successText');
-        successText.textContent = message;
-        successDiv.classList.remove('hidden');
+    // ── Load statistics ───────────────────────────────────────────────────────
+    async function loadStats() {
+      try {
+        const txs = await API.get('/api/transactions');
 
-        // Esconder após 5 segundos
-        setTimeout(() => {
-          successDiv.classList.add('hidden');
-        }, 5000);
-      }
+        const now = new Date();
+        const thisMonth = now.getMonth();
+        const thisYear  = now.getFullYear();
 
-      function showError(message) {
-        const errorDiv = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        errorText.textContent = message;
-        errorDiv.classList.remove('hidden');
-      }
+        const monthly = txs.filter(t => {
+          const d = new Date(t.created_at);
+          return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+        });
 
-      function hideMessages() {
-        document.getElementById('successMessage').classList.add('hidden');
-        document.getElementById('errorMessage').classList.add('hidden');
-      }
+        // Viagens (uso) no mês
+        const viagens = monthly.filter(t => t.amount < 0);
+        document.getElementById('statViagens').textContent = viagens.length;
 
-      // Carregar dados do perfil quando a página carregar
-      document.addEventListener('DOMContentLoaded', function() {
-        loadUserProfile();
-      });
-    </script>
+        // Gasto no mês
+        const gasto = viagens.reduce((acc, t) => acc + Math.abs(t.amount), 0);
+        document.getElementById('statGasto').textContent = fmtCurrency(gasto);
 
-    <script>
-      // Script de inicialização do tema
-      function applyTheme(isDark) {
-        const html = document.documentElement;
-        if (isDark) {
-          html.classList.add('dark');
-          html.classList.remove('light');
+        // Linha mais usada — encontra a descrição mais frequente entre usos
+        const allUsage = txs.filter(t => t.amount < 0 && t.description);
+        if (allUsage.length) {
+          const freq = {};
+          allUsage.forEach(t => { freq[t.description] = (freq[t.description] || 0) + 1; });
+          const top = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
+          document.getElementById('statLinha').textContent = top;
+          document.getElementById('statLinha').title = top;
         } else {
-          html.classList.remove('dark');
-          html.classList.add('light');
+          document.getElementById('statLinha').textContent = 'Nenhuma';
         }
-        feather.replace();
+
+        // Total recarregado (all time)
+        const totalRecarga = txs
+          .filter(t => t.amount > 0)
+          .reduce((acc, t) => acc + t.amount, 0);
+        document.getElementById('statRecargas').textContent = fmtCurrency(totalRecarga);
+
+      } catch (e) {
+        ['statViagens', 'statGasto', 'statLinha', 'statRecargas'].forEach(id => {
+          document.getElementById(id).textContent = '—';
+        });
+      }
+    }
+
+    // ── Update profile ────────────────────────────────────────────────────────
+    async function updateProfile() {
+      const username        = document.getElementById('usernameInput').value.trim();
+      const email           = document.getElementById('emailInput').value.trim();
+      const password        = document.getElementById('passwordInput').value;
+      const confirmPassword = document.getElementById('confirmPasswordInput').value;
+      const btn             = document.getElementById('updateProfileBtn');
+
+      hideMessages();
+
+      if (!username || !email) {
+        showError('Nome de usuário e e-mail são obrigatórios');
+        return;
+      }
+      if (password && password !== confirmPassword) {
+        showError('As senhas não coincidem');
+        return;
+      }
+      if (password && password.length < 6) {
+        showError('A senha deve ter pelo menos 6 caracteres');
+        return;
       }
 
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      let isDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
-      applyTheme(isDark);
-    </script>
-  </body>
+      btn.disabled = true;
+      btn.innerHTML = '<i data-feather="loader" class="w-5 h-5 animate-spin"></i> Salvando...';
+      if (typeof feather !== 'undefined') feather.replace();
+
+      try {
+        const body = { username, email };
+        if (password) body.password = password;
+
+        const data = await API.put('/api/auth/profile', body);
+
+        document.getElementById('userName').textContent  = data.username;
+        document.getElementById('userEmail').textContent = data.email;
+        document.getElementById('passwordInput').value        = '';
+        document.getElementById('confirmPasswordInput').value = '';
+
+        showSuccess('Perfil atualizado com sucesso!');
+      } catch (e) {
+        showError(e.data?.error || 'Erro ao atualizar perfil');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-feather="save" class="w-5 h-5"></i> Salvar Alterações';
+        if (typeof feather !== 'undefined') feather.replace();
+      }
+    }
+
+    // ── Form helpers ──────────────────────────────────────────────────────────
+    function resetForm() {
+      hideMessages();
+      document.getElementById('passwordInput').value        = '';
+      document.getElementById('confirmPasswordInput').value = '';
+      loadUserProfile();
+    }
+
+    function showSuccess(msg) {
+      document.getElementById('successText').textContent = msg;
+      document.getElementById('successMessage').classList.remove('hidden');
+      document.getElementById('errorMessage').classList.add('hidden');
+      if (typeof feather !== 'undefined') feather.replace();
+      setTimeout(() => document.getElementById('successMessage').classList.add('hidden'), 5000);
+    }
+
+    function showError(msg) {
+      document.getElementById('errorText').textContent = msg;
+      document.getElementById('errorMessage').classList.remove('hidden');
+      document.getElementById('successMessage').classList.add('hidden');
+      if (typeof feather !== 'undefined') feather.replace();
+    }
+
+    function hideMessages() {
+      document.getElementById('successMessage').classList.add('hidden');
+      document.getElementById('errorMessage').classList.add('hidden');
+    }
+
+    // ── Boot ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      updateThemeIcon();
+      loadUserProfile();
+      loadStats();
+    });
+  </script>
+</body>
 </html>

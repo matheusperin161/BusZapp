@@ -15,6 +15,7 @@ class User(db.Model):
     card_holder = db.Column(db.String(100), nullable=True)
     card_type = db.Column(db.String(30), nullable=True)  # cidadao | normal | estudante | idoso | acompanhante | carteiro | colaborador | pcd
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    profile_picture = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
 
@@ -33,6 +34,7 @@ class User(db.Model):
             'role': self.role,
             'card_balance': self.card_balance,
             'email_verified': self.email_verified,
+            'profile_picture': self.profile_picture,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 

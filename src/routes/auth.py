@@ -1,12 +1,21 @@
 """Authentication routes: register, login, logout, profile, password reset."""
+import os
 import secrets
 from datetime import datetime, timedelta
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 from src.models import db
 from src.models.user import User
 from src.utils.auth import login_required
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+MAX_AVATAR_BYTES = 3 * 1024 * 1024  # 3 MB
+
+
+def _allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -316,3 +325,66 @@ def driver_me():
     if not driver:
         return jsonify({'error': 'Motorista não encontrado'}), 404
     return jsonify(driver.to_dict())
+
+
+@auth_bp.route('/profile/picture', methods=['POST'])
+@login_required
+def upload_profile_picture():
+    """Faz upload da foto de perfil do usuário autenticado."""
+    if 'picture' not in request.files:
+        return jsonify({'error': 'Nenhum arquivo enviado'}), 400
+
+    file = request.files['picture']
+    if not file or file.filename == '':
+        return jsonify({'error': 'Arquivo inválido'}), 400
+
+    if not _allowed_file(file.filename):
+        return jsonify({'error': 'Formato não suportado. Use PNG, JPG, WEBP ou GIF'}), 400
+
+    # Verifica tamanho sem consumir o stream
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    if size > MAX_AVATAR_BYTES:
+        return jsonify({'error': 'Arquivo muito grande. Máximo 3 MB'}), 400
+
+    user = db.session.get(User, session['user_id'])
+    if not user:
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    filename = f"avatar_{user.id}.{ext}"
+
+    upload_dir = os.path.join(current_app.static_folder, 'uploads', 'avatars')
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Remove foto anterior se existir (extensão diferente)
+    for old in os.listdir(upload_dir):
+        if old.startswith(f"avatar_{user.id}."):
+            os.remove(os.path.join(upload_dir, old))
+
+    filepath = os.path.join(upload_dir, filename)
+    file.save(filepath)
+
+    user.profile_picture = f"/uploads/avatars/{filename}"
+    db.session.commit()
+
+    return jsonify({'profile_picture': user.profile_picture}), 200
+
+
+@auth_bp.route('/profile/picture', methods=['DELETE'])
+@login_required
+def delete_profile_picture():
+    """Remove a foto de perfil do usuário."""
+    user = db.session.get(User, session['user_id'])
+    if not user:
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+
+    if user.profile_picture:
+        filepath = os.path.join(current_app.static_folder, user.profile_picture.lstrip('/'))
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        user.profile_picture = None
+        db.session.commit()
+
+    return jsonify({'message': 'Foto removida'}), 200
