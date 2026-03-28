@@ -322,10 +322,7 @@
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Linha
               </label>
-              <select
-                id="bus_line"
-                class="input-modern w-full"
-              >
+              <select id="bus_line" class="input-modern w-full" onchange="onLineChange()">
                 <option value="">Selecione a linha</option>
               </select>
             </div>
@@ -333,21 +330,15 @@
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Data da Viagem
               </label>
-              <input
-                type="date"
-                class="input-modern w-full"
-                value="2024-12-22"
-              />
+              <input type="date" id="trip_date" class="input-modern w-full" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Horário
+                Horário de Saída
               </label>
-              <input
-                type="time"
-                class="input-modern w-full"
-                value="14:30"
-              />
+              <select id="trip_schedule" class="input-modern w-full" disabled>
+                <option value="">Selecione a linha primeiro</option>
+              </select>
             </div>
           </div>
         </div>
@@ -456,110 +447,108 @@
         window.history.back();
       }
 
-      // Função para carregar as linhas de ônibus e preencher o dropdown
+      // Define data padrão como hoje
+      document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('trip_date').value = today;
+        loadBusLines();
+      });
+
       async function loadBusLines() {
         try {
-          const response = await fetch('/api/routes', {
-            method: 'GET',
-            credentials: 'include',
+          const res = await fetch('/api/routes', { credentials: 'include' });
+          const lines = await res.json();
+          const sel = document.getElementById('bus_line');
+          sel.innerHTML = '<option value="">Selecione a linha</option>';
+          lines.forEach(line => {
+            const o = document.createElement('option');
+            o.value = `${line.route_number} - ${line.route_name}`;
+            o.textContent = `${line.route_number} - ${line.route_name}`;
+            o.dataset.routeNumber = line.route_number;
+            sel.appendChild(o);
           });
-
-          if (!response.ok) {
-            throw new Error('Erro ao carregar linhas de ônibus');
-          }
-
-          const busLines = await response.json();
-          const selectElement = document.getElementById('bus_line');
-          
-          // Limpa as opções existentes, mantendo a primeira (Selecione a Linha)
-          selectElement.innerHTML = '<option value="">Selecione a linha</option>';
-
-          busLines.forEach(line => {
-            const option = document.createElement('option');
-            // O valor da linha será a combinação do número e nome para facilitar a visualização
-            const lineValue = `${line.route_number} - ${line.route_name}`;
-            option.value = lineValue;
-            option.textContent = lineValue;
-            selectElement.appendChild(option);
-          });
-
-        } catch (error) {
-          console.error('Erro ao carregar linhas de ônibus:', error);
+        } catch (e) {
+          console.error('Erro ao carregar linhas:', e);
         }
       }
 
-      function submitRating() {
-        // Get all ratings
-        const ratings = {};
-        const categories = [
-          "overall",
-          "punctuality",
-          "cleanliness",
-          "comfort",
-          "service",
-        ];
+      async function onLineChange() {
+        const sel = document.getElementById('bus_line');
+        const opt = sel.options[sel.selectedIndex];
+        const schSel = document.getElementById('trip_schedule');
 
-        categories.forEach((category) => {
-          const activeStars = document.querySelectorAll(
-            `#${category}-rating .star.active`
-          );
-          ratings[category] = activeStars.length;
-        });
-
-        const comments = document.getElementById("comments").value;
-
-        // Simple validation
-        if (ratings.overall === 0) {
-          alert("Por favor, forneça uma avaliação geral antes de enviar.");
+        if (!opt || !opt.value) {
+          schSel.innerHTML = '<option value="">Selecione a linha primeiro</option>';
+          schSel.disabled = true;
           return;
         }
 
-        // Get trip information
-        const busLineSelect = document.getElementById('bus_line');
-        const tripDateInput = document.querySelector('input[type="date"]');
-        const tripTimeInput = document.querySelector('input[type="time"]');
+        const routeNumber = opt.dataset.routeNumber || opt.value.split(' - ')[0];
+        schSel.innerHTML = '<option value="">Carregando horários…</option>';
+        schSel.disabled = true;
+
+        try {
+          const res = await fetch(`/api/route/${routeNumber}/schedules`, { credentials: 'include' });
+          const schedules = await res.json();
+          schSel.innerHTML = '<option value="">Selecione o horário</option>';
+          schedules.forEach(sc => {
+            const o = document.createElement('option');
+            o.value = sc.departure_time;
+            o.textContent = `${sc.departure_time} — ${sc.period || ''}`;
+            schSel.appendChild(o);
+          });
+          schSel.disabled = false;
+        } catch (e) {
+          schSel.innerHTML = '<option value="">Erro ao carregar horários</option>';
+        }
+      }
+
+      async function submitRating() {
+        const ratings = {};
+        ['overall','punctuality','cleanliness','comfort','service'].forEach(cat => {
+          ratings[cat] = document.querySelectorAll(`#${cat}-rating .star.active`).length;
+        });
+
+        if (ratings.overall === 0) {
+          alert('Por favor, forneça uma avaliação geral antes de enviar.');
+          return;
+        }
+
+        const busLine = document.getElementById('bus_line').value;
+        const tripDate = document.getElementById('trip_date').value;
+        const scheduleDeparture = document.getElementById('trip_schedule').value;
 
         const ratingData = {
-          overall_rating: ratings.overall,
-          punctuality_rating: ratings.punctuality,
-          cleanliness_rating: ratings.cleanliness,
-          comfort_rating: ratings.comfort,
-          service_rating: ratings.service,
-          comments: comments,
-          bus_line: busLineSelect.value !== 'Selecione a linha' ? busLineSelect.value : '',
-          trip_date: tripDateInput.value,
-          trip_time: tripTimeInput.value
+          overall_rating:      ratings.overall,
+          punctuality_rating:  ratings.punctuality,
+          cleanliness_rating:  ratings.cleanliness,
+          comfort_rating:      ratings.comfort,
+          service_rating:      ratings.service,
+          comments:            document.getElementById('comments').value,
+          bus_line:            busLine,
+          trip_date:           tripDate,
+          trip_time:           scheduleDeparture,
+          schedule_departure:  scheduleDeparture,
         };
 
-        // Send to backend
-        fetch('/api/submit-rating', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(ratingData)
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+          const res = await fetch('/api/submit-rating', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(ratingData),
+          });
+          const data = await res.json();
           if (data.message) {
-            alert("Obrigado pela sua avaliação! Seus comentários são muito importantes para nós.");
-            // Redirect back to dashboard
+            alert('Obrigado pela sua avaliação! Seus comentários são muito importantes para nós.');
             window.location.href = 'dashboard.html';
           } else {
             alert('Erro ao enviar avaliação: ' + (data.error || 'Erro desconhecido'));
           }
-        })
-        .catch(error => {
-          console.error('Erro:', error);
+        } catch (e) {
           alert('Erro ao conectar com o servidor. Tente novamente.');
-        });
+        }
       }
-
-      // Carregar linhas de ônibus ao carregar a página
-      document.addEventListener('DOMContentLoaded', function() {
-        loadBusLines();
-      });
     </script>
 
     <script>

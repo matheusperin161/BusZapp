@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request, session
 from sqlalchemy import func
 
 from src.models import db
-from src.models.user import BusRoute, BusLocation, Notification, Rating
+from src.models.user import BusRoute, BusLocation, Notification, Rating, Driver, DriverTrip
 from src.utils.auth import login_required
 
 bus_bp = Blueprint('bus', __name__, url_prefix='/api')
@@ -100,14 +100,31 @@ def submit_rating():
         except ValueError:
             return jsonify({'error': 'Formato de hora inválido. Use HH:MM'}), 400
 
+    bus_line = data.get('bus_line', '')
+    schedule_departure = (data.get('schedule_departure') or '').strip()  # "HH:MM"
+
+    # Vincula a avaliação ao motorista que realmente iniciou esse trajeto no dia da viagem
+    matched_driver_id = None
+    if bus_line and schedule_departure and trip_date:
+        trip_record = (
+            DriverTrip.query
+            .filter_by(bus_line=bus_line, departure_time=schedule_departure, trip_date=trip_date)
+            .order_by(DriverTrip.started_at.desc())
+            .first()
+        )
+        if trip_record:
+            matched_driver_id = trip_record.driver_id
+
     rating = Rating(
         user_id=session['user_id'],
         overall_rating=int(overall_rating),
         **{k: int(v) for k, v in sub_ratings.items()},
         comments=data.get('comments', ''),
-        bus_line=data.get('bus_line', ''),
+        bus_line=bus_line,
         trip_date=trip_date,
         trip_time=trip_time,
+        schedule_departure=schedule_departure or None,
+        driver_id=matched_driver_id,
     )
 
     try:

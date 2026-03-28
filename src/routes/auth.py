@@ -327,6 +327,66 @@ def driver_me():
     return jsonify(driver.to_dict())
 
 
+@auth_bp.route('/driver/trip/start', methods=['POST'])
+def driver_trip_start():
+    """Registra o início de um trajeto pelo motorista logado."""
+    from src.models.user import Driver, DriverTrip
+    driver_id = session.get('driver_id')
+    if not driver_id:
+        return jsonify({'error': 'Não autenticado'}), 401
+
+    data           = request.get_json() or {}
+    bus_line       = (data.get('bus_line') or '').strip()
+    departure_time = (data.get('departure_time') or '').strip()
+    bus_number     = (data.get('bus_number') or '').strip()
+
+    if not bus_line or not departure_time:
+        return jsonify({'error': 'bus_line e departure_time são obrigatórios'}), 400
+
+    now = datetime.utcnow()
+    today = now.date()
+
+    # Encerra qualquer trip anterior ainda aberta deste motorista
+    DriverTrip.query.filter_by(driver_id=driver_id).filter(
+        DriverTrip.ended_at.is_(None)
+    ).update({'ended_at': now}, synchronize_session=False)
+
+    trip = DriverTrip(
+        driver_id      = driver_id,
+        bus_line       = bus_line,
+        departure_time = departure_time,
+        trip_date      = today,
+        bus_number     = bus_number or None,
+    )
+    db.session.add(trip)
+    db.session.commit()
+    return jsonify({'message': 'Trajeto registrado', 'trip': trip.to_dict()}), 201
+
+
+@auth_bp.route('/driver/trip/stop', methods=['POST'])
+def driver_trip_stop():
+    """Registra o fim do trajeto atual do motorista."""
+    from src.models.user import DriverTrip
+    driver_id = session.get('driver_id')
+    if not driver_id:
+        return jsonify({'error': 'Não autenticado'}), 401
+
+    today = datetime.utcnow().date()
+    trip = (
+        DriverTrip.query
+        .filter_by(driver_id=driver_id, trip_date=today)
+        .filter(DriverTrip.ended_at.is_(None))
+        .order_by(DriverTrip.started_at.desc())
+        .first()
+    )
+    if not trip:
+        return jsonify({'message': 'Nenhum trajeto ativo encontrado'}), 200
+
+    trip.ended_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'message': 'Trajeto encerrado', 'trip': trip.to_dict()}), 200
+
+
 @auth_bp.route('/profile/picture', methods=['POST'])
 @login_required
 def upload_profile_picture():

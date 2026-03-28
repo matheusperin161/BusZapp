@@ -102,9 +102,27 @@
       </div>
       <div>
         <label class="text-xs font-semibold text-gray-500 mb-1 block">LINHA DO ÔNIBUS *</label>
-        <select id="dBusLine" class="form-input">
+        <select id="dBusLine" class="form-input" onchange="loadSchedulesForDriver()">
           <option value="">Selecione a linha…</option>
         </select>
+      </div>
+      <div id="scheduleSection" class="hidden">
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">HORÁRIOS DO MOTORISTA</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">Primeiro horário</label>
+            <select id="dFirstSchedule" class="form-input">
+              <option value="">Selecione…</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">Último horário</label>
+            <select id="dLastSchedule" class="form-input">
+              <option value="">Selecione…</option>
+            </select>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Define quais avaliações serão direcionadas a este motorista</p>
       </div>
       <div>
         <label class="text-xs font-semibold text-gray-500 mb-1 block">CÓDIGO DO MOTORISTA *</label>
@@ -210,9 +228,32 @@
         const o=document.createElement('option');
         o.value=`${r.route_number} - ${r.route_name}`;
         o.textContent=`${r.route_number} - ${r.route_name}`;
+        o.dataset.routeNumber=r.route_number;
         sel.appendChild(o);
       });
     }catch(e){}
+  }
+
+  async function loadSchedulesForDriver(){
+    const sel=document.getElementById('dBusLine');
+    const opt=sel.options[sel.selectedIndex];
+    const section=document.getElementById('scheduleSection');
+    if(!opt||!opt.value){section.classList.add('hidden');return;}
+    const routeNumber=opt.dataset.routeNumber||opt.value.split(' - ')[0];
+    try{
+      const schedules=await API.get(`/api/route/${routeNumber}/schedules`);
+      ['dFirstSchedule','dLastSchedule'].forEach(id=>{
+        const s=document.getElementById(id);
+        s.innerHTML='<option value="">Selecione…</option>';
+        schedules.forEach(sc=>{
+          const o=document.createElement('option');
+          o.value=sc.departure_time;
+          o.textContent=`${sc.departure_time} (${sc.period||''})`;
+          s.appendChild(o);
+        });
+      });
+      section.classList.remove('hidden');
+    }catch(e){section.classList.add('hidden');}
   }
 
   function openModal(){
@@ -220,6 +261,8 @@
     document.getElementById('modalTitle').textContent='Novo Motorista';
     ['dName','dEmail','dCpf','dCnh','dCode','dPassword'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('dBusLine').value='';
+    document.getElementById('scheduleSection').classList.add('hidden');
+    ['dFirstSchedule','dLastSchedule'].forEach(id=>{document.getElementById(id).innerHTML='<option value="">Selecione…</option>';});
     document.getElementById('modalError').classList.add('hidden');
     document.getElementById('passwordRequired').textContent='*';
     document.getElementById('passwordHint').classList.add('hidden');
@@ -245,6 +288,10 @@
       let found=false;
       for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===d.bus_line){sel.selectedIndex=i;found=true;break;}}
       if(!found){const o=document.createElement('option');o.value=d.bus_line;o.textContent=d.bus_line;sel.appendChild(o);sel.value=d.bus_line;}
+      // Load schedules for the selected line, then restore saved values
+      await loadSchedulesForDriver();
+      if(d.first_schedule) document.getElementById('dFirstSchedule').value=d.first_schedule;
+      if(d.last_schedule)  document.getElementById('dLastSchedule').value=d.last_schedule;
       document.getElementById('modalError').classList.add('hidden');
       document.getElementById('driverModal').classList.remove('hidden');
       if(typeof feather!=='undefined')feather.replace();
@@ -270,6 +317,8 @@
       cnh:document.getElementById('dCnh').value.trim(),
       bus_line:document.getElementById('dBusLine').value,
       code:document.getElementById('dCode').value.trim(),
+      first_schedule:document.getElementById('dFirstSchedule').value||null,
+      last_schedule:document.getElementById('dLastSchedule').value||null,
     };
     if(password) body.password=password;
     const errEl=document.getElementById('modalError');

@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -m flask db migrate -m \"add profile_picture to user\")"
+      "Bash(python -m flask db migrate -m \"add profile_picture to user\")",
+      "Bash(python -m flask db upgrade)",
+      "Bash(python -m flask db migrate -m \"add driver_trip table\")",
+      "Bash(python -m flask db stamp head)",
+      "Bash(flask db:*)"
     ]
   }
 }

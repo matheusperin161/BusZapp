@@ -532,7 +532,7 @@
       </div>
       <div class="url-section" id="url-section">
         <label for="server-url">URL do servidor</label>
-        <input type="text" id="server-url" placeholder="http://localhost:8080" value="http://localhost:8080" />
+        <input type="text" id="server-url" placeholder="Ex: http://192.168.1.10:8080" />
         <div style="margin-top:8px;font-size:0.75rem;color:var(--muted)">
           Coloque o IP ou domínio do seu servidor Flask
         </div>
@@ -682,7 +682,7 @@
     }
 
     // ── Config ──────────────────────────────────────────────────────────────
-    let SERVER_URL = 'http://localhost:8080';
+    let SERVER_URL = window.location.origin;
     let selectedRoute = null;
     let selectedSchedule = null;
     let watchId = null;
@@ -722,7 +722,8 @@
 
     // ── Load routes ─────────────────────────────────────────────────────────
     async function loadRoutes() {
-      SERVER_URL = document.getElementById('server-url').value.replace(/\/$/, '');
+      const urlInput = document.getElementById('server-url').value.trim();
+      if (urlInput) SERVER_URL = urlInput.replace(/\/$/, '');
       const sel = document.getElementById('route-select');
       sel.innerHTML = '<option value="">Carregando...</option>';
       try {
@@ -895,7 +896,8 @@
     async function sendLocation() {
       if (!lastPosition || !selectedSchedule) return;
 
-      SERVER_URL = document.getElementById('server-url').value.replace(/\/$/, '');
+      const urlInput = document.getElementById('server-url').value.trim();
+      if (urlInput) SERVER_URL = urlInput.replace(/\/$/, '');
 
       const payload = {
         bus_id: selectedSchedule.bus_id,
@@ -954,6 +956,19 @@
 
       setStatus(true, 'Transmitindo');
       log(`🚌 Trajeto iniciado: ${selectedRoute.name} | ${selectedSchedule.departure_time}`, 'success');
+
+      // Registra o trajeto no servidor para vincular avaliações ao motorista correto
+      fetch(`${SERVER_URL}/api/auth/driver/trip/start`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bus_line:       `${selectedRoute.number} - ${selectedRoute.name}`,
+          departure_time: selectedSchedule.departure_time,
+          bus_number:     selectedSchedule.bus_number,
+        }),
+      }).catch(() => {}); // silencioso — não bloqueia o trajeto
+
       document.getElementById('incident-card').style.display = 'block';
       document.getElementById('incident-context-text').textContent =
         `Linha ${selectedRoute.number} — ${selectedRoute.name} | Horário ${selectedSchedule.departure_time} | Ônibus ${selectedSchedule.bus_number}`;
@@ -982,6 +997,12 @@
       document.getElementById('incident-card').style.display = 'none';
       log(`⏹ Trajeto encerrado. Total: ${sendCount} atualizações enviadas.`, 'warn');
       sendCount = 0;
+
+      // Notifica o servidor que o trajeto foi encerrado (remove do mapa do admin)
+      fetch(`${SERVER_URL}/api/auth/driver/trip/stop`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => {});
     }
 
     // ── Ocorrências ──────────────────────────────────────────────────────────

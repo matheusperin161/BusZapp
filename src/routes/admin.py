@@ -46,6 +46,8 @@ def add_driver():
     driver = Driver(
         **{f: data[f] for f in DRIVER_REQUIRED_FIELDS},
         password=generate_password_hash(data['password']),
+        first_schedule=data.get('first_schedule') or None,
+        last_schedule=data.get('last_schedule') or None,
     )
     db.session.add(driver)
     db.session.commit()
@@ -86,7 +88,9 @@ def edit_driver(driver_id):
     for field in DRIVER_REQUIRED_FIELDS:
         setattr(driver, field, data[field])
 
-    # Update password only if provided
+    driver.first_schedule = data.get('first_schedule') or None
+    driver.last_schedule  = data.get('last_schedule') or None
+
     if data.get('password'):
         from werkzeug.security import generate_password_hash
         driver.password = generate_password_hash(data['password'])
@@ -375,19 +379,18 @@ def create_route():
 def list_all_ratings():
     from src.models.user import Rating
     from sqlalchemy.orm import joinedload
-    drivers = Driver.query.all()
-    driver_map = {d.bus_line: d for d in drivers if d.bus_line}
+    driver_id_map = {d.id: d for d in Driver.query.all()}
     ratings = (
         Rating.query
-        .options(joinedload(Rating.user))
+        .options(joinedload(Rating.user), joinedload(Rating.driver))
         .order_by(Rating.created_at.desc())
         .limit(500)
         .all()
     )
     result = []
     for r in ratings:
-        d = driver_map.get(r.bus_line)
         item = r.to_dict()
+        d = driver_id_map.get(r.driver_id)
         item['driver_name'] = d.name if d else None
         item['driver_code'] = d.code if d else None
         item['username'] = r.user.username if r.user else None
@@ -418,8 +421,34 @@ def list_all_transactions():
 @admin_bp.route('/all-bus-locations', methods=['GET'])
 @admin_required
 def list_all_bus_locations():
-    from src.models.user import BusLocation
+    from src.models.user import BusLocation, DriverTrip
     from datetime import datetime, timedelta
-    cutoff = datetime.utcnow() - timedelta(minutes=15)
-    locations = BusLocation.query.filter(BusLocation.timestamp >= cutoff).all()
+
+    now = datetime.utcnow()
+    today = now.date()
+    gps_cutoff = now - timedelta(minutes=5)
+
+    # Encerra automaticamente trips de dias anteriores que ficaram abertas
+    DriverTrip.query.filter(
+        DriverTrip.trip_date < today,
+        DriverTrip.ended_at.is_(None),
+    ).update({'ended_at': now}, synchronize_session=False)
+    db.session.commit()
+
+    # Trips ativas hoje + GPS enviado nos últimos 5 min
+    active_trips = (
+        DriverTrip.query
+        .filter_by(trip_date=today)
+        .filter(DriverTrip.ended_at.is_(None))
+        .filter(DriverTrip.bus_number.isnot(None))
+        .all()
+    )
+    active_bus_numbers = {t.bus_number for t in active_trips}
+    if not active_bus_numbers:
+        return jsonify([])
+
+    locations = BusLocation.query.filter(
+        BusLocation.bus_number.in_(active_bus_numbers),
+        BusLocation.timestamp >= gps_cutoff,
+    ).all()
     return jsonify([loc.to_dict() for loc in locations])
