@@ -828,8 +828,19 @@
     // ── GPS ─────────────────────────────────────────────────────────────────
     function startGPS() {
       if (!navigator.geolocation) {
-        log('GPS não suportado neste dispositivo', 'error');
+        const isHttp = location.protocol !== 'https:';
+        const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (isHttp && !isLocalhost) {
+          log('GPS bloqueado: o navegador exige HTTPS para acessar a localização fora do localhost. Acesse via localhost ou configure HTTPS no servidor.', 'error');
+        } else {
+          log('GPS não suportado neste dispositivo.', 'error');
+        }
         return false;
+      }
+
+      // Avisa se não for origem segura (alguns navegadores permitem a API mas bloqueiam na chamada)
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        log('Atenção: GPS pode ser bloqueado por este endereço não usar HTTPS. Se ocorrer erro, acesse via localhost:8080.', 'warning');
       }
 
       watchId = navigator.geolocation.watchPosition(
@@ -855,7 +866,18 @@
           document.getElementById('stat-speed').textContent = spd != null ? `${(spd * 3.6).toFixed(0)} km/h` : '—';
         },
         err => {
-          log(`Erro GPS: ${err.message}`, 'error');
+          const secureOriginMsg = err.message && err.message.toLowerCase().includes('secure origin');
+          if (secureOriginMsg || err.code === 1 && location.protocol !== 'https:') {
+            log('GPS bloqueado: o navegador exige HTTPS para liberar a localização. Acesse o sistema via localhost:8080 ou peça ao administrador para configurar HTTPS.', 'error');
+          } else if (err.code === 1) {
+            log('Permissão de GPS negada. Permita o acesso à localização nas configurações do navegador e tente novamente.', 'error');
+          } else if (err.code === 2) {
+            log('GPS indisponível. Verifique se o GPS do dispositivo está ativado.', 'error');
+          } else if (err.code === 3) {
+            log('Tempo esgotado ao obter localização. Verifique o sinal GPS.', 'error');
+          } else {
+            log(`Erro GPS: ${err.message}`, 'error');
+          }
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
       );

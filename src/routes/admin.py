@@ -366,3 +366,60 @@ def create_route():
     db.session.commit()
 
     return jsonify({'message': f'Linha {data["route_number"]} criada com sucesso', 'route_id': rt.id}), 201
+
+
+# ── Admin reports ─────────────────────────────────────────────────────────────
+
+@admin_bp.route('/ratings', methods=['GET'])
+@admin_required
+def list_all_ratings():
+    from src.models.user import Rating
+    from sqlalchemy.orm import joinedload
+    drivers = Driver.query.all()
+    driver_map = {d.bus_line: d for d in drivers if d.bus_line}
+    ratings = (
+        Rating.query
+        .options(joinedload(Rating.user))
+        .order_by(Rating.created_at.desc())
+        .limit(500)
+        .all()
+    )
+    result = []
+    for r in ratings:
+        d = driver_map.get(r.bus_line)
+        item = r.to_dict()
+        item['driver_name'] = d.name if d else None
+        item['driver_code'] = d.code if d else None
+        item['username'] = r.user.username if r.user else None
+        result.append(item)
+    return jsonify(result)
+
+
+@admin_bp.route('/all-transactions', methods=['GET'])
+@admin_required
+def list_all_transactions():
+    from src.models.user import Transaction, User
+    from sqlalchemy.orm import joinedload
+    txs = (
+        Transaction.query
+        .options(joinedload(Transaction.user))
+        .order_by(Transaction.created_at.desc())
+        .limit(1000)
+        .all()
+    )
+    result = []
+    for tx in txs:
+        item = tx.to_dict()
+        item['username'] = tx.user.username if tx.user else None
+        result.append(item)
+    return jsonify(result)
+
+
+@admin_bp.route('/all-bus-locations', methods=['GET'])
+@admin_required
+def list_all_bus_locations():
+    from src.models.user import BusLocation
+    from datetime import datetime, timedelta
+    cutoff = datetime.utcnow() - timedelta(minutes=15)
+    locations = BusLocation.query.filter(BusLocation.timestamp >= cutoff).all()
+    return jsonify([loc.to_dict() for loc in locations])

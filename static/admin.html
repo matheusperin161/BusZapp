@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Painel Admin – BuszApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
+  <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon"/>
+  <link rel="stylesheet" href="./css/main.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .admin-tab{padding:10px 20px;border-radius:12px;cursor:pointer;font-weight:600;font-size:14px;transition:all .2s;border:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px}
+    .admin-tab.active{background:linear-gradient(135deg,#fbbf24,#f97316);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(249,115,22,.35)}
+    .admin-tab:not(.active){background:#fff;color:#374151;border-color:#e5e7eb}
+    .dark .admin-tab:not(.active){background:#2d3748;color:#e2e8f0;border-color:#4a5568}
+    .admin-tab:not(.active):hover{border-color:#f59e0b;color:#d97706}
+    .form-input{width:100%;padding:10px 14px;border-radius:10px;border:2px solid #e5e7eb;font-size:14px;outline:none;transition:border .2s;background:#fff}
+    .form-input:focus{border-color:#f59e0b}
+    .dark .form-input{background:#0f172a;border-color:#334155;color:#f1f5f9}
+    .item-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.07);margin-bottom:8px;transition:box-shadow .2s}
+    .item-row:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}
+    .dark .item-row{background:#2d3748}
+    .btn-icon{padding:7px;border-radius:8px;cursor:pointer;transition:background .15s;border:none;background:transparent}
+    .btn-icon:hover{background:#f3f4f6}.dark .btn-icon:hover{background:#4a5568}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+    .modal-box{background:#fff;border-radius:20px;padding:28px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 60px rgba(0,0,0,.3);animation:slideUp .3s ease}
+    .dark .modal-box{background:#1e293b;color:#f1f5f9}
+    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+    .badge-green{background:#dcfce7;color:#166534}.badge-red{background:#fee2e2;color:#991b1b}
+    .badge-yellow{background:#fef3c7;color:#92400e}.badge-gray{background:#f3f4f6;color:#374151}
+    .dark .badge-green{background:#14532d;color:#86efac}.dark .badge-red{background:#7f1d1d;color:#fca5a5}
+    .dark .badge-yellow{background:#78350f;color:#fde68a}.dark .badge-gray{background:#374151;color:#d1d5db}
+    .stat-card{background:#fff;border-radius:16px;padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,.07);display:flex;align-items:center;gap:16px}
+    .dark .stat-card{background:#2d3748}
+    #adminMap{height:450px;border-radius:16px;z-index:1}
+    .section-panel{background:#fff;border-radius:20px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+    .dark .section-panel{background:#1e293b}
+    .stop-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#f9fafb;margin-bottom:6px}
+    .dark .stop-row{background:#2d3748}
+    .order-badge{width:28px;height:28px;border-radius:8px;background:#fef3c7;color:#92400e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+    #routePickMap,#stopPickMap{width:100%;height:220px;border-radius:12px;cursor:crosshair}
+    .stars{color:#f59e0b;font-size:15px;letter-spacing:1px}
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-50">
+  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="bg-white/20 backdrop-blur p-2 rounded-xl"><i data-feather="bus" class="w-7 h-7"></i></div>
+      <div>
+        <h1 class="text-xl font-bold">BuszApp</h1>
+        <p class="text-xs opacity-80">Painel Administrativo</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="adminUsername" class="text-sm font-semibold opacity-90 hidden sm:block"></span>
+      <button id="themeToggleBtn" onclick="toggleDark()"
+              class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema">
+        <i data-feather="moon" class="w-5 h-5" id="themeIcon"></i>
+      </button>
+      <button onclick="window.location.href='profile.html'"
+              class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Perfil">
+        <i data-feather="user" class="w-5 h-5"></i>
+      </button>
+      <button onclick="doLogout()"
+              class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Sair">
+        <i data-feather="log-out" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="container mx-auto px-4 py-6 max-w-7xl">
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="stat-card">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center flex-shrink-0">
+        <i data-feather="users" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statDrivers">–</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Motoristas</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
+        <i data-feather="truck" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statVehicles">–</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Veículos</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center flex-shrink-0">
+        <i data-feather="map" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statRoutes">–</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Rotas</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center flex-shrink-0">
+        <i data-feather="navigation" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white" id="statBuses">–</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Ônibus em Rota</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="flex gap-2 flex-wrap mb-6 overflow-x-auto pb-1">
+    <button class="admin-tab active" id="tab-btn-drivers" onclick="showTab('drivers')">
+      <i data-feather="users" class="w-4 h-4"></i> Motoristas
+    </button>
+    <button class="admin-tab" id="tab-btn-fleet" onclick="showTab('fleet')">
+      <i data-feather="truck" class="w-4 h-4"></i> Frota
+    </button>
+    <button class="admin-tab" id="tab-btn-routes" onclick="showTab('routes')">
+      <i data-feather="map" class="w-4 h-4"></i> Rotas
+    </button>
+    <button class="admin-tab" id="tab-btn-ratings" onclick="showTab('ratings')">
+      <i data-feather="star" class="w-4 h-4"></i> Avaliações
+    </button>
+    <button class="admin-tab" id="tab-btn-map" onclick="showTab('map')">
+      <i data-feather="map-pin" class="w-4 h-4"></i> Mapa ao Vivo
+    </button>
+    <button class="admin-tab" id="tab-btn-recharges" onclick="showTab('recharges')">
+      <i data-feather="bar-chart-2" class="w-4 h-4"></i> Recargas
+    </button>
+  </div>
+
+  <!-- ═══════════════════ TAB: MOTORISTAS ═══════════════════ -->
+  <div id="tab-drivers" class="section-panel">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Motoristas Cadastrados</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" id="drvCount">Carregando…</p>
+      </div>
+      <button onclick="drvOpenModal()"
+              class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2.5 rounded-xl transition text-sm">
+        <i data-feather="plus" class="w-4 h-4"></i> Novo Motorista
+      </button>
+    </div>
+    <div class="relative mb-5">
+      <i data-feather="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-yellow-500 pointer-events-none"></i>
+      <input id="drvSearch" type="text" placeholder="Buscar por nome ou CPF…"
+             oninput="drvFilter(this.value)" class="form-input pl-10"/>
+    </div>
+    <div id="drvList"><p class="text-gray-400 text-center py-10">Carregando motoristas…</p></div>
+  </div>
+
+  <!-- ═══════════════════ TAB: FROTA ═══════════════════ -->
+  <div id="tab-fleet" class="section-panel hidden">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Veículos Cadastrados</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" id="fltCount">Carregando…</p>
+      </div>
+      <button onclick="fltOpenModal()"
+              class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2.5 rounded-xl transition text-sm">
+        <i data-feather="plus" class="w-4 h-4"></i> Novo Veículo
+      </button>
+    </div>
+    <div class="flex gap-3 mb-5 flex-wrap">
+      <div class="relative flex-1 min-w-48">
+        <i data-feather="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-yellow-500 pointer-events-none"></i>
+        <input id="fltSearch" type="text" placeholder="Buscar por placa ou modelo…"
+               oninput="fltFilter()" class="form-input pl-10"/>
+      </div>
+      <select id="fltStatus" onchange="fltFilter()" class="form-input" style="width:auto;min-width:140px">
+        <option value="">Todos os status</option>
+        <option value="ativo">Ativo</option>
+        <option value="inativo">Inativo</option>
+        <option value="manutencao">Manutenção</option>
+      </select>
+    </div>
+    <div id="fltList"><p class="text-gray-400 text-center py-10">Carregando veículos…</p></div>
+  </div>
+
+  <!-- ═══════════════════ TAB: ROTAS ═══════════════════ -->
+  <div id="tab-routes" class="section-panel hidden">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Rotas Cadastradas</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" id="rtCount">Carregando…</p>
+      </div>
+      <button onclick="rtOpenNewModal()"
+              class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2.5 rounded-xl transition text-sm">
+        <i data-feather="plus-circle" class="w-4 h-4"></i> Nova Linha
+      </button>
+    </div>
+    <div id="rtList"><p class="text-gray-400 text-center py-10">Carregando rotas…</p></div>
+  </div>
+
+  <!-- ═══════════════════ TAB: AVALIAÇÕES ═══════════════════ -->
+  <div id="tab-ratings" class="section-panel hidden">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">Histórico de Avaliações</h2>
+      <select id="ratDriverFilter" onchange="ratFilter()" class="form-input" style="width:auto;min-width:200px">
+        <option value="">Todos os motoristas</option>
+      </select>
+    </div>
+    <div id="ratStats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5"></div>
+    <div id="ratList"><p class="text-gray-400 text-center py-10">Carregando avaliações…</p></div>
+  </div>
+
+  <!-- ═══════════════════ TAB: MAPA ═══════════════════ -->
+  <div id="tab-map" class="section-panel hidden">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">Ônibus em Rota</h2>
+      <button onclick="mapRefresh()"
+              class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2 rounded-xl transition text-sm">
+        <i data-feather="refresh-cw" class="w-4 h-4"></i> Atualizar
+      </button>
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3" id="mapStatus">Carregando localização dos ônibus…</p>
+    <div id="adminMap"></div>
+  </div>
+
+  <!-- ═══════════════════ TAB: RECARGAS ═══════════════════ -->
+  <div id="tab-recharges" class="section-panel hidden">
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-5">Recargas</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl p-5">
+        <p class="text-xs font-semibold text-yellow-600 dark:text-yellow-400 mb-1">TOTAL RECARGAS</p>
+        <p class="text-3xl font-bold text-yellow-700 dark:text-yellow-300" id="rcTotal">–</p>
+      </div>
+      <div class="bg-green-50 dark:bg-green-900/20 rounded-2xl p-5">
+        <p class="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">VALOR TOTAL</p>
+        <p class="text-3xl font-bold text-green-700 dark:text-green-300" id="rcAmount">–</p>
+      </div>
+      <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-5">
+        <p class="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">HOJE</p>
+        <p class="text-3xl font-bold text-blue-700 dark:text-blue-300" id="rcToday">–</p>
+      </div>
+    </div>
+    <div class="mb-6">
+      <h3 class="font-semibold text-gray-800 dark:text-white mb-3">Recargas por Dia (últimos 30 dias)</h3>
+      <div style="height:280px"><canvas id="rcChart"></canvas></div>
+    </div>
+    <h3 class="font-semibold text-gray-800 dark:text-white mb-3">Últimas Transações</h3>
+    <div id="rcList"><p class="text-gray-400 text-center py-6">Carregando…</p></div>
+  </div>
+
+</main>
+
+<!-- ════════════════════════════════════════════════════════
+     MODALS – MOTORISTAS
+════════════════════════════════════════════════════════ -->
+<div id="drvModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h3 id="drvModalTitle" class="text-lg font-bold text-gray-900 dark:text-white">Novo Motorista</h3>
+      <button onclick="drvCloseModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NOME COMPLETO *</label>
+        <input id="drvName" type="text" placeholder="João da Silva" class="form-input"/></div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">EMAIL *</label>
+        <input id="drvEmail" type="email" placeholder="joao@empresa.com" class="form-input"/></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">CPF *</label>
+          <input id="drvCpf" type="text" placeholder="000.000.000-00" maxlength="14" class="form-input"/></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">CNH *</label>
+          <input id="drvCnh" type="text" placeholder="00000000000" maxlength="11" class="form-input"/></div>
+      </div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LINHA DO ÔNIBUS *</label>
+        <select id="drvBusLine" class="form-input"><option value="">Selecione a linha…</option></select></div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">CÓDIGO DO MOTORISTA *</label>
+        <input id="drvCode" type="text" placeholder="MTR12345" class="form-input"/></div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">SENHA <span id="drvPassReq">*</span></label>
+        <div class="relative">
+          <input id="drvPassword" type="password" placeholder="Senha de acesso" class="form-input pr-10"/>
+          <button type="button" onclick="drvTogglePass()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <i data-feather="eye" class="w-4 h-4" id="drvEyeIcon"></i>
+          </button>
+        </div>
+        <p id="drvPassHint" class="text-xs text-gray-400 mt-1 hidden">Deixe em branco para manter a senha atual</p>
+      </div>
+    </div>
+    <div id="drvModalError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="drvCloseModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+      <button onclick="drvSave()" class="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold transition">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="drvDeleteModal" class="modal-overlay hidden">
+  <div class="modal-box max-w-sm">
+    <div class="text-center mb-4">
+      <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-feather="trash-2" class="w-7 h-7 text-red-500"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">Remover Motorista?</h3>
+      <p id="drvDeleteName" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="drvCloseDelete()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition">Cancelar</button>
+      <button onclick="drvConfirmDelete()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition">Remover</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MODALS – FROTA
+════════════════════════════════════════════════════════ -->
+<div id="fltModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h3 id="fltModalTitle" class="text-lg font-bold text-gray-900 dark:text-white">Novo Veículo</h3>
+      <button onclick="fltCloseModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">PLACA *</label>
+          <input id="fltPlate" type="text" placeholder="ABC-1234" class="form-input"/></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">ANO *</label>
+          <input id="fltYear" type="number" placeholder="2022" class="form-input"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">MARCA *</label>
+          <input id="fltBrand" type="text" placeholder="Mercedes" class="form-input"/></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">MODELO *</label>
+          <input id="fltModel" type="text" placeholder="OF-1721" class="form-input"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">CAPACIDADE *</label>
+          <input id="fltCapacity" type="number" placeholder="40" class="form-input"/></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">STATUS *</label>
+          <select id="fltStatusSel" class="form-input">
+            <option value="">Selecione…</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+            <option value="manutencao">Manutenção</option>
+          </select></div>
+      </div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LINHA DO ÔNIBUS</label>
+        <select id="fltBusLine" class="form-input"><option value="">Sem linha atribuída</option></select></div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">MOTORISTA RESPONSÁVEL</label>
+        <select id="fltDriver" class="form-input"><option value="">Sem motorista atribuído</option></select></div>
+    </div>
+    <div id="fltModalError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="fltCloseModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+      <button onclick="fltSave()" class="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold transition">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="fltDeleteModal" class="modal-overlay hidden">
+  <div class="modal-box max-w-sm">
+    <div class="text-center mb-4">
+      <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-feather="trash-2" class="w-7 h-7 text-red-500"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">Remover Veículo?</h3>
+      <p id="fltDeleteName" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="fltCloseDelete()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition">Cancelar</button>
+      <button onclick="fltConfirmDelete()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition">Remover</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MODALS – ROTAS
+════════════════════════════════════════════════════════ -->
+<div id="rtNewModal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:560px">
+    <div class="flex justify-between items-center mb-5">
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">Nova Linha</h3>
+      <button onclick="rtCloseNewModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NÚMERO DA LINHA *</label>
+          <input id="rtNum" type="text" placeholder="Ex: 6" class="form-input"/></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">TARIFA (R$) *</label>
+          <input id="rtFare" type="number" step="0.01" placeholder="4.50" class="form-input"/></div>
+      </div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NOME DA LINHA *</label>
+        <input id="rtName" type="text" placeholder="Centro - Bairro São Pedro" class="form-input"/></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">ORIGEM *</label>
+          <input id="rtOrigin" type="text" placeholder="Terminal Central" class="form-input"/></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">DESTINO *</label>
+          <input id="rtDest" type="text" placeholder="Bairro São Pedro" class="form-input"/></div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-2 block">CLIQUE NO MAPA: 1º Origem (🟡), 2º Destino (🔴)</label>
+        <div id="routePickMap"></div>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LAT ORIGEM</label>
+            <input id="rtOriginLat" type="number" step="0.000001" class="form-input" placeholder="-27.10597"/></div>
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LNG ORIGEM</label>
+            <input id="rtOriginLon" type="number" step="0.000001" class="form-input" placeholder="-52.61336"/></div>
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LAT DESTINO</label>
+            <input id="rtDestLat" type="number" step="0.000001" class="form-input" placeholder="-27.07171"/></div>
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LNG DESTINO</label>
+            <input id="rtDestLon" type="number" step="0.000001" class="form-input" placeholder="-52.63635"/></div>
+        </div>
+      </div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">MOTORISTA RESPONSÁVEL</label>
+        <select id="rtDriver" class="form-input"><option value="">Sem motorista atribuído</option></select></div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">VEÍCULO PRINCIPAL</label>
+        <select id="rtVehicle" class="form-input"><option value="">Sem veículo atribuído</option></select></div>
+    </div>
+    <div id="rtNewError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="rtCloseNewModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+      <button onclick="rtSaveNew()" class="flex-1 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition">Criar Linha</button>
+    </div>
+  </div>
+</div>
+
+<div id="rtStopModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h3 id="rtStopModalTitle" class="text-lg font-bold text-gray-900 dark:text-white">Nova Parada</h3>
+      <button onclick="rtCloseStopModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <i data-feather="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NOME DA PARADA *</label>
+        <input id="rtStopName" type="text" placeholder="Terminal Central" class="form-input"/></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LATITUDE</label>
+          <input id="rtStopLat" type="number" step="0.000001" class="form-input"/></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LONGITUDE</label>
+          <input id="rtStopLng" type="number" step="0.000001" class="form-input"/></div>
+      </div>
+      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">ORDEM</label>
+        <input id="rtStopOrder" type="number" min="1" placeholder="1" class="form-input"/></div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">CLIQUE NO MAPA PARA DEFINIR COORDENADAS</label>
+        <div id="stopPickMap"></div>
+      </div>
+    </div>
+    <div id="rtStopError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="rtCloseStopModal()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancelar</button>
+      <button onclick="rtSaveStop()" class="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-bold transition">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="rtStopDeleteModal" class="modal-overlay hidden">
+  <div class="modal-box max-w-sm">
+    <div class="text-center mb-4">
+      <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i data-feather="trash-2" class="w-7 h-7 text-red-500"></i>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">Remover Parada?</h3>
+      <p id="rtStopDeleteName" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="rtCloseStopDelete()" class="flex-1 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition">Cancelar</button>
+      <button onclick="rtConfirmStopDelete()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold transition">Remover</button>
+    </div>
+  </div>
+</div>
+
+<script src="./js/app.js"></script>
+<script>
+function esc(s=''){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function fmtCur(v){return'R$ '+Number(v).toFixed(2).replace('.',',');}
+function fmtDate(s){if(!s)return'–';const d=new Date(s);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function stars(n){return'★'.repeat(n)+'☆'.repeat(5-n);}
+
+// ── THEME ──────────────────────────────────────────────────────────────────
+function toggleDark(){
+  const html=document.documentElement;
+  const dark=html.classList.toggle('dark');
+  localStorage.setItem('theme',dark?'dark':'light');
+  updateThemeIcon(dark);
+}
+function updateThemeIcon(dark){
+  const icon=document.getElementById('themeIcon');
+  if(!icon)return;
+  icon.setAttribute('data-feather',dark?'sun':'moon');
+  if(typeof feather!=='undefined')feather.replace();
+}
+(()=>{
+  const saved=localStorage.getItem('theme'),prefDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const dark=saved==='dark'||(saved===null&&prefDark);
+  if(dark)document.documentElement.classList.add('dark');
+  document.addEventListener('DOMContentLoaded',()=>updateThemeIcon(dark));
+})();
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+const TABS=['drivers','fleet','routes','ratings','map','recharges'];
+let tabLoaded={drivers:false,fleet:false,routes:false,ratings:false,map:false,recharges:false};
+
+function showTab(name){
+  TABS.forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden',t!==name);
+    document.getElementById('tab-btn-'+t).classList.toggle('active',t===name);
+  });
+  if(!tabLoaded[name]){
+    tabLoaded[name]=true;
+    if(name==='fleet'){fltLoad();}
+    else if(name==='routes'){rtLoad();}
+    else if(name==='ratings'){ratLoad();}
+    else if(name==='map'){mapInit();}
+    else if(name==='recharges'){rcLoad();}
+  }
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+// ── STATS ──────────────────────────────────────────────────────────────────
+async function loadStats(){
+  try{
+    const [drivers,vehicles,routes,locs]=await Promise.all([
+      API.get('/api/admin/drivers'),
+      API.get('/api/admin/vehicles'),
+      API.get('/api/admin/routes'),
+      API.get('/api/admin/all-bus-locations'),
+    ]);
+    document.getElementById('statDrivers').textContent=drivers.length;
+    document.getElementById('statVehicles').textContent=vehicles.length;
+    document.getElementById('statRoutes').textContent=routes.length;
+    document.getElementById('statBuses').textContent=locs.length;
+  }catch(e){}
+}
+
+// ════════════════════════════════════════════════════════
+// MOTORISTAS
+// ════════════════════════════════════════════════════════
+let drvAll=[],drvEditingId=null,drvDeletingId=null;
+
+async function drvLoad(){
+  try{
+    drvAll=await API.get('/api/admin/drivers');
+    drvRender(drvAll);
+  }catch(e){
+    document.getElementById('drvList').innerHTML='<p class="text-red-400 text-center py-8">Erro ao carregar motoristas.</p>';
+  }
+}
+
+function drvRender(list){
+  const el=document.getElementById('drvList');
+  document.getElementById('drvCount').textContent=`${list.length} motorista(s) cadastrado(s)`;
+  if(!list.length){
+    el.innerHTML=`<div class="text-center py-12 text-gray-400 dark:text-gray-500">
+      <i data-feather="users" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+      <p class="font-semibold">Nenhum motorista cadastrado</p>
+      <p class="text-sm mt-1">Clique em "Novo Motorista" para começar</p></div>`;
+    if(typeof feather!=='undefined')feather.replace();return;
+  }
+  el.innerHTML=list.map(d=>`
+    <div class="item-row">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center text-white font-bold flex-shrink-0 text-sm">
+        ${esc(d.name.charAt(0).toUpperCase())}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-gray-900 dark:text-white text-sm">${esc(d.name)}</p>
+        <p class="text-xs text-gray-400 truncate">${esc(d.email)} · CPF: ${esc(d.cpf)}</p>
+        <p class="text-xs text-gray-400">CNH: ${esc(d.cnh)} · Cód: ${esc(d.code)}</p>
+      </div>
+      <div class="flex-shrink-0 text-right hidden sm:block">
+        <span class="badge badge-yellow">${esc(d.bus_line)}</span>
+      </div>
+      <div class="flex gap-1 flex-shrink-0">
+        <button class="btn-icon text-blue-500" onclick="drvOpenEdit(${d.id})" title="Editar">
+          <i data-feather="edit-2" class="w-4 h-4"></i>
+        </button>
+        <button class="btn-icon text-red-500" onclick="drvOpenDelete(${d.id},'${esc(d.name)}')" title="Remover">
+          <i data-feather="trash-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>`).join('');
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+function drvFilter(q){
+  const f=q.toLowerCase().trim();
+  drvRender(f?drvAll.filter(d=>d.name.toLowerCase().includes(f)||d.cpf.includes(f)):drvAll);
+}
+
+async function drvLoadBusLines(){
+  try{
+    const routes=await API.get('/api/routes');
+    const sel=document.getElementById('drvBusLine');
+    sel.innerHTML='<option value="">Selecione a linha…</option>';
+    routes.forEach(r=>{const o=document.createElement('option');o.value=`${r.route_number} - ${r.route_name}`;o.textContent=`${r.route_number} - ${r.route_name}`;sel.appendChild(o);});
+  }catch(e){}
+}
+
+function drvOpenModal(){
+  drvEditingId=null;
+  document.getElementById('drvModalTitle').textContent='Novo Motorista';
+  ['drvName','drvEmail','drvCpf','drvCnh','drvCode','drvPassword'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('drvBusLine').value='';
+  document.getElementById('drvPassReq').textContent='*';
+  document.getElementById('drvPassHint').classList.add('hidden');
+  document.getElementById('drvModalError').classList.add('hidden');
+  document.getElementById('drvModal').classList.remove('hidden');
+  drvLoadBusLines();
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+async function drvOpenEdit(id){
+  try{
+    const d=await API.get(`/api/admin/drivers/${id}`);
+    drvEditingId=id;
+    document.getElementById('drvModalTitle').textContent='Editar Motorista';
+    document.getElementById('drvName').value=d.name;
+    document.getElementById('drvEmail').value=d.email;
+    document.getElementById('drvCpf').value=d.cpf;
+    document.getElementById('drvCnh').value=d.cnh;
+    document.getElementById('drvCode').value=d.code;
+    document.getElementById('drvPassword').value='';
+    document.getElementById('drvPassReq').textContent='(opcional)';
+    document.getElementById('drvPassHint').classList.remove('hidden');
+    document.getElementById('drvModalError').classList.add('hidden');
+    document.getElementById('drvModal').classList.remove('hidden');
+    await drvLoadBusLines();
+    const sel=document.getElementById('drvBusLine');
+    let found=false;
+    for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===d.bus_line){sel.selectedIndex=i;found=true;break;}}
+    if(!found&&d.bus_line){const o=document.createElement('option');o.value=d.bus_line;o.textContent=d.bus_line;sel.appendChild(o);sel.value=d.bus_line;}
+    if(typeof feather!=='undefined')feather.replace();
+  }catch(e){Toast.error('Erro ao carregar motorista.');}
+}
+
+function drvCloseModal(){document.getElementById('drvModal').classList.add('hidden');}
+
+function drvTogglePass(){
+  const inp=document.getElementById('drvPassword');
+  const icon=document.getElementById('drvEyeIcon');
+  inp.type=inp.type==='password'?'text':'password';
+  icon.setAttribute('data-feather',inp.type==='password'?'eye':'eye-off');
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+async function drvSave(){
+  const password=document.getElementById('drvPassword').value;
+  const body={
+    name:document.getElementById('drvName').value.trim(),
+    email:document.getElementById('drvEmail').value.trim(),
+    cpf:document.getElementById('drvCpf').value.trim(),
+    cnh:document.getElementById('drvCnh').value.trim(),
+    bus_line:document.getElementById('drvBusLine').value,
+    code:document.getElementById('drvCode').value.trim(),
+  };
+  if(password)body.password=password;
+  const errEl=document.getElementById('drvModalError');
+  if(['name','email','cpf','cnh','bus_line','code'].some(k=>!body[k])){
+    errEl.textContent='Preencha todos os campos obrigatórios.';errEl.classList.remove('hidden');return;
+  }
+  if(!drvEditingId&&!password){errEl.textContent='A senha é obrigatória para novos motoristas.';errEl.classList.remove('hidden');return;}
+  try{
+    if(drvEditingId){await API.put(`/api/admin/drivers/${drvEditingId}`,body);Toast.success('Motorista atualizado!');}
+    else{await API.post('/api/admin/drivers',body);Toast.success('Motorista cadastrado!');}
+    drvCloseModal();drvLoad();loadStats();
+  }catch(e){errEl.textContent=e.message||'Erro ao salvar.';errEl.classList.remove('hidden');}
+}
+
+function drvOpenDelete(id,name){
+  drvDeletingId=id;
+  document.getElementById('drvDeleteName').textContent=name;
+  document.getElementById('drvDeleteModal').classList.remove('hidden');
+}
+function drvCloseDelete(){document.getElementById('drvDeleteModal').classList.add('hidden');drvDeletingId=null;}
+async function drvConfirmDelete(){
+  try{await API.delete(`/api/admin/drivers/${drvDeletingId}`);Toast.success('Motorista removido!');drvCloseDelete();drvLoad();loadStats();}
+  catch(e){Toast.error('Erro ao remover.');}
+}
+
+// ════════════════════════════════════════════════════════
+// FROTA
+// ════════════════════════════════════════════════════════
+let fltAll=[],fltEditingId=null,fltDeletingId=null;
+const FLT_BADGE={ativo:'badge-green',inativo:'badge-red',manutencao:'badge-yellow'};
+const FLT_LABEL={ativo:'Ativo',inativo:'Inativo',manutencao:'Manutenção'};
+
+async function fltLoad(){
+  try{
+    fltAll=await API.get('/api/admin/vehicles');
+    fltRender(fltAll);
+  }catch(e){
+    document.getElementById('fltList').innerHTML='<p class="text-red-400 text-center py-8">Erro ao carregar veículos.</p>';
+  }
+}
+
+function fltRender(list){
+  const el=document.getElementById('fltList');
+  document.getElementById('fltCount').textContent=`${list.length} veículo(s) cadastrado(s)`;
+  if(!list.length){
+    el.innerHTML=`<div class="text-center py-12 text-gray-400 dark:text-gray-500">
+      <i data-feather="truck" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+      <p class="font-semibold">Nenhum veículo cadastrado</p></div>`;
+    if(typeof feather!=='undefined')feather.replace();return;
+  }
+  el.innerHTML=list.map(v=>`
+    <div class="item-row">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center flex-shrink-0">
+        <i data-feather="truck" class="w-5 h-5 text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-gray-900 dark:text-white text-sm">${esc(v.brand)} ${esc(v.model)} <span class="text-gray-400 font-mono text-xs">${esc(v.plate)}</span></p>
+        <p class="text-xs text-gray-400">Ano: ${v.year} · Cap: ${v.capacity} passageiros</p>
+        ${v.bus_line?`<p class="text-xs text-gray-400">Linha: ${esc(v.bus_line)}</p>`:''}
+      </div>
+      <div class="flex-shrink-0 hidden sm:block">
+        <span class="badge ${FLT_BADGE[v.status]||'badge-gray'}">${FLT_LABEL[v.status]||v.status}</span>
+      </div>
+      <div class="flex gap-1 flex-shrink-0">
+        <button class="btn-icon text-blue-500" onclick="fltOpenEdit(${v.id})" title="Editar">
+          <i data-feather="edit-2" class="w-4 h-4"></i>
+        </button>
+        <button class="btn-icon text-red-500" onclick="fltOpenDelete(${v.id},'${esc(v.plate)}')" title="Remover">
+          <i data-feather="trash-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>`).join('');
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+function fltFilter(){
+  const q=document.getElementById('fltSearch').value.toLowerCase().trim();
+  const s=document.getElementById('fltStatus').value;
+  fltRender(fltAll.filter(v=>{
+    const mq=!q||v.plate.toLowerCase().includes(q)||v.model.toLowerCase().includes(q)||v.brand.toLowerCase().includes(q);
+    const ms=!s||v.status===s;
+    return mq&&ms;
+  }));
+}
+
+async function fltLoadSelects(){
+  try{
+    const [routes,drivers]=await Promise.all([API.get('/api/routes'),API.get('/api/admin/drivers')]);
+    const lSel=document.getElementById('fltBusLine');
+    lSel.innerHTML='<option value="">Sem linha atribuída</option>';
+    routes.forEach(r=>{const o=document.createElement('option');o.value=`${r.route_number} - ${r.route_name}`;o.textContent=`${r.route_number} - ${r.route_name}`;lSel.appendChild(o);});
+    const dSel=document.getElementById('fltDriver');
+    dSel.innerHTML='<option value="">Sem motorista atribuído</option>';
+    drivers.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=`${d.name} (${d.code})`;dSel.appendChild(o);});
+  }catch(e){}
+}
+
+function fltOpenModal(){
+  fltEditingId=null;
+  document.getElementById('fltModalTitle').textContent='Novo Veículo';
+  ['fltPlate','fltYear','fltBrand','fltModel','fltCapacity'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fltStatusSel').value='';
+  document.getElementById('fltBusLine').value='';
+  document.getElementById('fltDriver').value='';
+  document.getElementById('fltModalError').classList.add('hidden');
+  document.getElementById('fltModal').classList.remove('hidden');
+  fltLoadSelects();
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+async function fltOpenEdit(id){
+  try{
+    const v=await API.get(`/api/admin/vehicles/${id}`);
+    fltEditingId=id;
+    document.getElementById('fltModalTitle').textContent='Editar Veículo';
+    document.getElementById('fltPlate').value=v.plate;
+    document.getElementById('fltYear').value=v.year;
+    document.getElementById('fltBrand').value=v.brand;
+    document.getElementById('fltModel').value=v.model;
+    document.getElementById('fltCapacity').value=v.capacity;
+    document.getElementById('fltStatusSel').value=v.status;
+    document.getElementById('fltBusLine').value=v.bus_line||'';
+    document.getElementById('fltDriver').value=v.driver_id||'';
+    document.getElementById('fltModalError').classList.add('hidden');
+    document.getElementById('fltModal').classList.remove('hidden');
+    await fltLoadSelects();
+    document.getElementById('fltBusLine').value=v.bus_line||'';
+    document.getElementById('fltDriver').value=v.driver_id||'';
+    if(typeof feather!=='undefined')feather.replace();
+  }catch(e){Toast.error('Erro ao carregar veículo.');}
+}
+
+function fltCloseModal(){document.getElementById('fltModal').classList.add('hidden');}
+
+async function fltSave(){
+  const errEl=document.getElementById('fltModalError');
+  const body={
+    plate:document.getElementById('fltPlate').value.trim(),
+    year:document.getElementById('fltYear').value,
+    brand:document.getElementById('fltBrand').value.trim(),
+    model:document.getElementById('fltModel').value.trim(),
+    capacity:document.getElementById('fltCapacity').value,
+    status:document.getElementById('fltStatusSel').value,
+    bus_line:document.getElementById('fltBusLine').value||null,
+    driver_id:document.getElementById('fltDriver').value||null,
+  };
+  if(!body.plate||!body.year||!body.brand||!body.model||!body.capacity||!body.status){
+    errEl.textContent='Preencha todos os campos obrigatórios.';errEl.classList.remove('hidden');return;
+  }
+  try{
+    if(fltEditingId){await API.put(`/api/admin/vehicles/${fltEditingId}`,body);Toast.success('Veículo atualizado!');}
+    else{await API.post('/api/admin/vehicles',body);Toast.success('Veículo cadastrado!');}
+    fltCloseModal();fltLoad();loadStats();
+  }catch(e){errEl.textContent=e.message||'Erro ao salvar.';errEl.classList.remove('hidden');}
+}
+
+function fltOpenDelete(id,plate){
+  fltDeletingId=id;
+  document.getElementById('fltDeleteName').textContent=`Placa: ${plate}`;
+  document.getElementById('fltDeleteModal').classList.remove('hidden');
+}
+function fltCloseDelete(){document.getElementById('fltDeleteModal').classList.add('hidden');fltDeletingId=null;}
+async function fltConfirmDelete(){
+  try{await API.delete(`/api/admin/vehicles/${fltDeletingId}`);Toast.success('Veículo removido!');fltCloseDelete();fltLoad();loadStats();}
+  catch(e){Toast.error('Erro ao remover.');}
+}
+
+// ════════════════════════════════════════════════════════
+// ROTAS
+// ════════════════════════════════════════════════════════
+let rtRoutes=[],rtSelectedRoute=null,rtEditingStop=null,rtDeletingStop=null;
+let rtPickMap=null,rtPickMarker=null,rtRoutePickMap=null,rtOriginMk=null,rtDestMk=null,rtPickStep=0;
+
+async function rtLoad(){
+  try{
+    rtRoutes=await API.get('/api/admin/routes');
+    rtRender();
+    document.getElementById('rtCount').textContent=`${rtRoutes.length} linha(s) cadastrada(s)`;
+  }catch(e){
+    document.getElementById('rtList').innerHTML='<p class="text-red-400 text-center py-8">Erro ao carregar rotas.</p>';
+  }
+}
+
+function rtRender(){
+  const el=document.getElementById('rtList');
+  if(!rtRoutes.length){
+    el.innerHTML='<p class="text-gray-400 text-center py-10">Nenhuma rota cadastrada. Clique em "Nova Linha".</p>';
+    return;
+  }
+  el.innerHTML=rtRoutes.map(r=>`
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
+      <div class="flex items-center gap-3 p-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center flex-shrink-0">
+          <i data-feather="map" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-gray-900 dark:text-white text-sm">${esc(r.route_name)}</p>
+          <p class="text-xs text-gray-400">${r.stop_count} parada(s)
+            ${r.driver?` · 🧑 ${esc(r.driver.name)}`:''}
+            ${r.vehicle?` · 🚌 ${esc(r.vehicle.plate)}`:''}
+          </p>
+        </div>
+        <button onclick="rtToggleStops(${r.id})"
+                class="flex items-center gap-1 text-xs font-semibold text-yellow-600 dark:text-yellow-400 border border-yellow-300 dark:border-yellow-600 px-3 py-1.5 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition flex-shrink-0">
+          <i data-feather="list" class="w-3.5 h-3.5"></i> Paradas
+        </button>
+      </div>
+      <div id="stops-${r.id}" class="hidden border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-4">
+        <div class="flex justify-end mb-3">
+          <button onclick="rtOpenAddStop(${r.id})"
+                  class="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">
+            <i data-feather="plus" class="w-3.5 h-3.5"></i> Nova Parada
+          </button>
+        </div>
+        <div id="stop-rows-${r.id}">
+          ${(r.stops||[]).slice().sort((a,b)=>a.order-b.order).map(s=>`
+            <div class="stop-row">
+              <div class="order-badge">${s.order}</div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">${esc(s.name)}</p>
+                <p class="text-xs text-gray-400">${s.latitude.toFixed(5)}, ${s.longitude.toFixed(5)}</p>
+              </div>
+              <div class="flex gap-1">
+                <button class="btn-icon text-blue-500" onclick="rtOpenEditStop(${r.id},${s.id})" title="Editar">
+                  <i data-feather="edit-2" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-icon text-red-500" onclick="rtOpenStopDelete(${r.id},${s.id},'${esc(s.name)}')" title="Remover">
+                  <i data-feather="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>`).join('')}
+          ${!(r.stops||[]).length?'<p class="text-gray-400 text-center text-sm py-4">Nenhuma parada. Clique em "Nova Parada".</p>':''}
+        </div>
+      </div>
+    </div>`).join('');
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+function rtToggleStops(routeId){
+  const el=document.getElementById('stops-'+routeId);
+  el.classList.toggle('hidden');
+  if(typeof feather!=='undefined')feather.replace();
+}
+
+async function rtLoadSelects(){
+  try{
+    const [drivers,vehicles]=await Promise.all([API.get('/api/admin/drivers'),API.get('/api/admin/vehicles')]);
+    const dSel=document.getElementById('rtDriver');
+    dSel.innerHTML='<option value="">Sem motorista atribuído</option>';
+    drivers.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=`${d.name} (${d.code})`;dSel.appendChild(o);});
+    const vSel=document.getElementById('rtVehicle');
+    vSel.innerHTML='<option value="">Sem veículo atribuído</option>';
+    vehicles.filter(v=>v.status==='ativo').forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=`${v.brand} ${v.model} - ${v.plate}`;vSel.appendChild(o);});
+  }catch(e){}
+}
+
+function rtOpenNewModal(){
+  ['rtNum','rtName','rtOrigin','rtDest','rtFare','rtOriginLat','rtOriginLon','rtDestLat','rtDestLon']
+    .forEach(id=>document.getElementById(id).value='');
+  document.getElementById('rtNewError').classList.add('hidden');
+  document.getElementById('rtNewModal').classList.remove('hidden');
+  rtPickStep=0;rtLoadSelects();
+  setTimeout(()=>{
+    if(rtRoutePickMap){rtRoutePickMap.remove();rtRoutePickMap=null;}
+    rtOriginMk=null;rtDestMk=null;
+    rtRoutePickMap=L.map('routePickMap').setView([-27.1060,-52.6134],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}).addTo(rtRoutePickMap);
+    rtRoutePickMap.on('click',(e)=>{
+      const{lat,lng}=e.latlng;
+      if(rtPickStep===0){
+        document.getElementById('rtOriginLat').value=lat.toFixed(6);
+        document.getElementById('rtOriginLon').value=lng.toFixed(6);
+        if(rtOriginMk)rtRoutePickMap.removeLayer(rtOriginMk);
+        rtOriginMk=L.circleMarker([lat,lng],{radius:8,fillColor:'#f59e0b',color:'#fff',weight:2,fillOpacity:1}).addTo(rtRoutePickMap).bindTooltip('Origem').openTooltip();
+        rtPickStep=1;
+      }else{
+        document.getElementById('rtDestLat').value=lat.toFixed(6);
+        document.getElementById('rtDestLon').value=lng.toFixed(6);
+        if(rtDestMk)rtRoutePickMap.removeLayer(rtDestMk);
+        rtDestMk=L.circleMarker([lat,lng],{radius:8,fillColor:'#ef4444',color:'#fff',weight:2,fillOpacity:1}).addTo(rtRoutePickMap).bindTooltip('Destino').openTooltip();
+        rtPickStep=0;
+      }
+    });
+    rtRoutePickMap.invalidateSize();
+  },150);
+}
+
+function rtCloseNewModal(){
+  document.getElementById('rtNewModal').classList.add('hidden');
+  if(rtRoutePickMap){rtRoutePickMap.remove();rtRoutePickMap=null;}
+}
+
+async function rtSaveNew(){
+  const errEl=document.getElementById('rtNewError');
+  const body={
+    route_number:document.getElementById('rtNum').value.trim(),
+    route_name:document.getElementById('rtName').value.trim(),
+    origin:document.getElementById('rtOrigin').value.trim(),
+    destination:document.getElementById('rtDest').value.trim(),
+    fare:document.getElementById('rtFare').value,
+    origin_lat:document.getElementById('rtOriginLat').value,
+    origin_lon:document.getElementById('rtOriginLon').value,
+    dest_lat:document.getElementById('rtDestLat').value,
+    dest_lon:document.getElementById('rtDestLon').value,
+    driver_id:document.getElementById('rtDriver').value||null,
+    vehicle_id:document.getElementById('rtVehicle').value||null,
+  };
+  if(!body.route_number||!body.route_name||!body.origin||!body.destination||!body.fare||
+     !body.origin_lat||!body.origin_lon||!body.dest_lat||!body.dest_lon){
+    errEl.textContent='Preencha todos os campos e marque origem e destino no mapa.';
+    errEl.classList.remove('hidden');return;
+  }
+  try{
+    await API.post('/api/admin/routes',body);
+    Toast.success(`Linha ${body.route_number} criada!`);
+    rtCloseNewModal();rtLoad();loadStats();
+  }catch(e){errEl.textContent=e.message||'Erro ao criar linha.';errEl.classList.remove('hidden');}
+}
+
+function rtOpenAddStop(routeId){
+  rtSelectedRoute=rtRoutes.find(r=>r.id===routeId);
+  rtEditingStop=null;
+  document.getElementById('rtStopModalTitle').textContent='Nova Parada';
+  document.getElementById('rtStopName').value='';
+  document.getElementById('rtStopLat').value='';
+  document.getElementById('rtStopLng').value='';
+  document.getElementById('rtStopOrder').value=(rtSelectedRoute?.stop_count||0)+1;
+  document.getElementById('rtStopError').classList.add('hidden');
+  document.getElementById('rtStopModal').classList.remove('hidden');
+  rtInitStopMap();
+}
+
+function rtOpenEditStop(routeId,stopId){
+  rtSelectedRoute=rtRoutes.find(r=>r.id===routeId);
+  const stop=rtSelectedRoute?.stops?.find(s=>s.id===stopId);
+  if(!stop)return;
+  rtEditingStop=stop;
+  document.getElementById('rtStopModalTitle').textContent='Editar Parada';
+  document.getElementById('rtStopName').value=stop.name;
+  document.getElementById('rtStopLat').value=stop.latitude;
+  document.getElementById('rtStopLng').value=stop.longitude;
+  document.getElementById('rtStopOrder').value=stop.order;
+  document.getElementById('rtStopError').classList.add('hidden');
+  document.getElementById('rtStopModal').classList.remove('hidden');
+  rtInitStopMap(stop.latitude,stop.longitude);
+}
+
+function rtCloseStopModal(){
+  document.getElementById('rtStopModal').classList.add('hidden');
+  if(rtPickMap){rtPickMap.remove();rtPickMap=null;rtPickMarker=null;}
+}
+
+function rtInitStopMap(lat,lng){
+  setTimeout(()=>{
+    if(rtPickMap){rtPickMap.remove();rtPickMap=null;rtPickMarker=null;}
+    const center=[lat||rtSelectedRoute?.origin_lat||-27.1060,lng||rtSelectedRoute?.origin_lon||-52.6134];
+    rtPickMap=L.map('stopPickMap').setView(center,14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}).addTo(rtPickMap);
+    if(lat&&lng)rtPickMarker=L.marker([lat,lng]).addTo(rtPickMap);
+    rtPickMap.on('click',(e)=>{
+      const{lat,lng}=e.latlng;
+      document.getElementById('rtStopLat').value=lat.toFixed(6);
+      document.getElementById('rtStopLng').value=lng.toFixed(6);
+      if(rtPickMarker)rtPickMarker.setLatLng([lat,lng]);
+      else rtPickMarker=L.marker([lat,lng]).addTo(rtPickMap);
+    });
+    rtPickMap.invalidateSize();
+  },150);
+}
+
+async function rtSaveStop(){
+  const name=document.getElementById('rtStopName').value.trim();
+  const lat=parseFloat(document.getElementById('rtStopLat').value);
+  const lng=parseFloat(document.getElementById('rtStopLng').value);
+  const order=parseInt(document.getElementById('rtStopOrder').value);
+  const errEl=document.getElementById('rtStopError');
+  if(!name||isNaN(lat)||isNaN(lng)||isNaN(order)){
+    errEl.textContent='Preencha todos os campos corretamente.';errEl.classList.remove('hidden');return;
+  }
+  try{
+    if(rtEditingStop){
+      await API.put(`/api/admin/routes/${rtSelectedRoute.id}/stops/${rtEditingStop.id}`,{name,latitude:lat,longitude:lng,order});
+      Toast.success('Parada atualizada!');
+    }else{
+      await API.post(`/api/admin/routes/${rtSelectedRoute.id}/stops`,{name,latitude:lat,longitude:lng,order});
+      Toast.success('Parada adicionada!');
+    }
+    rtCloseStopModal();rtLoad();
+  }catch(e){errEl.textContent=e.message||'Erro ao salvar.';errEl.classList.remove('hidden');}
+}
+
+function rtOpenStopDelete(routeId,stopId,stopName){
+  rtSelectedRoute=rtRoutes.find(r=>r.id===routeId);
+  rtDeletingStop=stopId;
+  document.getElementById('rtStopDeleteName').textContent=stopName;
+  document.getElementById('rtStopDeleteModal').classList.remove('hidden');
+}
+function rtCloseStopDelete(){document.getElementById('rtStopDeleteModal').classList.add('hidden');rtDeletingStop=null;}
+async function rtConfirmStopDelete(){
+  try{
+    await API.delete(`/api/admin/routes/${rtSelectedRoute.id}/stops/${rtDeletingStop}`);
+    Toast.success('Parada removida!');rtCloseStopDelete();rtLoad();
+  }catch(e){Toast.error('Erro ao remover.');}
+}
+
+// ════════════════════════════════════════════════════════
+// AVALIAÇÕES
+// ════════════════════════════════════════════════════════
+let ratAll=[],ratDrivers=[];
+
+async function ratLoad(){
+  try{
+    const [ratings,drivers]=await Promise.all([
+      API.get('/api/admin/ratings'),
+      API.get('/api/admin/drivers'),
+    ]);
+    ratAll=ratings;
+    ratDrivers=drivers;
+    const sel=document.getElementById('ratDriverFilter');
+    sel.innerHTML='<option value="">Todos os motoristas</option>';
+    drivers.forEach(d=>{
+      const o=document.createElement('option');
+      o.value=d.bus_line;
+      o.textContent=`${d.name} (${d.code})`;
+      sel.appendChild(o);
+    });
+    ratRender(ratAll);
+  }catch(e){
+    document.getElementById('ratList').innerHTML='<p class="text-red-400 text-center py-8">Erro ao carregar avaliações.</p>';
+  }
+}
+
+function ratFilter(){
+  const busLine=document.getElementById('ratDriverFilter').value;
+  const filtered=busLine?ratAll.filter(r=>r.bus_line===busLine):ratAll;
+  ratRender(filtered);
+}
+
+function ratRender(list){
+  const el=document.getElementById('ratList');
+  // Stats
+  const statsEl=document.getElementById('ratStats');
+  if(list.length){
+    const avg=f=>list.reduce((s,r)=>s+(r[f]||0),0)/list.length;
+    const cats=[
+      {k:'overall_rating',label:'Geral'},
+      {k:'punctuality_rating',label:'Pontualidade'},
+      {k:'cleanliness_rating',label:'Limpeza'},
+      {k:'comfort_rating',label:'Conforto'},
+      {k:'service_rating',label:'Atendimento'},
+    ];
+    statsEl.innerHTML=cats.map(c=>`
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-3 text-center">
+        <p class="text-xs font-semibold text-yellow-600 dark:text-yellow-400 mb-1">${c.label}</p>
+        <p class="text-xl font-bold text-yellow-700 dark:text-yellow-300">${avg(c.k).toFixed(1)}</p>
+        <p class="text-yellow-500 text-xs">${stars(Math.round(avg(c.k)))}</p>
+      </div>`).join('');
+  }else statsEl.innerHTML='';
+
+  if(!list.length){
+    el.innerHTML='<p class="text-gray-400 text-center py-10">Nenhuma avaliação encontrada.</p>';return;
+  }
+  el.innerHTML=`
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-200 dark:border-gray-700 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
+            <th class="pb-3 pr-4">Data</th>
+            <th class="pb-3 pr-4">Linha</th>
+            <th class="pb-3 pr-4">Motorista</th>
+            <th class="pb-3 pr-4">Geral</th>
+            <th class="pb-3 pr-4">Pontualidade</th>
+            <th class="pb-3 pr-4">Limpeza</th>
+            <th class="pb-3 pr-4">Conforto</th>
+            <th class="pb-3">Atendimento</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+          ${list.map(r=>`
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
+              <td class="py-3 pr-4 text-gray-500 dark:text-gray-400 whitespace-nowrap">${fmtDate(r.created_at)}</td>
+              <td class="py-3 pr-4 font-medium text-gray-900 dark:text-white">${esc(r.bus_line||'–')}</td>
+              <td class="py-3 pr-4 text-gray-600 dark:text-gray-300">${esc(r.driver_name||'–')}</td>
+              <td class="py-3 pr-4"><span class="stars">${stars(r.overall_rating)}</span></td>
+              <td class="py-3 pr-4"><span class="stars">${stars(r.punctuality_rating)}</span></td>
+              <td class="py-3 pr-4"><span class="stars">${stars(r.cleanliness_rating)}</span></td>
+              <td class="py-3 pr-4"><span class="stars">${stars(r.comfort_rating)}</span></td>
+              <td class="py-3"><span class="stars">${stars(r.service_rating)}</span></td>
+            </tr>
+            ${r.comments?`<tr class="bg-yellow-50/50 dark:bg-yellow-900/10">
+              <td colspan="8" class="py-2 px-2 text-xs text-gray-500 dark:text-gray-400 italic">"${esc(r.comments)}"</td>
+            </tr>`:''}
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// MAPA
+// ════════════════════════════════════════════════════════
+let adminMap=null,busMarkers=[],mapInterval=null;
+
+async function mapInit(){
+  if(!adminMap){
+    adminMap=L.map('adminMap').setView([-27.1060,-52.6134],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:19}).addTo(adminMap);
+  }
+  await mapRefresh();
+  if(mapInterval)clearInterval(mapInterval);
+  mapInterval=setInterval(mapRefresh,30000);
+}
+
+async function mapRefresh(){
+  try{
+    const locs=await API.get('/api/admin/all-bus-locations');
+    busMarkers.forEach(m=>adminMap.removeLayer(m));
+    busMarkers=[];
+    const status=document.getElementById('mapStatus');
+    if(!locs.length){status.textContent='Nenhum ônibus em rota no momento.';return;}
+    status.textContent=`${locs.length} ônibus em rota · atualizado em ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    locs.forEach(loc=>{
+      const icon=L.divIcon({
+        className:'',
+        html:`<div style="background:linear-gradient(135deg,#fbbf24,#f97316);color:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 3px 10px rgba(249,115,22,.5);border:2px solid #fff">🚌</div>`,
+        iconSize:[36,36],iconAnchor:[18,18],
+      });
+      const updated=loc.last_updated?new Date(loc.last_updated).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'–';
+      const popup=`<div style="font-family:sans-serif;min-width:160px">
+        <p style="font-weight:700;margin:0 0 4px">${loc.bus_number||('Ônibus #'+(loc.bus_id||loc.id))}</p>
+        ${loc.route?`<p style="font-size:12px;color:#666;margin:0 0 4px">Linha: ${loc.route.route_name||''}</p>`:''}
+        <p style="font-size:12px;color:#666;margin:0 0 2px">Velocidade: ${(loc.speed||0).toFixed(0)} km/h</p>
+        <p style="font-size:11px;color:#999;margin:0">Atualizado: ${updated}</p>
+      </div>`;
+      const mk=L.marker([loc.latitude,loc.longitude],{icon}).addTo(adminMap).bindPopup(popup);
+      busMarkers.push(mk);
+    });
+    if(busMarkers.length===1)adminMap.setView([locs[0].latitude,locs[0].longitude],14);
+    else if(busMarkers.length>1){
+      const group=L.featureGroup(busMarkers);
+      adminMap.fitBounds(group.getBounds(),{padding:[40,40]});
+    }
+  }catch(e){
+    document.getElementById('mapStatus').textContent='Erro ao carregar localização dos ônibus.';
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// RECARGAS
+// ════════════════════════════════════════════════════════
+let rcChart=null;
+
+async function rcLoad(){
+  try{
+    const txs=await API.get('/api/admin/all-transactions');
+    const recharges=txs.filter(t=>t.transaction_type==='recharge');
+    const today=new Date().toISOString().slice(0,10);
+    const todayAmt=recharges.filter(t=>t.created_at&&t.created_at.slice(0,10)===today).reduce((s,t)=>s+t.amount,0);
+    const totalAmt=recharges.reduce((s,t)=>s+t.amount,0);
+    document.getElementById('rcTotal').textContent=recharges.length;
+    document.getElementById('rcAmount').textContent=fmtCur(totalAmt);
+    document.getElementById('rcToday').textContent=fmtCur(todayAmt);
+    rcBuildChart(recharges);
+    rcRenderList(txs.slice(0,50));
+  }catch(e){
+    document.getElementById('rcList').innerHTML='<p class="text-red-400 text-center py-6">Erro ao carregar transações.</p>';
+  }
+}
+
+function rcBuildChart(recharges){
+  const days=30;
+  const labels=[],data=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    labels.push(d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));
+    data.push(recharges.filter(t=>t.created_at&&t.created_at.slice(0,10)===key).reduce((s,t)=>s+t.amount,0));
+  }
+  const ctx=document.getElementById('rcChart').getContext('2d');
+  if(rcChart)rcChart.destroy();
+  rcChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:'Valor de Recargas (R$)',
+        data,
+        backgroundColor:'rgba(251,191,36,0.7)',
+        borderColor:'#f59e0b',
+        borderWidth:2,
+        borderRadius:6,
+        borderSkipped:false,
+      }],
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`R$ ${ctx.parsed.y.toFixed(2)}`}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>`R$ ${v}`},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false}}},
+    },
+  });
+}
+
+function rcRenderList(txs){
+  const el=document.getElementById('rcList');
+  if(!txs.length){el.innerHTML='<p class="text-gray-400 text-center py-6">Nenhuma transação.</p>';return;}
+  el.innerHTML=`
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-200 dark:border-gray-700 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
+            <th class="pb-3 pr-4">Data</th>
+            <th class="pb-3 pr-4">Usuário</th>
+            <th class="pb-3 pr-4">Tipo</th>
+            <th class="pb-3 pr-4">Descrição</th>
+            <th class="pb-3">Valor</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+          ${txs.map(t=>{
+            const pos=t.amount>0;
+            const color=pos?'text-green-600 dark:text-green-400':'text-red-500 dark:text-red-400';
+            return`<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
+              <td class="py-3 pr-4 text-gray-500 dark:text-gray-400 whitespace-nowrap text-xs">${fmtDate(t.created_at)}</td>
+              <td class="py-3 pr-4 font-medium text-gray-900 dark:text-white">${esc(t.username||'–')}</td>
+              <td class="py-3 pr-4"><span class="badge ${pos?'badge-green':'badge-red'}">${t.transaction_type==='recharge'?'Recarga':'Uso'}</span></td>
+              <td class="py-3 pr-4 text-gray-500 dark:text-gray-400 text-xs max-w-xs truncate">${esc(t.description||'–')}</td>
+              <td class="py-3 font-bold ${color}">${pos?'+':''}${fmtCur(t.amount)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ── LOGOUT ─────────────────────────────────────────────────────────────────
+async function doLogout(){
+  try{await API.post('/api/auth/logout',{});}catch(e){}
+  window.location.href='/login.html';
+}
+
+// ── BOOT ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',async()=>{
+  if(typeof feather!=='undefined')feather.replace();
+
+  const user=await checkAuth(true);
+  if(!user){return;}
+  if(user.role!=='admin'){window.location.href='/dashboard.html';return;}
+  document.getElementById('adminUsername').textContent=user.username;
+
+  await Promise.all([loadStats(),drvLoad()]);
+  if(typeof feather!=='undefined')feather.replace();
+});
+</script>
+</body>
+</html>

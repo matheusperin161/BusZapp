@@ -167,7 +167,7 @@
                 class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema" aria-label="Alternar tema">
           <i data-feather="moon" class="w-5 h-5"></i>
         </button>
-        <button onclick="window.location.href='dashboard.html'"
+        <button id="backBtn" onclick="window.location.href='dashboard.html'"
                 class="p-2.5 rounded-xl hover:bg-white/20 transition" aria-label="Voltar">
           <i data-feather="arrow-left" class="w-5 h-5"></i>
         </button>
@@ -488,6 +488,11 @@
           document.getElementById('sidebarDrivers').classList.remove('hidden');
           document.getElementById('sidebarFleet').classList.remove('hidden');
           document.getElementById('sidebarRoutes').classList.remove('hidden');
+          // Redirect back button and sidebar home link to admin panel
+          const backBtn = document.getElementById('backBtn');
+          if (backBtn) backBtn.onclick = () => window.location.href = 'admin.html';
+          const homeLink = document.querySelector('a[href="dashboard.html"]');
+          if (homeLink) homeLink.href = 'admin.html';
         }
 
         if (typeof feather !== 'undefined') feather.replace();

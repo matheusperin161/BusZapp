@@ -180,7 +180,7 @@ def login():
 
         session['user_id'] = user.id
         session['role'] = user.role
-        redirect = '/dashboard.html'
+        redirect = '/admin.html' if user.role == 'admin' else '/dashboard.html'
         return jsonify({
             'message': 'Login realizado com sucesso',
             'role': user.role,
