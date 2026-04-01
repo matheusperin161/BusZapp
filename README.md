@@ -91,3 +91,55 @@ python simulate_bus.py
 ```
 
 Isso enviará dados de rota e posição para o websocket local em execução (porta `8080`).
+
+## Documentação da API de Pagamentos (Recarga)
+
+A aplicação conta com um fluxo de pagamento para recarga de saldo integrado, permitindo adicionar créditos à conta do usuário usando diferentes métodos de pagamento.
+
+### Endpoint de Recarga
+
+**`POST /api/recharge`**
+
+**Autenticação Obrigatória:** Sim (requer usuário logado)
+
+**Corpo da Requisição (JSON):**
+```json
+{
+  "amount": 50.00,
+  "payment_method": "cartao"
+}
+```
+
+- **`amount`**: (Obrigatório, número) Valor a ser recarregado. Deve ser numérico e maior que zero.
+- **`payment_method`**: (Opcional, string) Método de pagamento escolhido. O valor padrão é `"cartao"`. Opções válidas: `"cartao"` ou `"pix"`.
+
+**Respostas:**
+
+- **`200 OK`**: Recarga e atualização do saldo realizadas com sucesso.
+  - Para **PIX**, o `payment_info` da resposta incluirá o campo extra `qr_code` no formato base64.
+  - O sistema registra o histórico (`Transaction`) e cria uma notificação para o usuário.
+  ```json
+  {
+    "message": "Recarga realizada com sucesso",
+    "new_balance": 50.00,
+    "transaction": {
+      "id": 1,
+      "amount": 50.0,
+      "transaction_type": "recharge",
+      "description": "Recarga via Cartão de Crédito - R$ 50.00",
+      "created_at": "..."
+    },
+    "payment_info": {
+      "method": "Cartão de Crédito",
+      "status": "Aprovado",
+      "transaction_id": "CARD_1_1680000000"
+    }
+  }
+  ```
+- **`400 Bad Request`**: Erro de validação (ex: valor ausente/inválido, negativo, ou se o `payment_method` for inválido).
+- **`404 Not Found`**: Usuário não encontrado na base de dados.
+
+### Impactos no Sistema e Extensões
+- **Saldo**: O saldo (`card_balance`) recebe a somatória da quantia aprovada.
+- **Histórico**: A operação entra no extrato retornado por `GET /api/transactions`.
+- **Validação de Catraca**: Ao atingir o crédito, o passageiro pode utilizar a rota com `POST /api/use-transport`, onde o valor da tarifa correspondente é deduzido deste saldo. Caso o saldo atinja o limiar baixo (R$ 5,00), um aviso extra de "Saldo Baixo" será notificado.
