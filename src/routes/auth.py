@@ -346,10 +346,13 @@ def driver_trip_start():
     now = datetime.utcnow()
     today = now.date()
 
-    # Encerra qualquer trip anterior ainda aberta deste motorista
-    DriverTrip.query.filter_by(driver_id=driver_id).filter(
-        DriverTrip.ended_at.is_(None)
-    ).update({'ended_at': now}, synchronize_session=False)
+    # Encerra trip anterior aberta APENAS para o mesmo ônibus (bus_number)
+    # Isso permite que um mesmo motorista opere múltiplos ônibus simultaneamente
+    # (cenário de teste ou operação com conta compartilhada)
+    if bus_number:
+        DriverTrip.query.filter_by(driver_id=driver_id, bus_number=bus_number).filter(
+            DriverTrip.ended_at.is_(None)
+        ).update({'ended_at': now}, synchronize_session=False)
 
     trip = DriverTrip(
         driver_id      = driver_id,

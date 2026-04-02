@@ -37,12 +37,41 @@
 </head>
 <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen flex flex-col">
 
-<header class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg sticky top-0 z-50">
-  <div class="container mx-auto px-4 py-3 flex items-center gap-3">
-    <button id="backBtn" onclick="goBack()" class="p-2 rounded-full hover:bg-white/20 transition hidden">
-      <i data-feather="arrow-left" class="w-5 h-5"></i>
+<!-- Sidebar Overlay -->
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<!-- Menu Toggle -->
+<button class="menu-toggle" id="menuToggle" aria-label="Menu">
+  <i data-feather="menu" class="w-6 h-6"></i>
+</button>
+
+<!-- Sidebar -->
+<nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
+  <a href="dashboard.html" class="sidebar-item gap-3">
+    <i data-feather="home"></i><span>Página Inicial</span>
+  </a>
+  <a href="recarga.html" class="sidebar-item gap-3">
+    <i data-feather="credit-card"></i><span>Meu Cartão</span>
+  </a>
+  <a href="acompanhamento.html" class="sidebar-item gap-3 bg-white/20">
+    <i data-feather="map-pin"></i><span>Rastrear</span>
+  </a>
+  <a href="rating.html" class="sidebar-item gap-3">
+    <i data-feather="star"></i><span>Avaliação</span>
+  </a>
+  <a href="profile.html" class="sidebar-item gap-3">
+    <i data-feather="user"></i><span>Meu Perfil</span>
+  </a>
+  <div class="mt-auto">
+    <button onclick="logout()" class="sidebar-item gap-3 w-full text-left">
+      <i data-feather="log-out"></i><span>Sair</span>
     </button>
-    <button id="homeBtn" onclick="window.location.href='dashboard.html'" class="p-2 rounded-full hover:bg-white/20 transition">
+  </div>
+</nav>
+
+<header class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg sticky top-0 z-50">
+  <div class="container mx-auto px-4 py-3 flex items-center gap-3 pl-16">
+    <button id="backBtn" onclick="goBack()" class="p-2 rounded-full hover:bg-white/20 transition hidden">
       <i data-feather="arrow-left" class="w-5 h-5"></i>
     </button>
     <div class="flex items-center gap-3">
@@ -51,6 +80,11 @@
         <h1 class="text-lg font-bold" id="headerTitle">Acompanhamento</h1>
         <p class="text-xs opacity-80" id="headerSub">Rastreie em tempo real</p>
       </div>
+    </div>
+    <div id="homeBtn" class="ml-auto">
+      <button onclick="window.location.href='dashboard.html'" class="p-2 rounded-full hover:bg-white/20 transition">
+        <i data-feather="arrow-left" class="w-5 h-5"></i>
+      </button>
     </div>
   </div>
 </header>

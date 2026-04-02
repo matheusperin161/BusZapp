@@ -246,9 +246,8 @@
       if (typeof feather !== 'undefined') feather.replace();
 
       if (user.role === 'admin') {
-        document.getElementById('sidebarDrivers').classList.remove('hidden');
-        document.getElementById('sidebarFleet').classList.remove('hidden');
-        document.getElementById('sidebarRoutes').classList.remove('hidden');
+        window.location.replace('admin.html');
+        return;
       }
 
       await loadBalance();

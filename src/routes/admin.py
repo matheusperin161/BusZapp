@@ -372,6 +372,20 @@ def create_route():
     return jsonify({'message': f'Linha {data["route_number"]} criada com sucesso', 'route_id': rt.id}), 201
 
 
+# ── Active trips count (for the stats counter) ───────────────────────────────
+
+@admin_bp.route('/active-trips-count', methods=['GET'])
+@admin_required
+def active_trips_count():
+    from src.models.user import DriverTrip
+    from datetime import datetime
+    today = datetime.utcnow().date()
+    count = DriverTrip.query.filter_by(trip_date=today).filter(
+        DriverTrip.ended_at.is_(None)
+    ).count()
+    return jsonify({'count': count})
+
+
 # ── Admin reports ─────────────────────────────────────────────────────────────
 
 @admin_bp.route('/ratings', methods=['GET'])
@@ -418,15 +432,63 @@ def list_all_transactions():
     return jsonify(result)
 
 
+# ── User Cards ────────────────────────────────────────────────────────────────
+
+VALID_CARD_TYPES = ('cidadao', 'normal', 'estudante', 'idoso', 'acompanhante', 'carteiro', 'colaborador', 'pcd')
+
+@admin_bp.route('/users/cards', methods=['GET'])
+@admin_required
+def list_user_cards():
+    from src.models.user import User
+    users = User.query.filter_by(role='user').order_by(User.username).all()
+    return jsonify([{
+        'id': u.id,
+        'username': u.username,
+        'email': u.email,
+        'card_number': u.card_number,
+        'card_holder': u.card_holder,
+        'card_type': u.card_type,
+        'card_balance': u.card_balance,
+        'email_verified': u.email_verified,
+    } for u in users])
+
+
+@admin_bp.route('/users/<int:user_id>/card', methods=['PUT'])
+@admin_required
+def edit_user_card(user_id):
+    from src.models.user import User
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+    data = request.get_json() or {}
+    if 'card_number' in data:
+        user.card_number = data['card_number'] or None
+    if 'card_holder' in data:
+        user.card_holder = data['card_holder'] or None
+    if 'card_type' in data:
+        ct = data['card_type']
+        if ct and ct not in VALID_CARD_TYPES:
+            return jsonify({'error': f'Tipo inválido. Use: {", ".join(VALID_CARD_TYPES)}'}), 400
+        user.card_type = ct or None
+    if 'card_balance' in data:
+        try:
+            user.card_balance = float(data['card_balance'])
+        except (TypeError, ValueError):
+            return jsonify({'error': 'Saldo inválido'}), 400
+    db.session.commit()
+    return jsonify({'message': 'Cartão atualizado com sucesso'})
+
+
 @admin_bp.route('/all-bus-locations', methods=['GET'])
 @admin_required
 def list_all_bus_locations():
     from src.models.user import BusLocation, DriverTrip
     from datetime import datetime, timedelta
+    from sqlalchemy import func
 
     now = datetime.utcnow()
     today = now.date()
-    gps_cutoff = now - timedelta(minutes=5)
+    gps_cutoff = now - timedelta(minutes=15)
 
     # Encerra automaticamente trips de dias anteriores que ficaram abertas
     DriverTrip.query.filter(
@@ -435,20 +497,47 @@ def list_all_bus_locations():
     ).update({'ended_at': now}, synchronize_session=False)
     db.session.commit()
 
-    # Trips ativas hoje + GPS enviado nos últimos 5 min
-    active_trips = (
-        DriverTrip.query
-        .filter_by(trip_date=today)
-        .filter(DriverTrip.ended_at.is_(None))
-        .filter(DriverTrip.bus_number.isnot(None))
+    # Ônibus que transmitiram GPS nos últimos 15 min — critério principal
+    # (independente de DriverTrip aberta, para suportar testes com 1 conta)
+    latest_ids = (
+        db.session.query(func.max(BusLocation.id))
+        .filter(BusLocation.timestamp >= gps_cutoff)
+        .filter(BusLocation.bus_number.isnot(None))
+        .group_by(BusLocation.bus_number)
         .all()
     )
-    active_bus_numbers = {t.bus_number for t in active_trips}
-    if not active_bus_numbers:
+    loc_ids = [row[0] for row in latest_ids if row[0] is not None]
+    if not loc_ids:
         return jsonify([])
 
-    locations = BusLocation.query.filter(
-        BusLocation.bus_number.in_(active_bus_numbers),
-        BusLocation.timestamp >= gps_cutoff,
-    ).all()
-    return jsonify([loc.to_dict() for loc in locations])
+    locations = BusLocation.query.filter(BusLocation.id.in_(loc_ids)).all()
+
+    # Monta mapa bus_number -> trip mais recente do dia para enriquecer a rota
+    all_today_trips = (
+        DriverTrip.query
+        .filter_by(trip_date=today)
+        .filter(DriverTrip.bus_number.isnot(None))
+        .order_by(DriverTrip.started_at.desc())
+        .all()
+    )
+    # Pega a trip mais recente por bus_number (aberta ou não)
+    trip_by_bus = {}
+    for t in all_today_trips:
+        if t.bus_number not in trip_by_bus:
+            trip_by_bus[t.bus_number] = t
+
+    result = []
+    for loc in locations:
+        d = loc.to_dict()
+        if not d.get('route'):
+            trip = trip_by_bus.get(loc.bus_number)
+            if trip and trip.bus_line:
+                parts = trip.bus_line.split(' - ', 1)
+                route_number = parts[0].strip()
+                route_name = parts[1].strip() if len(parts) > 1 else trip.bus_line
+                d['route'] = {
+                    'route_number': route_number,
+                    'route_name': route_name,
+                }
+        result.append(d)
+    return jsonify(result)

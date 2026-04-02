@@ -1,574 +1,451 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Avaliação - Mobilidade Urbana</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    
-    <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon" />
-    <style>
-      /* Estilos para o tema escuro */
-      .dark .bg-yellow-50 {
-        background-color: #1a202c;
-      }
-      .dark .bg-white {
-        background-color: #2d3748;
-      }
-      .dark .text-yellow-800 {
-        color: #f7fafc;
-      }
-      .dark .text-yellow-600 {
-        color: #a0aec0;
-      }
-      .dark .border-yellow-200 {
-        border-color: #4a5568;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avaliação – BuszApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
+  <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <style>
+    /* ── Stars ──────────────────────────────────────────────────── */
+    .star-btn {
+      cursor: pointer;
+      transition: transform .15s, color .15s;
+      color: #d1d5db;
+      display: inline-flex;
+    }
+    .dark .star-btn { color: #4b5563; }
+    .star-btn.active { color: #f59e0b; }
+    .star-btn:hover  { transform: scale(1.25); color: #fbbf24; }
 
-      /* Animações personalizadas */
-      @keyframes slideInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
+    /* ── Rating card accent ──────────────────────────────────────── */
+    .rating-section {
+      background: white;
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      transition: box-shadow .2s;
+    }
+    .dark .rating-section { background: #1e293b; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .rating-section:focus-within { box-shadow: 0 4px 24px rgba(245,158,11,0.18); }
 
-      .animate-slide-in-up {
-        animation: slideInUp 0.6s ease-out;
-      }
+    /* ── Success overlay ─────────────────────────────────────────── */
+    #successOverlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    #successOverlay.show { display: flex; }
+    .success-box {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,.25);
+      animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    .dark .success-box { background: #1e293b; }
 
-      /* Card moderno */
-      .card-modern {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-      }
+    @keyframes popIn {
+      from { opacity:0; transform: scale(.75); }
+      to   { opacity:1; transform: scale(1); }
+    }
 
-      .card-modern:hover {
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        transform: translateY(-2px);
-      }
+    /* ── Animated fade-in ────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(22px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .5s ease both; }
+    .fade-up-1 { animation-delay: .05s; }
+    .fade-up-2 { animation-delay: .12s; }
+    .fade-up-3 { animation-delay: .19s; }
+    .fade-up-4 { animation-delay: .26s; }
+    .fade-up-5 { animation-delay: .33s; }
 
-      .dark .card-modern {
-        background: #2d3748;
-      }
+    /* ── Textarea ────────────────────────────────────────────────── */
+    .input-modern {
+      background-color: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
+      width: 100%;
+      color: #1f2937;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .input-modern:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.12); }
+    .dark .input-modern { background-color: #0f172a; border-color: #334155; color: #f1f5f9; }
+    .dark .input-modern:focus { border-color: #f59e0b; }
 
-      /* Input moderno */
-      .input-modern {
-        background-color: rgba(255, 255, 255, 0.95);
-        border: 2px solid #fef3c7;
-        border-radius: 12px;
-        padding: 12px 16px;
-        font-size: 16px;
-        transition: all 0.3s ease;
-      }
+    select.input-modern { cursor: pointer; }
+  </style>
+</head>
+<body class="bg-yellow-50 dark:bg-gray-900 min-h-screen">
 
-      .input-modern:focus {
-        outline: none;
-        border-color: #f59e0b;
-        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-      }
+  <!-- Sidebar Overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-      .dark .input-modern {
-        background-color: rgba(45, 55, 72, 0.8);
-        border-color: #4a5568;
-        color: #f7fafc;
-      }
+  <!-- Menu Toggle -->
+  <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+    <i data-feather="menu" class="w-6 h-6"></i>
+  </button>
 
-      .dark .input-modern:focus {
-        border-color: #f59e0b;
-        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
-      }
+  <!-- Sidebar -->
+  <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
+    <a href="dashboard.html" class="sidebar-item gap-3">
+      <i data-feather="home"></i><span>Página Inicial</span>
+    </a>
+    <a href="rating.html" class="sidebar-item gap-3 bg-white/20">
+      <i data-feather="star"></i><span>Avaliação</span>
+    </a>
+    <a href="profile.html" class="sidebar-item gap-3">
+      <i data-feather="user"></i><span>Meu Perfil</span>
+    </a>
+    <div class="mt-auto">
+      <button onclick="logout()" class="sidebar-item gap-3 w-full text-left">
+        <i data-feather="log-out"></i><span>Sair</span>
+      </button>
+    </div>
+  </nav>
 
-      /* Botão moderno */
-      .btn-primary {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px rgba(245, 158, 11, 0.4);
-      }
-
-      .btn-primary:active {
-        transform: translateY(0);
-      }
-
-      /* Header gradient */
-      .header-gradient {
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-      }
-
-      .dark .header-gradient {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      }
-
-      /* Star rating */
-      .star {
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 28px;
-      }
-
-      .star:hover {
-        transform: scale(1.2);
-      }
-
-      .star.active {
-        color: #f59e0b;
-      }
-
-      .star.inactive {
-        color: #d1d5db;
-      }
-
-      .dark .star.inactive {
-        color: #4b5563;
-      }
-
-      /* Rating card */
-      .rating-card {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
-        border-left: 4px solid #f59e0b;
-        border-radius: 12px;
-        padding: 16px;
-      }
-
-      .dark .rating-card {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
-      }
-
-      /* Section title */
-      .section-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .dark .section-title {
-        color: #f7fafc;
-      }
-    </style>
-  </head>
-  <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="header-gradient text-white shadow-lg sticky top-0 z-40">
-      <div class="container mx-auto px-4 py-4 flex items-center">
-        <div class="flex items-center space-x-3">
-          <button
-            onclick="goBack()"
-            class="p-2 rounded-full hover:bg-white/20 transition"
-            title="Voltar"
-          >
-            <i data-feather="arrow-left" class="w-6 h-6"></i>
-          </button>
-          <div class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
-            <i data-feather="star" class="w-7 h-7"></i>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold">Avaliação do Serviço</h1>
-            <p class="text-xs opacity-90">Sua opinião é importante para nós</p>
-          </div>
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3 pl-12">
+        <div class="bg-white/20 backdrop-blur p-2 rounded-xl">
+          <i data-feather="star" class="w-7 h-7"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold">Avaliação do Serviço</h1>
+          <p class="text-xs opacity-80">Sua opinião é importante para nós</p>
         </div>
       </div>
-    </header>
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" onclick="DarkMode.toggle(); updateThemeIcon()"
+                class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema" aria-label="Alternar tema">
+          <i data-feather="moon" class="w-5 h-5"></i>
+        </button>
+        <button onclick="window.location.href='dashboard.html'"
+                class="p-2.5 rounded-xl hover:bg-white/20 transition" aria-label="Voltar">
+          <i data-feather="arrow-left" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8 flex-grow">
-      <!-- Header Section -->
-      <div class="card-modern p-8 mb-8 text-center animate-slide-in-up">
-        <div class="mb-4">
-          <div class="w-16 h-16 mx-auto bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-full flex items-center justify-center mb-4">
-            <i data-feather="smile" class="w-8 h-8 text-orange-600 dark:text-orange-400"></i>
-          </div>
+  <!-- Main -->
+  <main class="container mx-auto px-4 py-8 max-w-3xl">
+
+    <!-- Hero card -->
+    <div class="rating-section p-8 mb-6 text-center fade-up fade-up-1">
+      <div class="w-16 h-16 mx-auto bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/20 rounded-full flex items-center justify-center mb-4">
+        <i data-feather="smile" class="w-8 h-8 text-orange-500"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Como foi sua viagem?</h2>
+      <p class="text-gray-500 dark:text-gray-400">Sua avaliação nos ajuda a melhorar continuamente o serviço</p>
+    </div>
+
+    <!-- Overall Rating -->
+    <div class="rating-section p-6 mb-4 fade-up fade-up-2">
+      <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+        <i data-feather="award" class="w-5 h-5 text-yellow-500"></i>
+        Avaliação Geral <span class="text-red-500">*</span>
+      </h3>
+      <div class="flex justify-center gap-3 mb-2" id="overall-rating" role="group" aria-label="Avaliação geral">
+        <button class="star-btn" data-rating="1" aria-label="1 estrela"><i data-feather="star" class="w-10 h-10"></i></button>
+        <button class="star-btn" data-rating="2" aria-label="2 estrelas"><i data-feather="star" class="w-10 h-10"></i></button>
+        <button class="star-btn" data-rating="3" aria-label="3 estrelas"><i data-feather="star" class="w-10 h-10"></i></button>
+        <button class="star-btn" data-rating="4" aria-label="4 estrelas"><i data-feather="star" class="w-10 h-10"></i></button>
+        <button class="star-btn" data-rating="5" aria-label="5 estrelas"><i data-feather="star" class="w-10 h-10"></i></button>
+      </div>
+      <p class="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 h-5" id="overall-text">Toque nas estrelas para avaliar</p>
+    </div>
+
+    <!-- Sub-ratings -->
+    <div class="grid grid-cols-2 gap-4 mb-4 fade-up fade-up-3">
+      <!-- Pontualidade -->
+      <div class="rating-section p-5">
+        <h4 class="font-semibold text-gray-700 dark:text-white flex items-center gap-1.5 mb-3 text-sm">
+          <i data-feather="clock" class="w-4 h-4 text-yellow-500"></i> Pontualidade
+        </h4>
+        <div class="flex gap-1.5 justify-center mb-1" id="punctuality-rating" role="group" aria-label="Pontualidade">
+          <button class="star-btn" data-rating="1"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="2"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="3"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="4"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="5"><i data-feather="star" class="w-7 h-7"></i></button>
         </div>
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Como foi sua experiência?
-        </h2>
-        <p class="text-gray-600 dark:text-gray-400 text-lg">
-          Sua avaliação nos ajuda a melhorar continuamente nossos serviços
-        </p>
+        <p class="text-center text-xs text-gray-400 h-4" id="punctuality-text">Não avaliado</p>
       </div>
 
-      <!-- Rating Form -->
-      <div class="max-w-4xl mx-auto animate-slide-in-up" style="animation-delay: 0.1s;">
-        <!-- Overall Rating -->
-        <div class="card-modern p-8 mb-8">
-          <h3 class="section-title">
-            <i data-feather="award" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-            Avaliação Geral
-          </h3>
-          <div class="text-center">
-            <div class="flex justify-center gap-3 mb-4" id="overall-rating">
-              <i data-feather="star" class="w-10 h-10 star inactive" data-rating="1"></i>
-              <i data-feather="star" class="w-10 h-10 star inactive" data-rating="2"></i>
-              <i data-feather="star" class="w-10 h-10 star inactive" data-rating="3"></i>
-              <i data-feather="star" class="w-10 h-10 star inactive" data-rating="4"></i>
-              <i data-feather="star" class="w-10 h-10 star inactive" data-rating="5"></i>
-            </div>
-            <p class="text-lg font-semibold text-gray-900 dark:text-white" id="overall-text">
-              Clique nas estrelas para avaliar
-            </p>
-          </div>
+      <!-- Limpeza -->
+      <div class="rating-section p-5">
+        <h4 class="font-semibold text-gray-700 dark:text-white flex items-center gap-1.5 mb-3 text-sm">
+          <i data-feather="shield" class="w-4 h-4 text-yellow-500"></i> Limpeza
+        </h4>
+        <div class="flex gap-1.5 justify-center mb-1" id="cleanliness-rating" role="group" aria-label="Limpeza">
+          <button class="star-btn" data-rating="1"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="2"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="3"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="4"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="5"><i data-feather="star" class="w-7 h-7"></i></button>
         </div>
+        <p class="text-center text-xs text-gray-400 h-4" id="cleanliness-text">Não avaliado</p>
+      </div>
 
-        <!-- Specific Ratings Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <!-- Pontualidade -->
-          <div class="card-modern p-6">
-            <h4 class="section-title">
-              <i data-feather="clock" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-              Pontualidade
-            </h4>
-            <div class="flex justify-center gap-2 mb-3" id="punctuality-rating">
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="1"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="2"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="3"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="4"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="5"></i>
-            </div>
-            <p class="text-center text-sm text-gray-600 dark:text-gray-400" id="punctuality-text">
-              Não avaliado
-            </p>
-          </div>
-
-          <!-- Limpeza -->
-          <div class="card-modern p-6">
-            <h4 class="section-title">
-              <i data-feather="shield" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-              Limpeza
-            </h4>
-            <div class="flex justify-center gap-2 mb-3" id="cleanliness-rating">
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="1"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="2"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="3"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="4"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="5"></i>
-            </div>
-            <p class="text-center text-sm text-gray-600 dark:text-gray-400" id="cleanliness-text">
-              Não avaliado
-            </p>
-          </div>
-
-          <!-- Conforto -->
-          <div class="card-modern p-6">
-            <h4 class="section-title">
-              <i data-feather="heart" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-              Conforto
-            </h4>
-            <div class="flex justify-center gap-2 mb-3" id="comfort-rating">
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="1"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="2"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="3"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="4"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="5"></i>
-            </div>
-            <p class="text-center text-sm text-gray-600 dark:text-gray-400" id="comfort-text">
-              Não avaliado
-            </p>
-          </div>
-
-          <!-- Motorista -->
-          <div class="card-modern p-6">
-            <h4 class="section-title">
-              <i data-feather="user" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-              Motorista
-            </h4>
-            <div class="flex justify-center gap-2 mb-3" id="service-rating">
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="1"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="2"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="3"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="4"></i>
-              <i data-feather="star" class="w-8 h-8 star inactive" data-rating="5"></i>
-            </div>
-            <p class="text-center text-sm text-gray-600 dark:text-gray-400" id="service-text">
-              Não avaliado
-            </p>
-          </div>
+      <!-- Conforto -->
+      <div class="rating-section p-5">
+        <h4 class="font-semibold text-gray-700 dark:text-white flex items-center gap-1.5 mb-3 text-sm">
+          <i data-feather="heart" class="w-4 h-4 text-yellow-500"></i> Conforto
+        </h4>
+        <div class="flex gap-1.5 justify-center mb-1" id="comfort-rating" role="group" aria-label="Conforto">
+          <button class="star-btn" data-rating="1"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="2"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="3"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="4"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="5"><i data-feather="star" class="w-7 h-7"></i></button>
         </div>
+        <p class="text-center text-xs text-gray-400 h-4" id="comfort-text">Não avaliado</p>
+      </div>
 
-        <!-- Trip Information -->
-        <div class="card-modern p-8 mb-8">
-          <h3 class="section-title">
-            <i data-feather="map-pin" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-            Informações da Viagem
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Linha
-              </label>
-              <select id="bus_line" class="input-modern w-full" onchange="onLineChange()">
-                <option value="">Selecione a linha</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Data da Viagem
-              </label>
-              <input type="date" id="trip_date" class="input-modern w-full" />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Horário de Saída
-              </label>
-              <select id="trip_schedule" class="input-modern w-full" disabled>
-                <option value="">Selecione a linha primeiro</option>
-              </select>
-            </div>
-          </div>
+      <!-- Motorista -->
+      <div class="rating-section p-5">
+        <h4 class="font-semibold text-gray-700 dark:text-white flex items-center gap-1.5 mb-3 text-sm">
+          <i data-feather="user" class="w-4 h-4 text-yellow-500"></i> Motorista
+        </h4>
+        <div class="flex gap-1.5 justify-center mb-1" id="service-rating" role="group" aria-label="Motorista">
+          <button class="star-btn" data-rating="1"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="2"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="3"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="4"><i data-feather="star" class="w-7 h-7"></i></button>
+          <button class="star-btn" data-rating="5"><i data-feather="star" class="w-7 h-7"></i></button>
         </div>
+        <p class="text-center text-xs text-gray-400 h-4" id="service-text">Não avaliado</p>
+      </div>
+    </div>
 
-        <!-- Comments -->
-        <div class="card-modern p-8 mb-8">
-          <h3 class="section-title">
-            <i data-feather="message-circle" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
-            Comentários Adicionais
-          </h3>
-          <textarea
-            id="comments"
-            rows="4"
-            class="input-modern w-full resize-none"
-            placeholder="Conte-nos mais sobre sua experiência... (opcional)"
-          ></textarea>
+    <!-- Trip Info -->
+    <div class="rating-section p-6 mb-4 fade-up fade-up-4">
+      <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+        <i data-feather="map-pin" class="w-5 h-5 text-yellow-500"></i>
+        Informações da Viagem
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Linha</label>
+          <select id="bus_line" class="input-modern" onchange="onLineChange()">
+            <option value="">Selecione a linha</option>
+          </select>
         </div>
-
-        <!-- Submit Button -->
-        <div class="flex gap-4">
-          <button
-            onclick="submitRating()"
-            class="btn-primary flex-1 flex items-center justify-center gap-2"
-          >
-            <i data-feather="send" class="w-5 h-5"></i>
-            Enviar Avaliação
-          </button>
-          <button
-            onclick="goBack()"
-            class="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            Cancelar
-          </button>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Data da Viagem</label>
+          <input type="date" id="trip_date" class="input-modern" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Horário de Saída</label>
+          <select id="trip_schedule" class="input-modern" disabled>
+            <option value="">Selecione a linha primeiro</option>
+          </select>
         </div>
       </div>
-    </main>
+    </div>
 
-    <script>
-      feather.replace();
+    <!-- Comments -->
+    <div class="rating-section p-6 mb-6 fade-up fade-up-5">
+      <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+        <i data-feather="message-circle" class="w-5 h-5 text-yellow-500"></i>
+        Comentários (opcional)
+      </h3>
+      <textarea id="comments" rows="4" class="input-modern resize-none"
+                placeholder="Conte mais sobre sua experiência…"></textarea>
+    </div>
 
-      const ratingTexts = {
-        1: "Muito Ruim",
-        2: "Ruim",
-        3: "Regular",
-        4: "Bom",
-        5: "Excelente",
-      };
+    <!-- Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 fade-up fade-up-5">
+      <button id="submitBtn" onclick="submitRating()"
+              class="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white
+                     bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600
+                     shadow-md hover:shadow-lg transition-all text-base">
+        <i data-feather="send" class="w-5 h-5"></i>
+        Enviar Avaliação
+      </button>
+      <button onclick="window.location.href='dashboard.html'"
+              class="flex-1 py-3.5 px-6 bg-white dark:bg-gray-800 text-gray-700 dark:text-white
+                     font-semibold rounded-xl border-2 border-gray-200 dark:border-gray-700
+                     hover:bg-gray-50 dark:hover:bg-gray-700 transition text-base">
+        Cancelar
+      </button>
+    </div>
+  </main>
 
-      function setupRating(containerId, textId) {
-        const container = document.getElementById(containerId);
-        const textElement = document.getElementById(textId);
-        const stars = container.querySelectorAll(".star");
+  <!-- Success Overlay -->
+  <div id="successOverlay">
+    <div class="success-box dark:text-white">
+      <div class="w-20 h-20 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-5">
+        <i data-feather="check-circle" class="w-10 h-10 text-green-500"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Obrigado!</h3>
+      <p class="text-gray-500 dark:text-gray-400 mb-6">Sua avaliação foi enviada com sucesso. Sua opinião é muito importante para nós.</p>
+      <button onclick="window.location.href='dashboard.html'"
+              class="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 transition">
+        Voltar ao início
+      </button>
+    </div>
+  </div>
 
-        stars.forEach((star, index) => {
-          star.addEventListener("click", () => {
-            const rating = parseInt(star.getAttribute("data-rating"));
+  <script src="./js/app.js"></script>
+  <script src="./js/notifications.js"></script>
+  <script>
+    // ── Theme ─────────────────────────────────────────────────────────────────
+    function updateThemeIcon() {
+      const btn = document.getElementById('themeToggle');
+      const isDark = DarkMode.isDark();
+      btn.innerHTML = isDark
+        ? '<i data-feather="sun" class="w-5 h-5"></i>'
+        : '<i data-feather="moon" class="w-5 h-5"></i>';
+      if (typeof feather !== 'undefined') feather.replace();
+    }
 
-            // Reset all stars
-            stars.forEach((s) => {
-              s.classList.remove("active");
-              s.classList.add("inactive");
-            });
+    // ── Star ratings ──────────────────────────────────────────────────────────
+    const ratingTexts = { 1:'Muito Ruim', 2:'Ruim', 3:'Regular', 4:'Bom', 5:'Excelente' };
 
-            // Activate stars up to clicked rating
-            for (let i = 0; i < rating; i++) {
-              stars[i].classList.add("active");
-              stars[i].classList.remove("inactive");
-            }
+    function setupRating(containerId, textId) {
+      const container = document.getElementById(containerId);
+      const textEl = document.getElementById(textId);
+      const stars = Array.from(container.querySelectorAll('.star-btn'));
 
-            // Update text
-            if (textElement) {
-              textElement.textContent = ratingTexts[rating];
-            }
-          });
-
-          star.addEventListener("mouseenter", () => {
-            const rating = parseInt(star.getAttribute("data-rating"));
-
-            // Highlight stars on hover
-            stars.forEach((s, i) => {
-              if (i < rating) {
-                s.style.opacity = "0.7";
-              } else {
-                s.style.opacity = s.classList.contains("active") ? "1" : "0.5";
-              }
-            });
-          });
-
-          star.addEventListener("mouseleave", () => {
-            // Reset to active state
-            stars.forEach((s) => {
-              s.style.opacity = "1";
-            });
-          });
+      function setStars(rating) {
+        stars.forEach((s, i) => {
+          s.classList.toggle('active', i < rating);
         });
+        if (textEl) textEl.textContent = rating ? ratingTexts[rating] : (containerId === 'overall-rating' ? 'Toque nas estrelas para avaliar' : 'Não avaliado');
       }
 
-      // Setup all rating systems
-      setupRating("overall-rating", "overall-text");
-      setupRating("punctuality-rating", "punctuality-text");
-      setupRating("cleanliness-rating", "cleanliness-text");
-      setupRating("comfort-rating", "comfort-text");
-      setupRating("service-rating", "service-text");
-
-      function goBack() {
-        window.history.back();
-      }
-
-      // Define data padrão como hoje
-      document.addEventListener('DOMContentLoaded', function() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('trip_date').value = today;
-        loadBusLines();
+      stars.forEach(star => {
+        star.addEventListener('click', () => setStars(parseInt(star.dataset.rating)));
+        star.addEventListener('mouseenter', () => {
+          const r = parseInt(star.dataset.rating);
+          stars.forEach((s, i) => s.style.opacity = i < r ? '0.7' : '');
+        });
+        star.addEventListener('mouseleave', () => stars.forEach(s => s.style.opacity = ''));
       });
 
-      async function loadBusLines() {
-        try {
-          const res = await fetch('/api/routes', { credentials: 'include' });
-          const lines = await res.json();
-          const sel = document.getElementById('bus_line');
-          sel.innerHTML = '<option value="">Selecione a linha</option>';
-          lines.forEach(line => {
-            const o = document.createElement('option');
-            o.value = `${line.route_number} - ${line.route_name}`;
-            o.textContent = `${line.route_number} - ${line.route_name}`;
-            o.dataset.routeNumber = line.route_number;
-            sel.appendChild(o);
-          });
-        } catch (e) {
-          console.error('Erro ao carregar linhas:', e);
-        }
-      }
+      return () => stars.filter(s => s.classList.contains('active')).length;
+    }
 
-      async function onLineChange() {
+    const getOverall      = setupRating('overall-rating',     'overall-text');
+    const getPunctuality  = setupRating('punctuality-rating', 'punctuality-text');
+    const getCleanliness  = setupRating('cleanliness-rating', 'cleanliness-text');
+    const getComfort      = setupRating('comfort-rating',     'comfort-text');
+    const getService      = setupRating('service-rating',     'service-text');
+
+    // ── Bus lines ─────────────────────────────────────────────────────────────
+    async function loadBusLines() {
+      try {
+        const lines = await API.get('/api/routes');
         const sel = document.getElementById('bus_line');
-        const opt = sel.options[sel.selectedIndex];
-        const schSel = document.getElementById('trip_schedule');
-
-        if (!opt || !opt.value) {
-          schSel.innerHTML = '<option value="">Selecione a linha primeiro</option>';
-          schSel.disabled = true;
-          return;
-        }
-
-        const routeNumber = opt.dataset.routeNumber || opt.value.split(' - ')[0];
-        schSel.innerHTML = '<option value="">Carregando horários…</option>';
-        schSel.disabled = true;
-
-        try {
-          const res = await fetch(`/api/route/${routeNumber}/schedules`, { credentials: 'include' });
-          const schedules = await res.json();
-          schSel.innerHTML = '<option value="">Selecione o horário</option>';
-          schedules.forEach(sc => {
-            const o = document.createElement('option');
-            o.value = sc.departure_time;
-            o.textContent = `${sc.departure_time} — ${sc.period || ''}`;
-            schSel.appendChild(o);
-          });
-          schSel.disabled = false;
-        } catch (e) {
-          schSel.innerHTML = '<option value="">Erro ao carregar horários</option>';
-        }
-      }
-
-      async function submitRating() {
-        const ratings = {};
-        ['overall','punctuality','cleanliness','comfort','service'].forEach(cat => {
-          ratings[cat] = document.querySelectorAll(`#${cat}-rating .star.active`).length;
+        sel.innerHTML = '<option value="">Selecione a linha</option>';
+        lines.forEach(line => {
+          const o = document.createElement('option');
+          o.value = `${line.route_number} - ${line.route_name}`;
+          o.textContent = `${line.route_number} - ${line.route_name}`;
+          o.dataset.routeNumber = line.route_number;
+          sel.appendChild(o);
         });
-
-        if (ratings.overall === 0) {
-          alert('Por favor, forneça uma avaliação geral antes de enviar.');
-          return;
-        }
-
-        const busLine = document.getElementById('bus_line').value;
-        const tripDate = document.getElementById('trip_date').value;
-        const scheduleDeparture = document.getElementById('trip_schedule').value;
-
-        const ratingData = {
-          overall_rating:      ratings.overall,
-          punctuality_rating:  ratings.punctuality,
-          cleanliness_rating:  ratings.cleanliness,
-          comfort_rating:      ratings.comfort,
-          service_rating:      ratings.service,
-          comments:            document.getElementById('comments').value,
-          bus_line:            busLine,
-          trip_date:           tripDate,
-          trip_time:           scheduleDeparture,
-          schedule_departure:  scheduleDeparture,
-        };
-
-        try {
-          const res = await fetch('/api/submit-rating', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(ratingData),
-          });
-          const data = await res.json();
-          if (data.message) {
-            alert('Obrigado pela sua avaliação! Seus comentários são muito importantes para nós.');
-            window.location.href = 'dashboard.html';
-          } else {
-            alert('Erro ao enviar avaliação: ' + (data.error || 'Erro desconhecido'));
-          }
-        } catch (e) {
-          alert('Erro ao conectar com o servidor. Tente novamente.');
-        }
+      } catch (e) {
+        console.error('Erro ao carregar linhas:', e);
       }
-    </script>
+    }
 
-    <script>
-      // Script de inicialização do tema
-      function applyTheme(isDark) {
-        const html = document.documentElement;
-        if (isDark) {
-          html.classList.add('dark');
-          html.classList.remove('light');
-        } else {
-          html.classList.remove('dark');
-          html.classList.add('light');
-        }
-        feather.replace();
+    async function onLineChange() {
+      const sel = document.getElementById('bus_line');
+      const opt = sel.options[sel.selectedIndex];
+      const schSel = document.getElementById('trip_schedule');
+
+      if (!opt || !opt.value) {
+        schSel.innerHTML = '<option value="">Selecione a linha primeiro</option>';
+        schSel.disabled = true;
+        return;
       }
 
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      let isDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
-      applyTheme(isDark);
-    </script>
-  </body>
+      const routeNumber = opt.dataset.routeNumber || opt.value.split(' - ')[0];
+      schSel.innerHTML = '<option value="">Carregando horários…</option>';
+      schSel.disabled = true;
+
+      try {
+        const schedules = await API.get(`/api/route/${routeNumber}/schedules`);
+        schSel.innerHTML = '<option value="">Selecione o horário</option>';
+        schedules.forEach(sc => {
+          const o = document.createElement('option');
+          o.value = sc.departure_time;
+          o.textContent = `${sc.departure_time}${sc.period ? ' — ' + sc.period : ''}`;
+          schSel.appendChild(o);
+        });
+        schSel.disabled = false;
+      } catch (e) {
+        schSel.innerHTML = '<option value="">Erro ao carregar horários</option>';
+      }
+    }
+
+    // ── Submit ────────────────────────────────────────────────────────────────
+    async function submitRating() {
+      const overall = getOverall();
+      if (!overall) {
+        Toast.warning('Por favor, selecione uma avaliação geral.');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i data-feather="loader" class="w-5 h-5 animate-spin"></i> Enviando…';
+      if (typeof feather !== 'undefined') feather.replace();
+
+      const ratingData = {
+        overall_rating:      overall,
+        punctuality_rating:  getPunctuality(),
+        cleanliness_rating:  getCleanliness(),
+        comfort_rating:      getComfort(),
+        service_rating:      getService(),
+        comments:            document.getElementById('comments').value,
+        bus_line:            document.getElementById('bus_line').value,
+        trip_date:           document.getElementById('trip_date').value,
+        schedule_departure:  document.getElementById('trip_schedule').value,
+        trip_time:           document.getElementById('trip_schedule').value,
+      };
+
+      try {
+        await API.post('/api/submit-rating', ratingData);
+        document.getElementById('successOverlay').classList.add('show');
+        if (typeof feather !== 'undefined') feather.replace();
+      } catch (e) {
+        Toast.error(e.data?.error || 'Erro ao enviar avaliação. Tente novamente.');
+        btn.disabled = false;
+        btn.innerHTML = '<i data-feather="send" class="w-5 h-5"></i> Enviar Avaliação';
+        if (typeof feather !== 'undefined') feather.replace();
+      }
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+      updateThemeIcon();
+      if (typeof feather !== 'undefined') feather.replace();
+
+      const user = await checkAuth(true);
+      if (!user) return;
+
+      document.getElementById('trip_date').value = new Date().toISOString().split('T')[0];
+      await loadBusLines();
+    });
+  </script>
+</body>
 </html>

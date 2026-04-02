@@ -9,6 +9,8 @@ dist/
 build/
 *.egg
 
+.claude/
+
 # Ambiente virtual
 venv/
 .venv/

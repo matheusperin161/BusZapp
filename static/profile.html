@@ -209,7 +209,7 @@
           </div>
         </div>
         <!-- Saldo -->
-        <div class="balance-card text-white p-5 min-w-[180px] text-center flex-shrink-0 relative z-10">
+        <div id="profileBalanceCard" class="balance-card text-white p-5 min-w-[180px] text-center flex-shrink-0 relative z-10">
           <p class="text-xs opacity-80 mb-1 flex items-center justify-center gap-1">
             <i data-feather="credit-card" class="w-3.5 h-3.5"></i> Saldo
           </p>
@@ -223,7 +223,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
       <!-- Form -->
-      <div class="lg:col-span-2 animate-fade-in-up">
+      <div id="profileFormCol" class="lg:col-span-2 animate-fade-in-up">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-8 mb-6">
           <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-6">
             <i data-feather="edit-2" class="w-5 h-5 text-yellow-500"></i>
@@ -294,10 +294,10 @@
       </div>
 
       <!-- Sidebar stats -->
-      <div class="lg:col-span-1 animate-fade-in-up flex flex-col gap-6">
+      <div id="profileSideCol" class="lg:col-span-1 animate-fade-in-up flex flex-col gap-6">
 
         <!-- Estatísticas reais -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
+        <div id="profileStatsSection" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
           <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-5">
             <i data-feather="bar-chart-2" class="w-5 h-5 text-yellow-500"></i>
             Estatísticas
@@ -493,6 +493,15 @@
           if (backBtn) backBtn.onclick = () => window.location.href = 'admin.html';
           const homeLink = document.querySelector('a[href="dashboard.html"]');
           if (homeLink) homeLink.href = 'admin.html';
+          // Hide user-only sections and expand form to full width
+          document.getElementById('profileBalanceCard')?.classList.add('hidden');
+          document.getElementById('profileStatsSection')?.classList.add('hidden');
+          document.getElementById('profileSideCol')?.classList.add('hidden');
+          const formCol = document.getElementById('profileFormCol');
+          if (formCol) {
+            formCol.classList.remove('lg:col-span-2');
+            formCol.classList.add('lg:col-span-3');
+          }
         }
 
         if (typeof feather !== 'undefined') feather.replace();
