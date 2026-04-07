@@ -641,7 +641,7 @@
               </div>
               <div class="flex-1">
                 <p class="font-semibold text-gray-900 dark:text-white text-sm" id="saved-card-label">Cartão •••• 1234</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Clique para alterar os dados</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400" id="saved-card-sublabel">Clique para alterar os dados</p>
               </div>
               <i data-feather="edit-2" class="w-4 h-4 text-gray-400"></i>
             </div>
@@ -677,7 +677,7 @@
       <div id="viewRegister" class="hidden animate-slide-in-up">
 
         <!-- back -->
-        <button class="back-link" onclick="showView('viewHome')">
+        <button class="back-link" onclick="goBackFromRegister()">
           <i data-feather="arrow-left" class="w-4 h-4"></i> Voltar
         </button>
 
@@ -812,7 +812,7 @@
           <p class="cc-subtitle">Preencha as informações da frente do cartão</p>
           <div style="display:flex;flex-direction:column;gap:12px">
             <div><label class="cc-label-text">Número do Cartão</label><input class="cc-input" id="cc-input-number" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" /></div>
-            <div><label class="cc-label-text">Nome do Titular</label><input class="cc-input" id="cc-input-name" type="text" placeholder="Como aparece no cartão" /></div>
+            <div><label class="cc-label-text">Nome do Titular</label><input class="cc-input" id="cc-input-name" type="text" placeholder="Como aparece no cartão" maxlength="26" /></div>
             <div class="cc-grid-2">
               <div><label class="cc-label-text">Validade</label><input class="cc-input" id="cc-input-expiry" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" /></div>
               <div></div>
@@ -959,17 +959,21 @@
         const cvv = document.getElementById('cc-input-cvv').value;
         if (cvv.length < 3) { alert('CVV inválido.'); return; }
         document.getElementById('ccCard').classList.remove('flipped');
-        const num  = document.getElementById('cc-input-number').value;
-        const name = document.getElementById('cc-input-name').value;
-        const exp  = document.getElementById('cc-input-expiry').value;
+        const num   = document.getElementById('cc-input-number').value;
+        const name  = document.getElementById('cc-input-name').value;
+        const exp   = document.getElementById('cc-input-expiry').value;
         document.getElementById('card-number').value = num;
         document.getElementById('card-name').value   = name;
         document.getElementById('card-expiry').value = exp;
         document.getElementById('card-cvv').value    = cvv;
         const last4 = num.replace(/\s/g,'').slice(-4);
-        document.getElementById('saved-card-label').textContent = `Cartão •••• •••• •••• ${last4}`;
+        const nameDisplay = name.trim().toUpperCase();
+        document.getElementById('saved-card-label').textContent = `${nameDisplay} • •••• ${last4}`;
+        document.getElementById('saved-card-sublabel').textContent = 'Clique para alterar os dados';
         document.getElementById('saved-card-indicator').classList.remove('hidden');
         document.getElementById('add-card-btn').classList.add('hidden');
+        // Persiste os dados do cartão de crédito para futuras recargas
+        localStorage.setItem('saved_credit_card', JSON.stringify({ number: num, name, expiry: exp, cvv }));
         setTimeout(() => { closeCardModal(); feather.replace(); checkFormCompletion(); }, 700);
       }
       document.getElementById('creditCardModal').addEventListener('click', function(e) {
@@ -1059,6 +1063,7 @@
 
       /* ——— Card registration ——— */
       let selectedCardType = '';
+      let loadedCardType   = '';  // tipo real do cartão cadastrado (restaurado ao voltar)
 
       function selectCardType(type, btn) {
         selectedCardType = type;
@@ -1091,12 +1096,19 @@
           document.getElementById('cardHolderDisplay').textContent = data.card_holder.split(' ')[0].toUpperCase();
         }
         if (data.card_type) {
+          loadedCardType = data.card_type;  // guarda o tipo real para restaurar ao voltar
           document.getElementById('cardTypeDisplay').textContent = CARD_TYPE_LABELS[data.card_type] || data.card_type;
           applyCardTypeColor(data.card_type);
         }
         if (data.card_balance !== undefined) {
           document.getElementById('currentBalance').textContent = `R$ ${parseFloat(data.card_balance).toFixed(2).replace('.', ',')}`;
         }
+      }
+
+      /* Volta da view de cadastro restaurando a cor original do cartão */
+      function goBackFromRegister() {
+        applyCardTypeColor(loadedCardType);
+        showView('viewHome');
       }
 
       async function cadastrarCartao() {
@@ -1250,6 +1262,27 @@
           applyCardData({ card_number: card.number, card_holder: card.name, card_type: card.type });
           if (card.number) lockRegisterBtn();
         }
+      })();
+
+      /* ——— Restaura cartão de crédito salvo ——— */
+      (() => {
+        const savedCC = localStorage.getItem('saved_credit_card');
+        if (!savedCC) return;
+        try {
+          const cc = JSON.parse(savedCC);
+          document.getElementById('card-number').value = cc.number  || '';
+          document.getElementById('card-name').value   = cc.name    || '';
+          document.getElementById('card-expiry').value = cc.expiry  || '';
+          document.getElementById('card-cvv').value    = cc.cvv     || '';
+          const last4 = (cc.number || '').replace(/\s/g,'').slice(-4);
+          if (last4) {
+            const nameDisplay = (cc.name || '').trim().toUpperCase();
+            document.getElementById('saved-card-label').textContent = `${nameDisplay} • •••• ${last4}`;
+            document.getElementById('saved-card-sublabel').textContent = 'Clique para alterar os dados';
+            document.getElementById('saved-card-indicator').classList.remove('hidden');
+            document.getElementById('add-card-btn').classList.add('hidden');
+          }
+        } catch(_) {}
       })();
 
       /* ——— Load last recharge from API ——— */
