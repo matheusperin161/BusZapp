@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
 <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
   <link rel="stylesheet" href="./css/main.css" />
+  <link rel="stylesheet" href="./css/notifications.css" />
   <style>
     .balance-card {
       background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
@@ -118,38 +119,29 @@
 
         <!-- Notifications -->
         <div class="relative">
-          <button id="notificationButton" class="p-2.5 rounded-xl hover:bg-white/20 transition relative" aria-label="Notificações">
+          <button id="notificationButton" class="notif-bell-btn relative" aria-label="Notificações">
             <i data-feather="bell" class="w-5 h-5"></i>
-            <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-yellow-500"></span>
+            <span id="notificationBadge" class="hidden notif-badge"></span>
           </button>
-          <div id="notificationDropdown" class="hidden absolute right-0 top-full mt-3 w-96
-               bg-white dark:bg-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden
-               border border-gray-100 dark:border-gray-700"
-               style="max-width: calc(100vw - 1rem);">
-            <!-- Dropdown Header -->
-            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
-                  <i data-feather="bell" class="w-4 h-4 text-yellow-600 dark:text-yellow-400"></i>
+
+          <div id="notificationDropdown" class="hidden notif-dropdown">
+            <!-- Header -->
+            <div class="notif-dropdown-header">
+              <div class="notif-dropdown-title">
+                <div class="notif-dropdown-icon-wrap">
+                  <i data-feather="bell" class="w-4 h-4"></i>
                 </div>
-                <h3 class="font-bold text-gray-800 dark:text-white text-base">Notificações</h3>
+                <span>Notificações</span>
               </div>
-              <button id="markAllAsRead"
-                      class="text-xs font-medium text-yellow-600 dark:text-yellow-400
-                             bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40
-                             px-3 py-1.5 rounded-lg transition">
-                Marcar lidas
-              </button>
+              <button id="markAllAsRead" class="notif-mark-read-btn">Marcar lidas</button>
             </div>
-            <!-- Notification list -->
-            <div id="notificationList" class="max-h-80 overflow-y-auto py-1">
-              <!-- Empty state -->
-              <div id="noNotificationsMessage" class="flex flex-col items-center justify-center py-8 px-4 text-center">
-                <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
-                  <i data-feather="bell-off" class="w-6 h-6 text-gray-400"></i>
-                </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sem notificações</p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Você está em dia!</p>
+
+            <!-- List -->
+            <div id="notificationList" class="notif-list">
+              <div id="noNotificationsMessage" class="notif-empty">
+                <div class="notif-empty-icon">🔔</div>
+                <p class="notif-empty-title">Nenhuma notificação</p>
+                <p class="notif-empty-sub">Você está em dia!</p>
               </div>
             </div>
           </div>

@@ -105,21 +105,30 @@ class NotificationManager {
     if (!list) return;
     document.getElementById('noNotificationsMessage')?.remove();
 
+    const TYPE_META = {
+      success:    { icon: '✅', bg: '#d1fae5', color: '#059669' },
+      line_delay: { icon: '🚌', bg: '#ffedd5', color: '#ea580c' },
+      warning:    { icon: '⚠️', bg: '#fef9c3', color: '#ca8a04' },
+      error:      { icon: '❌', bg: '#fee2e2', color: '#dc2626' },
+      low_balance:{ icon: '💰', bg: '#ede9fe', color: '#7c3aed' },
+      info:       { icon: 'ℹ️', bg: '#dbeafe', color: '#2563eb' },
+    };
+    const meta = TYPE_META[n.type] || { icon: '🔔', bg: '#fef3c7', color: '#d97706' };
+
     const el = document.createElement('div');
     el.dataset.notifId = n.id;
     el.className = `notification-item ${n.type}${n.read ? '' : ' unread'}`;
     el.innerHTML = `
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1.5">
-            <p class="notification-title font-semibold text-sm truncate">${escapeHtml(n.title)}</p>
-          </div>
-          <p class="notification-message text-xs mt-0.5 text-gray-600 dark:text-gray-400">${escapeHtml(n.message)}</p>
-          <p class="notification-time text-xs mt-1 text-gray-400">${n.time}</p>
+      <div class="notif-type-icon" style="background:${meta.bg}">${meta.icon}</div>
+      <div class="notif-content">
+        <div class="notif-top">
+          <p class="notification-title">${escapeHtml(n.title)}</p>
+          <button data-close="${n.id}" class="notif-close-btn" aria-label="Fechar">✕</button>
         </div>
-        <button data-close="${n.id}" class="flex-shrink-0 text-gray-400 hover:text-gray-700 text-sm leading-none"
-                aria-label="Fechar">✕</button>
+        <p class="notification-message">${escapeHtml(n.message)}</p>
+        <p class="notification-time">${n.time}</p>
       </div>
+      ${!n.read ? `<span class="notif-unread-dot" style="background:${meta.color}"></span>` : ''}
     `;
 
     el.querySelector('[data-close]').addEventListener('click', e => {
