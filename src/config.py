@@ -24,8 +24,8 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,       # verifica conexão antes de usar
         'pool_recycle': 300,         # recicla conexões a cada 5 min
-        'pool_size': 3,              # conservador para tier gratuito do Neon
-        'max_overflow': 5,
+        'pool_size': 5,
+        'max_overflow': 10,
         'connect_args': {'options': '-c timezone=America/Sao_Paulo'}
     }
 
