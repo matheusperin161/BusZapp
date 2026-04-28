@@ -79,11 +79,16 @@
   top: 0;
   width: 300px;
   height: 100vh;
+  height: 100dvh;
   background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 50%, var(--color-primary-dark) 100%);
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
   transition: left var(--transition-base);
   z-index: 1000;
   padding-top: 80px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar.open { left: 0; }

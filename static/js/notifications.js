@@ -8,7 +8,7 @@ const NOTIF_CONFIG = {
   MAX_STORED:         50,
   EXPIRY_MS:          7 * 24 * 60 * 60 * 1000, // 7 days
   STORAGE_KEY:        'buszapp_notifications',
-  DELAY_INTERVAL_MS:  60_000,
+  DISMISSED_KEY:      'buszapp_dismissed_notifs',
   ENABLE_DESKTOP:     true,
 };
 
@@ -54,9 +54,30 @@ class NotificationManager {
   }
 
   remove(id) {
-    this._items = this._items.filter(n => n.id !== id);
+    const n = this._items.find(item => item.id === id);
+    this._items = this._items.filter(item => item.id !== id);
     this._save();
     this._updateBadge();
+    if (n?.options?.backendId) this._saveDismissed(n.options.backendId);
+  }
+
+  _saveDismissed(backendId) {
+    try {
+      const raw = localStorage.getItem(NOTIF_CONFIG.DISMISSED_KEY);
+      const dismissed = raw ? JSON.parse(raw) : [];
+      if (!dismissed.includes(backendId)) {
+        dismissed.push(backendId);
+        if (dismissed.length > 200) dismissed.shift();
+        localStorage.setItem(NOTIF_CONFIG.DISMISSED_KEY, JSON.stringify(dismissed));
+      }
+    } catch { /* ignore */ }
+  }
+
+  _getDismissed() {
+    try {
+      const raw = localStorage.getItem(NOTIF_CONFIG.DISMISSED_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
   }
 
   markRead(id) {
@@ -178,7 +199,9 @@ async function syncNotificationsFromAPI() {
     const res = await fetch('/api/notifications', { credentials: 'include' });
     if (!res.ok) return;
     const list = await res.json();
+    const dismissed = notificationManager._getDismissed();
     list.forEach(item => {
+      if (dismissed.includes(item.id)) return;
       const alreadyAdded = notificationManager._items.some(n => n.options?.backendId === item.id);
       if (alreadyAdded) return;
       const type = item.title.includes('Recarga') ? 'success'
@@ -203,25 +226,6 @@ function checkLowBalance(balance) {
       'low_balance',
     );
   }
-}
-
-// ── Line Delay Check ──────────────────────────────────────────────────────────
-
-async function checkLineDelays() {
-  try {
-    const res = await fetch('/api/lines', { credentials: 'include' });
-    if (!res.ok) return;
-    const { lines = [] } = await res.json();
-    lines.forEach(line => {
-      if (!line.delay) return;
-      const title = `Atraso na ${line.name}`;
-      const recentlySent = notificationManager.getByType('line_delay')
-        .some(n => n.title === title && Date.now() - n.timestamp < 3_600_000);
-      if (!recentlySent) {
-        notificationManager.add(title, `Motivo: ${line.reason}. Atraso estimado: ${line.delay} min.`, 'line_delay');
-      }
-    });
-  } catch { /* API not available */ }
 }
 
 // ── Dropdown Setup ────────────────────────────────────────────────────────────
@@ -265,8 +269,6 @@ function initNotifications() {
   notificationManager._updateBadge();
   setupNotificationDropdown();
   syncNotificationsFromAPI();
-
-  setInterval(checkLineDelays, NOTIF_CONFIG.DELAY_INTERVAL_MS);
 }
 
 // ── Exports ───────────────────────────────────────────────────────────────────
@@ -281,6 +283,7 @@ window.NotificationSystem = {
   getAll:          ()      => notificationManager.getAll(),
   getUnread:       ()      => notificationManager.getUnread(),
   checkLowBalance,
+  syncFromAPI:     syncNotificationsFromAPI,
   init:            initNotifications,
 };
 

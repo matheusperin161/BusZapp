@@ -81,10 +81,19 @@
     0 0 0 1px rgba(255,255,255,0.06);
 }
 
-@media (max-width: 420px) {
+@media (max-width: 640px) {
   .notif-dropdown {
-    right: -8px;
-    width: calc(100vw - 16px);
+    position: fixed;
+    top: 68px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - 84px);
+    overflow-y: auto;
+  }
+  .notif-list {
+    max-height: calc(100dvh - 200px);
   }
 }
 
