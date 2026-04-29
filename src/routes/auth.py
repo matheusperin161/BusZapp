@@ -386,6 +386,12 @@ def driver_trip_stop():
         return jsonify({'message': 'Nenhum trajeto ativo encontrado'}), 200
 
     trip.ended_at = datetime.utcnow()
+
+    # Remove bus from live map immediately when trip ends
+    from src.models.user import BusLocation
+    if trip.bus_number:
+        BusLocation.query.filter_by(bus_number=trip.bus_number).delete()
+
     db.session.commit()
     return jsonify({'message': 'Trajeto encerrado', 'trip': trip.to_dict()}), 200
 

@@ -139,13 +139,11 @@
       <div id="map" style="height:100%;min-height:420px"></div>
       <!-- Waiting overlay shown until first GPS update -->
       <div id="waitingOverlay" class="waiting-overlay">
-        <div class="text-5xl mb-4">🚌</div>
-        <p class="font-bold text-gray-700 dark:text-white text-lg">Aguardando localização</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center px-6">
-          O ônibus aparecerá assim que o rastreamento estiver ativo.<br>
-          Para testar, rode: <code class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-xs">python simulate_bus.py --line <span id="overlayLine">1</span></code>
+        <div class="text-5xl mb-4" id="overlayIcon">🕐</div>
+        <p class="font-bold text-gray-700 dark:text-white text-lg" id="overlayTitle">Trajeto não iniciado</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center px-6" id="overlayMsg">
+          O motorista ainda não iniciou este trajeto.<br>Aguarde o início para acompanhar em tempo real.
         </p>
-        <p class="text-xs text-gray-400 mt-3">Conectado · aguardando dados GPS…</p>
       </div>
     </div>
     <!-- Stop list -->
@@ -405,12 +403,20 @@
 
   // ── Socket.IO — bus only moves when real GPS data arrives ──────────────────
   async function connectSocket(busId){
-    // Fetch current location immediately so the bus shows if already active
+    // Fetch current location and trip status immediately
     try{
       const res=await fetch(`/api/bus_location/${busId}`,{credentials:'include'});
       if(res.ok){
         const json=await res.json();
-        if(json.found)applyLocationData(json.data);
+        if(json.found){
+          applyLocationData(json.data);
+        } else if(json.trip_active){
+          // Driver started but GPS not received yet
+          document.getElementById('overlayIcon').textContent='📡';
+          document.getElementById('overlayTitle').textContent='Aguardando localização';
+          document.getElementById('overlayMsg').textContent='O motorista iniciou o trajeto. Aguardando dados de GPS…';
+        }
+        // else: trip not started — default overlay message stays
       }
     }catch(e){}
 

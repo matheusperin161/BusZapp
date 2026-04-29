@@ -92,12 +92,25 @@ def update_location():
 
 @tracking_bp.route('/bus_location/<int:bus_id>', methods=['GET'])
 def get_bus_location(bus_id):
-    """Return the last known location for a bus_id."""
-    bus_location = BusLocation.query.filter_by(bus_id=bus_id).first()
-    if not bus_location:
-        return jsonify({'found': False}), 200
+    """Return the last known location for a bus_id and whether its trip is active."""
+    from src.models.user import DriverTrip
+    today = datetime.utcnow().date()
 
     schedule = BusSchedule.query.filter_by(bus_id=bus_id).first()
+    trip_active = False
+    if schedule and schedule.bus_number:
+        active_trip = (
+            DriverTrip.query
+            .filter_by(bus_number=schedule.bus_number, trip_date=today)
+            .filter(DriverTrip.ended_at.is_(None))
+            .first()
+        )
+        trip_active = active_trip is not None
+
+    bus_location = BusLocation.query.filter_by(bus_id=bus_id).first()
+    if not bus_location:
+        return jsonify({'found': False, 'trip_active': trip_active}), 200
+
     route = None
     if schedule:
         route = db.session.get(Route, schedule.route_id)
@@ -114,7 +127,7 @@ def get_bus_location(bus_id):
             data['next_stop'] = first['stop'].to_dict(eta_minutes=first['eta_minutes'])
             data['distance_to_stop'] = first['distance_meters']
 
-    return jsonify({'found': True, 'data': data}), 200
+    return jsonify({'found': True, 'trip_active': trip_active, 'data': data}), 200
 
 
 @tracking_bp.route('/route/<route_number>', methods=['GET'])
