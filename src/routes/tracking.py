@@ -75,18 +75,46 @@ def update_location():
     elif bus_location.route_id:
         route = db.session.get(Route, bus_location.route_id)
 
-    if route and _socketio:
-        stops = find_next_stops_with_eta(
-            data['latitude'], data['longitude'],
-            speed_kmh if speed_kmh > 0 else 30.0, route)
+    if _socketio:
         location_data = bus_location.to_dict()
-        if stops:
-            first = stops[0]
-            location_data['next_stop'] = first['stop'].to_dict(eta_minutes=first['eta_minutes'])
-            location_data['distance_to_stop'] = first['distance_meters']
+        if route:
+            stops = find_next_stops_with_eta(
+                data['latitude'], data['longitude'],
+                speed_kmh if speed_kmh > 0 else 30.0, route)
+            if stops:
+                first = stops[0]
+                location_data['next_stop'] = first['stop'].to_dict(eta_minutes=first['eta_minutes'])
+                location_data['distance_to_stop'] = first['distance_meters']
         _socketio.emit('location_update', location_data, namespace='/tracking')
 
     return jsonify({'success': True, 'data': bus_location.to_dict()}), 200
+
+
+@tracking_bp.route('/bus_location/<int:bus_id>', methods=['GET'])
+def get_bus_location(bus_id):
+    """Return the last known location for a bus_id."""
+    bus_location = BusLocation.query.filter_by(bus_id=bus_id).first()
+    if not bus_location:
+        return jsonify({'found': False}), 200
+
+    schedule = BusSchedule.query.filter_by(bus_id=bus_id).first()
+    route = None
+    if schedule:
+        route = db.session.get(Route, schedule.route_id)
+    elif bus_location.route_id:
+        route = db.session.get(Route, bus_location.route_id)
+
+    data = bus_location.to_dict()
+    if route:
+        stops = find_next_stops_with_eta(
+            bus_location.latitude, bus_location.longitude,
+            bus_location.speed if bus_location.speed > 0 else 30.0, route)
+        if stops:
+            first = stops[0]
+            data['next_stop'] = first['stop'].to_dict(eta_minutes=first['eta_minutes'])
+            data['distance_to_stop'] = first['distance_meters']
+
+    return jsonify({'found': True, 'data': data}), 200
 
 
 @tracking_bp.route('/route/<route_number>', methods=['GET'])

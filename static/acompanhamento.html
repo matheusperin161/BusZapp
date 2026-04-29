@@ -382,33 +382,43 @@
     },50);
   }
 
+  // ── Apply a location_update payload to the UI ─────────────────────────────
+  function applyLocationData(data){
+    document.getElementById('waitingOverlay').style.display='none';
+    document.getElementById('infoStatus').innerHTML=
+      '<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Em Rota';
+    document.getElementById('infoStatus').className='font-bold text-green-600 flex items-center gap-1 mt-1';
+
+    const np={lat:data.latitude,lng:data.longitude};
+    if(busPos)animateTo(busPos,np,()=>{busPos=np;});
+    else{busPos=np;placeBus(np);map.panTo([np.lat,np.lng]);}
+
+    if(data.speed!=null)
+      document.getElementById('infoBusNum').textContent=`${selectedSchedule?.bus_number} · ${data.speed.toFixed(0)} km/h`;
+    if(data.next_stop){
+      document.getElementById('infoNextStop').textContent=data.next_stop.name;
+      if(data.next_stop.eta_minutes!=null)
+        document.getElementById('infoEta').textContent=
+          data.next_stop.eta_minutes<1?'Chegando':`${Math.round(data.next_stop.eta_minutes)} min`;
+    }
+  }
+
   // ── Socket.IO — bus only moves when real GPS data arrives ──────────────────
-  function connectSocket(busId){
+  async function connectSocket(busId){
+    // Fetch current location immediately so the bus shows if already active
+    try{
+      const res=await fetch(`/api/bus_location/${busId}`,{credentials:'include'});
+      if(res.ok){
+        const json=await res.json();
+        if(json.found)applyLocationData(json.data);
+      }
+    }catch(e){}
+
     if(socket)return;
-    socket=io('http://'+document.domain+':'+location.port+'/tracking');
+    socket=io('/tracking');
     socket.on('location_update',(data)=>{
       if(String(data.bus_id)!==String(busId))return;
-
-      // Hide waiting overlay on first update
-      document.getElementById('waitingOverlay').style.display='none';
-
-      // Update status
-      document.getElementById('infoStatus').innerHTML=
-        '<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Em Rota';
-      document.getElementById('infoStatus').className='font-bold text-green-600 flex items-center gap-1 mt-1';
-
-      const np={lat:data.latitude,lng:data.longitude};
-      if(busPos)animateTo(busPos,np,()=>{busPos=np;});
-      else{busPos=np;placeBus(np);map.panTo([np.lat,np.lng]);}
-
-      if(data.speed!=null)
-        document.getElementById('infoBusNum').textContent=`${selectedSchedule?.bus_number} · ${data.speed.toFixed(0)} km/h`;
-      if(data.next_stop){
-        document.getElementById('infoNextStop').textContent=data.next_stop.name;
-        if(data.next_stop.eta_minutes!=null)
-          document.getElementById('infoEta').textContent=
-            data.next_stop.eta_minutes<1?'Chegando':`${Math.round(data.next_stop.eta_minutes)} min`;
-      }
+      applyLocationData(data);
     });
   }
 
