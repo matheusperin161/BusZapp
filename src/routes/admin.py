@@ -432,6 +432,28 @@ def list_all_transactions():
     return jsonify(result)
 
 
+@admin_bp.route('/recharge-chart', methods=['GET'])
+@admin_required
+def recharge_chart():
+    from src.models.user import Transaction, User
+    from sqlalchemy.orm import joinedload
+    from datetime import datetime, timedelta
+    since = datetime.utcnow() - timedelta(days=30)
+    txs = (
+        Transaction.query
+        .options(joinedload(Transaction.user))
+        .filter(Transaction.transaction_type == 'recharge', Transaction.created_at >= since)
+        .order_by(Transaction.created_at.desc())
+        .all()
+    )
+    result = []
+    for tx in txs:
+        item = tx.to_dict()
+        item['username'] = tx.user.username if tx.user else None
+        result.append(item)
+    return jsonify(result)
+
+
 # ── User Cards ────────────────────────────────────────────────────────────────
 
 VALID_CARD_TYPES = ('cidadao', 'normal', 'estudante', 'idoso', 'acompanhante', 'carteiro', 'colaborador', 'pcd')

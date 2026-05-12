@@ -1327,8 +1327,10 @@ let rcChart=null;
 
 async function rcLoad(){
   try{
-    const txs=await API.get('/api/admin/all-transactions');
-    const recharges=txs.filter(t=>t.transaction_type==='recharge');
+    const [recharges,txs]=await Promise.all([
+      API.get('/api/admin/recharge-chart'),
+      API.get('/api/admin/all-transactions'),
+    ]);
     const today=new Date().toISOString().slice(0,10);
     const todayAmt=recharges.filter(t=>t.created_at&&t.created_at.slice(0,10)===today).reduce((s,t)=>s+t.amount,0);
     const totalAmt=recharges.reduce((s,t)=>s+t.amount,0);
@@ -1350,6 +1352,12 @@ function rcBuildChart(recharges){
     const key=d.toISOString().slice(0,10);
     labels.push(d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));
     data.push(recharges.filter(t=>t.created_at&&t.created_at.slice(0,10)===key).reduce((s,t)=>s+t.amount,0));
+  }
+  const wrapper=document.getElementById('rcChart').parentElement;
+  const existing=wrapper.querySelector('.rc-empty');
+  if(existing)existing.remove();
+  if(recharges.length===0){
+    wrapper.insertAdjacentHTML('beforeend','<p class="rc-empty text-center text-gray-400 dark:text-gray-500 py-8">Nenhuma recarga nos últimos 30 dias.</p>');
   }
   const ctx=document.getElementById('rcChart').getContext('2d');
   if(rcChart)rcChart.destroy();
