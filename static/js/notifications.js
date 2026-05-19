@@ -258,11 +258,51 @@ function setupNotificationDropdown() {
   });
 }
 
+// ── Web Push Subscription ─────────────────────────────────────────────────────
+
+function _urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function subscribePush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) return; // already subscribed
+
+    const res = await fetch('/api/push/vapid-public-key');
+    const { publicKey } = await res.json();
+    if (!publicKey) return;
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: _urlBase64ToUint8Array(publicKey),
+    });
+
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(sub.toJSON()),
+    });
+  } catch (e) {
+    // User denied or browser unsupported — silently ignore
+  }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 function initNotifications() {
   if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-    Notification.requestPermission();
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') subscribePush();
+    });
+  } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    subscribePush();
   }
 
   notificationManager._renderAll();

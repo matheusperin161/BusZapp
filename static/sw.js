@@ -100,3 +100,41 @@ self.addEventListener('fetch', (event) => {
     fetch(request).catch(() => caches.match(request))
   );
 });
+
+// ── Push: show notification when app is closed ────────────────────────────────
+self.addEventListener('push', (event) => {
+  let payload = { title: 'BusZapp', body: 'Nova notificação', url: '/dashboard.html', icon: '/static/img/icon-192x192.png' };
+  if (event.data) {
+    try { payload = { ...payload, ...JSON.parse(event.data.text()) }; } catch { /* use defaults */ }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body:    payload.body,
+      icon:    payload.icon,
+      badge:   '/static/img/icon-72x72.png',
+      tag:     'buszapp-push',
+      renotify: true,
+      data:    { url: payload.url },
+      vibrate: [200, 100, 200],
+    })
+  );
+});
+
+// ── NotificationClick: open/focus the app ────────────────────────────────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = event.notification.data?.url || '/dashboard.html';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.navigate(target);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(target);
+    })
+  );
+});
