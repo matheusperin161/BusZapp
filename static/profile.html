@@ -27,15 +27,7 @@
       width: 100px; height: 100px; bottom: -30px; left: -20px;
     }
 
-    .stat-card {
-      background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(249,115,22,0.05));
-      border-left: 4px solid #f59e0b;
-      border-radius: 12px;
-      padding: 16px;
-      transition: all 0.2s;
-    }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.15); }
-    .dark .stat-card { background: rgba(245,158,11,0.06); }
+
 
     .input-modern {
       background-color: #fffbeb;
@@ -296,32 +288,6 @@
       <!-- Sidebar stats -->
       <div id="profileSideCol" class="lg:col-span-1 animate-fade-in-up flex flex-col gap-6">
 
-        <!-- Estatísticas reais -->
-        <div id="profileStatsSection" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
-          <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-5">
-            <i data-feather="bar-chart-2" class="w-5 h-5 text-yellow-500"></i>
-            Estatísticas
-          </h3>
-          <div class="space-y-3" id="statsContainer">
-            <div class="stat-card">
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Viagens este mês</p>
-              <p id="statViagens" class="text-2xl font-bold text-gray-900 dark:text-white">—</p>
-            </div>
-            <div class="stat-card">
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Gasto no mês</p>
-              <p id="statGasto" class="text-xl font-bold text-gray-900 dark:text-white">—</p>
-            </div>
-            <div class="stat-card">
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Linha mais usada</p>
-              <p id="statLinha" class="text-sm font-semibold text-gray-900 dark:text-white truncate">—</p>
-            </div>
-            <div class="stat-card" style="border-left-color:#10b981">
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total recarregado</p>
-              <p id="statRecargas" class="text-xl font-bold text-green-600 dark:text-green-400">—</p>
-            </div>
-          </div>
-        </div>
-
         <!-- Ações rápidas -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6">
           <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
@@ -495,7 +461,6 @@
           if (homeLink) homeLink.href = 'admin.html';
           // Hide user-only sections and expand form to full width
           document.getElementById('profileBalanceCard')?.classList.add('hidden');
-          document.getElementById('profileStatsSection')?.classList.add('hidden');
           document.getElementById('profileSideCol')?.classList.add('hidden');
           const formCol = document.getElementById('profileFormCol');
           if (formCol) {
@@ -507,53 +472,6 @@
         if (typeof feather !== 'undefined') feather.replace();
       } catch (e) {
         window.location.href = 'login.html';
-      }
-    }
-
-    // ── Load statistics ───────────────────────────────────────────────────────
-    async function loadStats() {
-      try {
-        const txs = await API.get('/api/transactions');
-
-        const now = new Date();
-        const thisMonth = now.getMonth();
-        const thisYear  = now.getFullYear();
-
-        const monthly = txs.filter(t => {
-          const d = new Date(t.created_at);
-          return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-        });
-
-        // Viagens (uso) no mês
-        const viagens = monthly.filter(t => t.amount < 0);
-        document.getElementById('statViagens').textContent = viagens.length;
-
-        // Gasto no mês
-        const gasto = viagens.reduce((acc, t) => acc + Math.abs(t.amount), 0);
-        document.getElementById('statGasto').textContent = fmtCurrency(gasto);
-
-        // Linha mais usada — encontra a descrição mais frequente entre usos
-        const allUsage = txs.filter(t => t.amount < 0 && t.description);
-        if (allUsage.length) {
-          const freq = {};
-          allUsage.forEach(t => { freq[t.description] = (freq[t.description] || 0) + 1; });
-          const top = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
-          document.getElementById('statLinha').textContent = top;
-          document.getElementById('statLinha').title = top;
-        } else {
-          document.getElementById('statLinha').textContent = 'Nenhuma';
-        }
-
-        // Total recarregado (all time)
-        const totalRecarga = txs
-          .filter(t => t.amount > 0)
-          .reduce((acc, t) => acc + t.amount, 0);
-        document.getElementById('statRecargas').textContent = fmtCurrency(totalRecarga);
-
-      } catch (e) {
-        ['statViagens', 'statGasto', 'statLinha', 'statRecargas'].forEach(id => {
-          document.getElementById(id).textContent = '—';
-        });
       }
     }
 
@@ -637,7 +555,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       updateThemeIcon();
       loadUserProfile();
-      loadStats();
     });
   </script>
 </body>
