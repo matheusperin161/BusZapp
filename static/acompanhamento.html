@@ -407,7 +407,7 @@
       const res=await fetch(`/api/bus_location/${busId}`,{credentials:'include'});
       if(res.ok){
         const json=await res.json();
-        if(json.found){
+        if(json.found && json.trip_active){
           applyLocationData(json.data);
         } else if(json.trip_active){
           // Driver started but GPS not received yet
