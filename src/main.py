@@ -45,7 +45,11 @@ def create_app(env: str = 'default') -> Flask:
 
     # Create tables
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning('db.create_all() warning: %s', e)
 
     # Serve frontend SPA
     @app.route('/', defaults={'path': ''})
