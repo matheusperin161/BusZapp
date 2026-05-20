@@ -352,7 +352,7 @@ class PushSubscription(db.Model):
     auth       = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    user = db.relationship('User', backref=db.backref('push_subscriptions', lazy='dynamic', cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('push_subscriptions', lazy='dynamic'))
 
 
 class EmailVerificationToken(db.Model):
