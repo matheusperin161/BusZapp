@@ -3,9 +3,15 @@ import json
 import os
 import logging
 
-from pywebpush import webpush, WebPushException
-
 logger = logging.getLogger(__name__)
+
+try:
+    from pywebpush import webpush, WebPushException
+    WEBPUSH_AVAILABLE = True
+except ImportError:
+    logger.warning('pywebpush not installed — Web Push disabled. Run: pip install pywebpush')
+    WEBPUSH_AVAILABLE = False
+    WebPushException = Exception
 
 VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', '')
 VAPID_PUBLIC_KEY  = os.environ.get('VAPID_PUBLIC_KEY', '')
@@ -13,11 +19,9 @@ VAPID_CLAIMS      = {'sub': os.environ.get('VAPID_CLAIMS_EMAIL', 'mailto:admin@b
 
 
 def send_push(subscription, title: str, body: str, url: str = '/dashboard.html', icon: str = '/static/img/icon-192x192.png') -> bool:
-    """Send a single Web Push notification to one subscription dict.
-
-    subscription must have keys: endpoint, keys.p256dh, keys.auth
-    Returns True on success, False on failure (expired/invalid subscriptions are handled silently).
-    """
+    """Send a single Web Push notification. Returns True on success."""
+    if not WEBPUSH_AVAILABLE:
+        return False
     if not VAPID_PRIVATE_KEY:
         logger.warning('VAPID_PRIVATE_KEY not configured — push skipped')
         return False
