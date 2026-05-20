@@ -106,61 +106,13 @@
   </nav>
 
   <!-- Header -->
-  <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-40">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center gap-3 pl-16">
-        <div class="bg-white/20 backdrop-blur p-2 rounded-xl">
-          <i data-feather="bus" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold">BuszApp</h1>
-          <p class="text-xs opacity-80">Painel de Controle</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 relative">
-        <button id="themeToggle" onclick="DarkMode.toggle();updateThemeIcon()"
-                class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema" aria-label="Alternar tema">
-          <i data-feather="moon" class="w-5 h-5"></i>
-        </button>
-
-        <!-- Notifications -->
-        <div class="relative">
-          <button id="notificationButton" class="notif-bell-btn relative" aria-label="Notificações">
-            <i data-feather="bell" class="w-5 h-5"></i>
-            <span id="notificationBadge" class="hidden notif-badge"></span>
-          </button>
-
-          <div id="notificationDropdown" class="hidden notif-dropdown">
-            <!-- Header -->
-            <div class="notif-dropdown-header">
-              <div class="notif-dropdown-title">
-                <div class="notif-dropdown-icon-wrap">
-                  <i data-feather="bell" class="w-4 h-4"></i>
-                </div>
-                <span>Notificações</span>
-              </div>
-              <button id="markAllAsRead" class="notif-mark-read-btn">Marcar lidas</button>
-            </div>
-
-            <!-- List -->
-            <div id="notificationList" class="notif-list">
-              <div id="noNotificationsMessage" class="notif-empty">
-                <div class="notif-empty-icon">🔔</div>
-                <p class="notif-empty-title">Nenhuma notificação</p>
-                <p class="notif-empty-sub">Você está em dia!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button onclick="window.location.href='profile.html'"
-                class="p-2.5 rounded-xl hover:bg-white/20 transition" aria-label="Perfil">
-          <i data-feather="user" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </header>
+  <script src="./js/header.js"
+          data-icon="bus"
+          data-title="BuszApp"
+          data-subtitle="Painel de Controle"
+          data-show-theme="true"
+          data-show-notifications="true"
+          data-show-profile="true"></script>
 
   <!-- Main -->
   <main class="container mx-auto px-4 py-8 max-w-5xl">
@@ -284,7 +236,15 @@
 
     function renderTransactions(txs, container) {
       if (!txs.length) {
-        container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Nenhuma transação encontrada.</p>';
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i data-feather="inbox" class="w-7 h-7 text-gray-400 dark:text-gray-500"></i>
+            </div>
+            <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Nenhuma transação encontrada.</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Suas recargas e usos aparecerão aqui.</p>
+          </div>`;
+        feather.replace();
         return;
       }
       container.innerHTML = txs.map(tx => {

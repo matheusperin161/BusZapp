@@ -126,25 +126,11 @@
   </nav>
 
   <!-- Header -->
-  <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-40">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3 pl-16">
-        <div class="bg-white/20 backdrop-blur p-2 rounded-xl">
-          <i data-feather="star" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold">Avaliação do Serviço</h1>
-          <p class="text-xs opacity-80">Sua opinião é importante para nós</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button id="themeToggle" onclick="DarkMode.toggle(); updateThemeIcon()"
-                class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema" aria-label="Alternar tema">
-          <i data-feather="moon" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </header>
+  <script src="./js/header.js"
+          data-icon="star"
+          data-title="Avaliação do Serviço"
+          data-subtitle="Sua opinião é importante para nós"
+          data-show-theme="true"></script>
 
   <!-- Main -->
   <main class="container mx-auto px-4 py-8 max-w-3xl">
