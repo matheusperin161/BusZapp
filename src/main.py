@@ -31,25 +31,19 @@ def create_app(env: str = 'default') -> Flask:
     from src.routes.bus import bus_bp
     from src.routes.admin import admin_bp
     from src.routes.tracking import tracking_bp, set_socketio, register_socketio_handlers
-    from src.routes.push import push_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(card_bp)
     app.register_blueprint(bus_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(tracking_bp)
-    app.register_blueprint(push_bp)
 
     set_socketio(socketio)
     register_socketio_handlers(socketio)
 
     # Create tables
     with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning('db.create_all() warning: %s', e)
+        db.create_all()
 
     # Serve frontend SPA
     @app.route('/', defaults={'path': ''})

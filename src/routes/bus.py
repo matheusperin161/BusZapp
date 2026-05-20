@@ -253,18 +253,10 @@ def create_incident():
 
     try:
         db.session.commit()
-    except Exception:
+        return jsonify({'message': 'Ocorrência registrada com sucesso', 'incident': incident.to_dict()}), 201
+    except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Erro ao registrar ocorrência'}), 500
-
-    # Send Web Push to all subscribed users (best-effort, non-blocking)
-    try:
-        from src.services.push_service import send_push_to_all
-        send_push_to_all(title, message, url='/dashboard.html')
-    except Exception:
-        pass  # push failure never blocks the incident registration
-
-    return jsonify({'message': 'Ocorrência registrada com sucesso', 'incident': incident.to_dict()}), 201
 
 
 @bus_bp.route('/incidents', methods=['GET'])
