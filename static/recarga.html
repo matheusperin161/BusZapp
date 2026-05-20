@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -7,117 +7,240 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
     <script>
-      tailwind.config = { darkMode: 'class' }
+      tailwind.config = { darkMode: "class" };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <link rel="shortcut icon" href="./img/icone_site.png" type="image/x-icon" />
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#f59e0b">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="BusZapp">
-  <link rel="apple-touch-icon" href="/static/img/icon-192x192.png">
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#f59e0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BusZapp" />
+    <link rel="apple-touch-icon" href="/static/img/icon-192x192.png" />
     <link rel="stylesheet" href="./css/notifications.css" />
     <link rel="stylesheet" href="./css/main.css" />
     <script src="./js/notifications.js"></script>
 
     <style>
       /* ——— Dark overrides ——— */
-      .dark .bg-yellow-50 { background-color: #1a202c; }
-      .dark .bg-yellow-500 { background-color: #2d3748; }
-      .dark .text-white    { color: #f7fafc; }
-      .dark .text-yellow-800 { color: #f7fafc; }
-      .dark .text-yellow-600 { color: #a0aec0; }
-      .dark .text-yellow-700 { color: #cbd5e0; }
-      .dark .bg-white       { background-color: #2d3748; }
-      .dark .border-yellow-200 { border-color: #4a5568; }
-      .dark .bg-yellow-100  { background-color: #4a5568; }
-      .dark .bg-gray-200    { background-color: #4a5568; }
-      .dark .text-gray-700  { color: #f7fafc; }
-      .dark .border-yellow-300 { border-color: #4a5568; }
-      .dark .bg-green-50    { background-color: #4a5568; }
-      .dark .text-green-800 { color: #f7fafc; }
-      .dark .text-green-700 { color: #a0aec0; }
-      .dark .text-green-600 { color: #a0aec0; }
-      .dark .bg-blue-50     { background-color: #4a5568; }
-      .dark .text-blue-800  { color: #f7fafc; }
-      .dark .text-blue-700  { color: #a0aec0; }
-      .dark .text-blue-600  { color: #a0aec0; }
+      .dark .bg-yellow-50 {
+        background-color: #1a202c;
+      }
+      .dark .bg-yellow-500 {
+        background-color: #2d3748;
+      }
+      .dark .text-white {
+        color: #f7fafc;
+      }
+      .dark .text-yellow-800 {
+        color: #f7fafc;
+      }
+      .dark .text-yellow-600 {
+        color: #a0aec0;
+      }
+      .dark .text-yellow-700 {
+        color: #cbd5e0;
+      }
+      .dark .bg-white {
+        background-color: #2d3748;
+      }
+      .dark .border-yellow-200 {
+        border-color: #4a5568;
+      }
+      .dark .bg-yellow-100 {
+        background-color: #4a5568;
+      }
+      .dark .bg-gray-200 {
+        background-color: #4a5568;
+      }
+      .dark .text-gray-700 {
+        color: #f7fafc;
+      }
+      .dark .border-yellow-300 {
+        border-color: #4a5568;
+      }
+      .dark .bg-green-50 {
+        background-color: #4a5568;
+      }
+      .dark .text-green-800 {
+        color: #f7fafc;
+      }
+      .dark .text-green-700 {
+        color: #a0aec0;
+      }
+      .dark .text-green-600 {
+        color: #a0aec0;
+      }
+      .dark .bg-blue-50 {
+        background-color: #4a5568;
+      }
+      .dark .text-blue-800 {
+        color: #f7fafc;
+      }
+      .dark .text-blue-700 {
+        color: #a0aec0;
+      }
+      .dark .text-blue-600 {
+        color: #a0aec0;
+      }
 
       /* ——— Animations ——— */
       @keyframes slideInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to   { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 20px rgba(59,130,246,.5); }
-        50%       { box-shadow: 0 0 40px rgba(59,130,246,.8); }
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+        }
       }
       @keyframes spin-slow {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
       }
       @keyframes bounce {
-        0%, 80%, 100% { transform: scale(1); opacity: .5; }
-        40%            { transform: scale(1.2); opacity: 1; }
+        0%,
+        80%,
+        100% {
+          transform: scale(1);
+          opacity: 0.5;
+        }
+        40% {
+          transform: scale(1.2);
+          opacity: 1;
+        }
       }
-      .animate-slide-in-up { animation: slideInUp .6s ease-out; }
-      .animate-pulse-glow  { animation: pulse-glow 2s ease-in-out infinite; }
-      .animate-spin-slow   { animation: spin-slow 3s linear infinite; }
+      .animate-slide-in-up {
+        animation: slideInUp 0.6s ease-out;
+      }
+      .animate-pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite;
+      }
+      .animate-spin-slow {
+        animation: spin-slow 3s linear infinite;
+      }
 
       /* ——— Visual card chip ——— */
       .bus-card {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+        background: linear-gradient(
+          135deg,
+          #f59e0b 0%,
+          #d97706 50%,
+          #b45309 100%
+        );
         border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(251,191,36,.4), 0 4px 12px rgba(0,0,0,.15);
+        box-shadow:
+          0 20px 60px rgba(251, 191, 36, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
         position: relative;
         overflow: hidden;
         min-height: 190px;
       }
       .bus-card::before {
-        content: '';
+        content: "";
         position: absolute;
-        top: -40px; right: -40px;
-        width: 180px; height: 180px;
-        background: rgba(255,255,255,.08);
+        top: -40px;
+        right: -40px;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, 0.08);
         border-radius: 50%;
       }
       .bus-card::after {
-        content: '';
+        content: "";
         position: absolute;
-        bottom: -60px; left: -30px;
-        width: 200px; height: 200px;
-        background: rgba(255,255,255,.05);
+        bottom: -60px;
+        left: -30px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 50%;
       }
       .dark .bus-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        box-shadow: 0 20px 60px rgba(0,0,0,.5);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
       }
       /* ——— Card type color variants ——— */
-      .bus-card.type-cidadao    { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 20px 60px rgba(251,191,36,.4), 0 4px 12px rgba(0,0,0,.15); }
-      .bus-card.type-normal     { background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); box-shadow: 0 20px 60px rgba(74,222,128,.4), 0 4px 12px rgba(0,0,0,.15); }
-      .bus-card.type-estudante  { background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%); box-shadow: 0 20px 60px rgba(96,165,250,.4), 0 4px 12px rgba(0,0,0,.15); }
-      .bus-card.type-idoso      { background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%); box-shadow: 0 20px 60px rgba(251,146,60,.4), 0 4px 12px rgba(0,0,0,.15); }
-      .bus-card.type-acompanhante { background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%); box-shadow: 0 20px 60px rgba(192,132,252,.4), 0 4px 12px rgba(0,0,0,.15); }
-      .bus-card.type-carteiro   { background: linear-gradient(135deg, #f87171 0%, #dc2626 100%); box-shadow: 0 20px 60px rgba(248,113,113,.4), 0 4px 12px rgba(0,0,0,.15); }
-      .bus-card.type-colaborador { background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%); box-shadow: 0 20px 60px rgba(34,211,238,.4), 0 4px 12px rgba(0,0,0,.15); }
-      .bus-card.type-pcd        { background: linear-gradient(135deg, #f472b6 0%, #db2777 100%); box-shadow: 0 20px 60px rgba(244,114,182,.4), 0 4px 12px rgba(0,0,0,.15); }
+      .bus-card.type-cidadao {
+        background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+        box-shadow:
+          0 20px 60px rgba(251, 191, 36, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .bus-card.type-normal {
+        background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+        box-shadow:
+          0 20px 60px rgba(74, 222, 128, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .bus-card.type-estudante {
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+        box-shadow:
+          0 20px 60px rgba(96, 165, 250, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .bus-card.type-idoso {
+        background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        box-shadow:
+          0 20px 60px rgba(251, 146, 60, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .bus-card.type-acompanhante {
+        background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%);
+        box-shadow:
+          0 20px 60px rgba(192, 132, 252, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .bus-card.type-carteiro {
+        background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+        box-shadow:
+          0 20px 60px rgba(248, 113, 113, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .bus-card.type-colaborador {
+        background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%);
+        box-shadow:
+          0 20px 60px rgba(34, 211, 238, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .bus-card.type-pcd {
+        background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);
+        box-shadow:
+          0 20px 60px rgba(244, 114, 182, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
 
       .chip {
-        width: 44px; height: 34px;
+        width: 44px;
+        height: 34px;
         background: linear-gradient(135deg, #fef3c7, #fcd34d);
         border-radius: 6px;
         position: relative;
       }
       .chip::before {
-        content: '';
+        content: "";
         position: absolute;
-        top: 50%; left: 50%;
+        top: 50%;
+        left: 50%;
         transform: translate(-50%, -50%);
-        width: 22px; height: 22px;
-        border: 2px solid rgba(180,130,0,.4);
+        width: 22px;
+        height: 22px;
+        border: 2px solid rgba(180, 130, 0, 0.4);
         border-radius: 3px;
       }
 
@@ -127,95 +250,130 @@
         border-radius: 16px;
         padding: 24px;
         cursor: pointer;
-        transition: all .3s ease;
+        transition: all 0.3s ease;
         background: white;
         text-align: center;
       }
-      .dark .option-card { background: #2d3748; }
+      .dark .option-card {
+        background: #2d3748;
+      }
       .option-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 16px 32px rgba(0,0,0,.12);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
         border-color: #f59e0b;
       }
-      .option-card.recharge-card:hover { border-color: #10b981; }
-      .option-card.register-card:hover  { border-color: #6366f1; }
+      .option-card.recharge-card:hover {
+        border-color: #10b981;
+      }
+      .option-card.register-card:hover {
+        border-color: #6366f1;
+      }
 
       .option-icon {
-        width: 60px; height: 60px;
+        width: 60px;
+        height: 60px;
         border-radius: 16px;
-        display: flex; align-items: center; justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin: 0 auto 12px;
-        transition: transform .3s;
+        transition: transform 0.3s;
       }
-      .option-card:hover .option-icon { transform: scale(1.1); }
+      .option-card:hover .option-icon {
+        transform: scale(1.1);
+      }
 
       /* ——— Inputs ——— */
       .input-modern {
-        background-color: rgba(255,255,255,.95);
+        background-color: rgba(255, 255, 255, 0.95);
         border: 2px solid #fef3c7;
         border-radius: 12px;
         padding: 12px 16px;
         font-size: 16px;
-        transition: all .3s ease;
+        transition: all 0.3s ease;
         width: 100%;
       }
       .input-modern:focus {
         outline: none;
         border-color: #f59e0b;
-        box-shadow: 0 0 0 3px rgba(245,158,11,.1);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
       }
       .dark .input-modern {
-        background-color: rgba(45,55,72,.8);
+        background-color: rgba(45, 55, 72, 0.8);
         border-color: #4a5568;
         color: #f7fafc;
       }
       .dark .input-modern:focus {
         border-color: #f59e0b;
-        box-shadow: 0 0 0 3px rgba(245,158,11,.2);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
       }
 
       /* ——— Amount buttons ——— */
       .btn-amount {
-        background-color: rgba(255,255,255,.9);
+        background-color: rgba(255, 255, 255, 0.9);
         border: 2px solid transparent;
         border-radius: 12px;
         padding: 12px 16px;
         font-weight: 600;
-        transition: all .3s ease;
+        transition: all 0.3s ease;
         cursor: pointer;
       }
       .btn-amount:hover {
         background-color: #fef3c7;
         border-color: #f59e0b;
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(245,158,11,.2);
+        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.2);
       }
       .btn-amount.active {
         background-color: #f59e0b;
         color: white;
         border-color: #d97706;
-        box-shadow: 0 8px 16px rgba(245,158,11,.3);
+        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
       }
-      .dark .btn-amount { background-color: rgba(45,55,72,.8); color: #f7fafc; }
-      .dark .btn-amount:hover { background-color: #4a5568; border-color: #f59e0b; }
-      .dark .btn-amount.active { background-color: #f59e0b; color: #1a202c; }
+      .dark .btn-amount {
+        background-color: rgba(45, 55, 72, 0.8);
+        color: #f7fafc;
+      }
+      .dark .btn-amount:hover {
+        background-color: #4a5568;
+        border-color: #f59e0b;
+      }
+      .dark .btn-amount.active {
+        background-color: #f59e0b;
+        color: #1a202c;
+      }
 
       /* ——— Payment method buttons ——— */
       .btn-payment {
-        background-color: rgba(255,255,255,.9);
+        background-color: rgba(255, 255, 255, 0.9);
         border: 2px solid transparent;
         border-radius: 12px;
         padding: 16px;
         font-weight: 600;
-        transition: all .3s ease;
+        transition: all 0.3s ease;
         cursor: pointer;
         text-align: center;
       }
-      .btn-payment:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,.1); }
-      .btn-payment.active { border-color: #f59e0b; background-color: #fef3c7; box-shadow: 0 12px 24px rgba(245,158,11,.3); }
-      .dark .btn-payment { background-color: rgba(45,55,72,.8); color: #f7fafc; }
-      .dark .btn-payment:hover { background-color: #4a5568; }
-      .dark .btn-payment.active { border-color: #f59e0b; background-color: rgba(245,158,11,.2); }
+      .btn-payment:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+      .btn-payment.active {
+        border-color: #f59e0b;
+        background-color: #fef3c7;
+        box-shadow: 0 12px 24px rgba(245, 158, 11, 0.3);
+      }
+      .dark .btn-payment {
+        background-color: rgba(45, 55, 72, 0.8);
+        color: #f7fafc;
+      }
+      .dark .btn-payment:hover {
+        background-color: #4a5568;
+      }
+      .dark .btn-payment.active {
+        border-color: #f59e0b;
+        background-color: rgba(245, 158, 11, 0.2);
+      }
 
       /* ——— Card-type selector ——— */
       .type-btn {
@@ -223,24 +381,64 @@
         border-radius: 12px;
         padding: 10px 8px;
         cursor: pointer;
-        transition: all .3s ease;
+        transition: all 0.3s ease;
         background: white;
         text-align: center;
         font-size: 13px;
         font-weight: 600;
       }
-      .dark .type-btn { background: #374151; border-color: #4b5563; color: #f9fafb; }
-      .type-btn:hover { transform: translateY(-2px); }
+      .dark .type-btn {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+      }
+      .type-btn:hover {
+        transform: translateY(-2px);
+      }
       /* per-type active colors */
-      .type-btn[data-type="cidadao"].active    { border-color: #d97706; background-color: #fef3c7; color: #92400e; }
-      .type-btn[data-type="normal"].active     { border-color: #16a34a; background-color: #dcfce7; color: #14532d; }
-      .type-btn[data-type="estudante"].active  { border-color: #2563eb; background-color: #dbeafe; color: #1e3a8a; }
-      .type-btn[data-type="idoso"].active      { border-color: #ea580c; background-color: #ffedd5; color: #7c2d12; }
-      .type-btn[data-type="acompanhante"].active { border-color: #9333ea; background-color: #f3e8ff; color: #581c87; }
-      .type-btn[data-type="carteiro"].active   { border-color: #dc2626; background-color: #fee2e2; color: #7f1d1d; }
-      .type-btn[data-type="colaborador"].active { border-color: #0891b2; background-color: #cffafe; color: #164e63; }
-      .type-btn[data-type="pcd"].active        { border-color: #db2777; background-color: #fce7f3; color: #831843; }
-      .dark .type-btn.active { opacity: .9; }
+      .type-btn[data-type="cidadao"].active {
+        border-color: #d97706;
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+      .type-btn[data-type="normal"].active {
+        border-color: #16a34a;
+        background-color: #dcfce7;
+        color: #14532d;
+      }
+      .type-btn[data-type="estudante"].active {
+        border-color: #2563eb;
+        background-color: #dbeafe;
+        color: #1e3a8a;
+      }
+      .type-btn[data-type="idoso"].active {
+        border-color: #ea580c;
+        background-color: #ffedd5;
+        color: #7c2d12;
+      }
+      .type-btn[data-type="acompanhante"].active {
+        border-color: #9333ea;
+        background-color: #f3e8ff;
+        color: #581c87;
+      }
+      .type-btn[data-type="carteiro"].active {
+        border-color: #dc2626;
+        background-color: #fee2e2;
+        color: #7f1d1d;
+      }
+      .type-btn[data-type="colaborador"].active {
+        border-color: #0891b2;
+        background-color: #cffafe;
+        color: #164e63;
+      }
+      .type-btn[data-type="pcd"].active {
+        border-color: #db2777;
+        background-color: #fce7f3;
+        color: #831843;
+      }
+      .dark .type-btn.active {
+        opacity: 0.9;
+      }
 
       /* ——— Primary buttons ——— */
       .btn-finalize {
@@ -252,16 +450,21 @@
         font-weight: 700;
         font-size: 16px;
         cursor: pointer;
-        transition: all .3s ease;
-        box-shadow: 0 8px 16px rgba(245,158,11,.3);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
       }
-      .btn-finalize:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(245,158,11,.4); }
-      .btn-finalize:active { transform: translateY(0); }
+      .btn-finalize:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(245, 158, 11, 0.4);
+      }
+      .btn-finalize:active {
+        transform: translateY(0);
+      }
 
       .btn-indigo {
         background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
@@ -272,22 +475,30 @@
         font-weight: 700;
         font-size: 16px;
         cursor: pointer;
-        transition: all .3s ease;
-        box-shadow: 0 8px 16px rgba(99,102,241,.3);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
       }
-      .btn-indigo:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(99,102,241,.4); }
+      .btn-indigo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
+      }
 
       /* ——— Processing overlay ——— */
       .processing-overlay {
-        position: fixed; top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,.7);
-        display: flex; align-items: center; justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         z-index: 9999;
         backdrop-filter: blur(4px);
       }
@@ -296,164 +507,371 @@
         border-radius: 20px;
         padding: 40px;
         text-align: center;
-        box-shadow: 0 30px 60px rgba(0,0,0,.3);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
         max-width: 400px;
-        animation: slideInUp .4s ease-out;
+        animation: slideInUp 0.4s ease-out;
       }
-      .dark .processing-card { background: #2d3748; color: #f7fafc; }
-      .processing-spinner { width: 80px; height: 80px; margin: 0 auto 20px; }
-      .processing-spinner svg { width: 100%; height: 100%; animation: spin-slow 3s linear infinite; }
-      .processing-dots { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+      .dark .processing-card {
+        background: #2d3748;
+        color: #f7fafc;
+      }
+      .processing-spinner {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+      }
+      .processing-spinner svg {
+        width: 100%;
+        height: 100%;
+        animation: spin-slow 3s linear infinite;
+      }
+      .processing-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 20px;
+      }
       .processing-dot {
-        width: 12px; height: 12px; border-radius: 50%;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
         background-color: #f59e0b;
         animation: bounce 1.4s infinite;
       }
-      .processing-dot:nth-child(1) { animation-delay: 0s; }
-      .processing-dot:nth-child(2) { animation-delay: .2s; }
-      .processing-dot:nth-child(3) { animation-delay: .4s; }
+      .processing-dot:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .processing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .processing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
 
       /* ——— Back link ——— */
       .back-link {
-        display: inline-flex; align-items: center; gap: 6px;
-        color: #6b7280; font-size: 14px; font-weight: 500;
-        cursor: pointer; transition: color .2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.2s;
         margin-bottom: 20px;
-        background: none; border: none;
+        background: none;
+        border: none;
       }
-      .back-link:hover { color: #f59e0b; }
+      .back-link:hover {
+        color: #f59e0b;
+      }
 
       /* ——— Credit Card Modal ——— */
       #creditCardModal {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,.75);
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
         backdrop-filter: blur(8px);
-        display: flex; align-items: center; justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         z-index: 10000;
         padding: 16px;
       }
-      #creditCardModal.hidden { display: none; }
+      #creditCardModal.hidden {
+        display: none;
+      }
       .cc-modal-box {
         background: #1a1f2e;
         border-radius: 24px;
         padding: 32px 28px 28px;
-        width: 100%; max-width: 420px;
-        box-shadow: 0 40px 80px rgba(0,0,0,.6);
-        animation: slideInUp .4s ease-out;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+        animation: slideInUp 0.4s ease-out;
       }
       .cc-scene {
-        width: 100%; max-width: 360px; height: 210px;
+        width: 100%;
+        max-width: 360px;
+        height: 210px;
         margin: 0 auto 28px;
         perspective: 1000px;
       }
       .cc-card {
-        width: 100%; height: 100%;
+        width: 100%;
+        height: 100%;
         position: relative;
         transform-style: preserve-3d;
-        transition: transform .7s cubic-bezier(.4,0,.2,1);
+        transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         border-radius: 18px;
       }
-      .cc-card.flipped { transform: rotateY(180deg); }
-      .cc-front, .cc-back {
-        position: absolute; inset: 0;
+      .cc-card.flipped {
+        transform: rotateY(180deg);
+      }
+      .cc-front,
+      .cc-back {
+        position: absolute;
+        inset: 0;
         border-radius: 18px;
         backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
         overflow: hidden;
       }
       .cc-front {
-        background: linear-gradient(135deg, #1a237e 0%, #283593 40%, #1565c0 100%);
+        background: linear-gradient(
+          135deg,
+          #1a237e 0%,
+          #283593 40%,
+          #1565c0 100%
+        );
         padding: 24px;
-        display: flex; flex-direction: column; justify-content: space-between;
-        box-shadow: 0 20px 50px rgba(21,101,192,.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 20px 50px rgba(21, 101, 192, 0.5);
       }
       .cc-front::before {
-        content: ''; position: absolute;
-        top: -60px; right: -60px;
-        width: 220px; height: 220px;
-        background: rgba(255,255,255,.06); border-radius: 50%;
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 220px;
+        height: 220px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
       }
       .cc-front::after {
-        content: ''; position: absolute;
-        bottom: -80px; left: -40px;
-        width: 240px; height: 240px;
-        background: rgba(255,255,255,.04); border-radius: 50%;
+        content: "";
+        position: absolute;
+        bottom: -80px;
+        left: -40px;
+        width: 240px;
+        height: 240px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 50%;
       }
       .cc-back {
-        background: linear-gradient(135deg, #1a1f2e 0%, #263043 100%);
+        background: linear-gradient(
+          135deg,
+          #1a237e 0%,
+          #283593 40%,
+          #1565c0 100%
+        );
         transform: rotateY(180deg);
-        box-shadow: 0 20px 50px rgba(0,0,0,.5);
+        box-shadow: 0 20px 50px rgba(21, 101, 192, 0.5);
       }
-      .cc-back-stripe { width: 100%; height: 48px; background: #0a0e18; margin-top: 36px; }
+      .cc-back-stripe {
+        width: 100%;
+        height: 48px;
+        background: #0a0e18;
+        margin-top: 36px;
+      }
       .cc-back-cvv-area {
-        display: flex; align-items: center; justify-content: flex-end;
-        padding: 12px 20px; gap: 12px; margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 12px 20px;
+        gap: 12px;
+        margin-top: 12px;
       }
-      .cc-back-cvv-label { color: rgba(255,255,255,.5); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+      .cc-back-cvv-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
       .cc-back-cvv-value {
-        background: white; color: #1a1f2e;
-        font-family: monospace; font-size: 18px; font-weight: 700;
-        letter-spacing: 4px; border-radius: 6px;
-        padding: 6px 14px; min-width: 70px; text-align: center;
+        background: white;
+        color: #1a1f2e;
+        font-family: monospace;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        border-radius: 6px;
+        padding: 6px 14px;
+        min-width: 70px;
+        text-align: center;
       }
-      .cc-back-logo { position: absolute; bottom: 18px; right: 20px; font-size: 11px; color: rgba(255,255,255,.3); font-style: italic; }
-      .cc-chip { width: 42px; height: 32px; background: linear-gradient(135deg, #ffd700, #b8860b); border-radius: 6px; position: relative; }
-      .cc-chip::after { content: ''; position: absolute; inset: 6px; border: 1.5px solid rgba(0,0,0,.3); border-radius: 3px; }
-      .cc-network { position: absolute; top: 20px; right: 20px; display: flex; }
-      .cc-network span { width: 30px; height: 30px; border-radius: 50%; display: inline-block; opacity: .85; }
-      .cc-network span:first-child { background: #eb001b; margin-right: -10px; }
-      .cc-network span:last-child  { background: #f79e1b; }
-      .cc-number { font-family: 'Courier New', monospace; font-size: 20px; font-weight: 700; color: white; letter-spacing: 3px; text-shadow: 0 2px 4px rgba(0,0,0,.3); }
-      .cc-row { display: flex; justify-content: space-between; align-items: flex-end; }
-      .cc-label { color: rgba(255,255,255,.55); font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 3px; }
-      .cc-value { color: white; font-size: 13px; font-weight: 600; letter-spacing: .5px; }
-      .cc-step { display: none; }
-      .cc-step.active { display: block; }
+      .cc-back-logo {
+        position: absolute;
+        bottom: 18px;
+        right: 20px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.3);
+        font-style: italic;
+      }
+      .cc-chip {
+        width: 42px;
+        height: 32px;
+        background: linear-gradient(135deg, #ffd700, #b8860b);
+        border-radius: 6px;
+        position: relative;
+      }
+      .cc-chip::after {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        border: 1.5px solid rgba(0, 0, 0, 0.3);
+        border-radius: 3px;
+      }
+      .cc-network {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+      }
+      .cc-network span {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-block;
+        opacity: 0.85;
+      }
+      .cc-network span:first-child {
+        background: #eb001b;
+        margin-right: -10px;
+      }
+      .cc-network span:last-child {
+        background: #f79e1b;
+      }
+      .cc-number {
+        font-family: "Courier New", monospace;
+        font-size: 20px;
+        font-weight: 700;
+        color: white;
+        letter-spacing: 3px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      .cc-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+      .cc-label {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 3px;
+      }
+      .cc-value {
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .cc-step {
+        display: none;
+      }
+      .cc-step.active {
+        display: block;
+      }
       .cc-input {
         width: 100%;
-        background: rgba(255,255,255,.08);
-        border: 1.5px solid rgba(255,255,255,.15);
-        border-radius: 10px; padding: 12px 16px;
-        color: white; font-size: 15px; outline: none;
-        transition: border-color .2s, box-shadow .2s; margin-top: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: white;
+        font-size: 15px;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        margin-top: 6px;
       }
-      .cc-input::placeholder { color: rgba(255,255,255,.3); }
-      .cc-input:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.15); }
-      .cc-label-text { color: rgba(255,255,255,.7); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; }
+      .cc-input::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+      }
+      .cc-input:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+      }
+      .cc-label-text {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
       .cc-btn-primary {
-        width: 100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        color: white; border: none; border-radius: 12px; padding: 14px;
-        font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 20px;
-        transition: all .2s; box-shadow: 0 6px 20px rgba(59,130,246,.4);
+        width: 100%;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: all 0.2s;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
       }
-      .cc-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(59,130,246,.5); }
+      .cc-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(59, 130, 246, 0.5);
+      }
       .cc-btn-secondary {
-        width: 100%; background: transparent; color: rgba(255,255,255,.5);
-        border: 1.5px solid rgba(255,255,255,.15); border-radius: 12px;
-        padding: 11px; font-size: 14px; cursor: pointer; margin-top: 10px; transition: all .2s;
+        width: 100%;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.5);
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 11px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.2s;
       }
-      .cc-btn-secondary:hover { border-color: rgba(255,255,255,.4); color: white; }
-      .cc-title { color: white; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-      .cc-subtitle { color: rgba(255,255,255,.5); font-size: 13px; margin-bottom: 20px; }
-      .cc-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .cc-btn-secondary:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        color: white;
+      }
+      .cc-title {
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .cc-subtitle {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
+      .cc-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
       .saved-card-chip {
-        display: flex; align-items: center; gap: 10px;
-        background: rgba(16,185,129,.12);
-        border: 1.5px solid rgba(16,185,129,.3);
-        border-radius: 12px; padding: 12px 16px;
-        cursor: pointer; transition: all .2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1.5px solid rgba(16, 185, 129, 0.3);
+        border-radius: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.2s;
       }
-      .saved-card-chip:hover { background: rgba(16,185,129,.2); }
+      .saved-card-chip:hover {
+        background: rgba(16, 185, 129, 0.2);
+      }
       .saved-card-chip .sc-icon {
-        width: 36px; height: 36px;
-        background: rgba(16,185,129,.2);
-        border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: rgba(16, 185, 129, 0.2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     </style>
   </head>
 
   <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen">
-
     <!-- Sidebar Overlay -->
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
@@ -463,7 +881,11 @@
     </button>
 
     <!-- Sidebar -->
-    <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
+    <nav
+      class="sidebar flex flex-col pb-4"
+      id="sidebar"
+      aria-label="Navegação principal"
+    >
       <a href="dashboard.html" class="sidebar-item gap-3">
         <i data-feather="home"></i><span>Página Inicial</span>
       </a>
@@ -487,7 +909,9 @@
     </nav>
 
     <!-- Header -->
-    <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-lg sticky top-0 z-40">
+    <header
+      class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-lg sticky top-0 z-40"
+    >
       <div class="container mx-auto px-4 py-4 flex items-center gap-3 pl-16">
         <div class="flex items-center space-x-3">
           <div class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
@@ -498,32 +922,37 @@
             <p class="text-xs opacity-90">Gerencie seu cartão de transporte</p>
           </div>
         </div>
-        <div class="ml-auto">
-          <button onclick="window.location.href='dashboard.html'" class="p-2 rounded-full hover:bg-white/20 transition" title="Voltar">
-            <i data-feather="arrow-left" class="w-6 h-6"></i>
-          </button>
-        </div>
       </div>
     </header>
 
     <!-- Main -->
     <main class="container mx-auto px-4 py-8 max-w-xl">
-
       <!-- ════════════════════════════════════════ -->
       <!-- VIEW 1 – Card overview + option buttons  -->
       <!-- ════════════════════════════════════════ -->
       <div id="viewHome" class="animate-slide-in-up">
-
         <!-- Visual bus card -->
         <div class="bus-card p-6 mb-6">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <p class="text-white/70 text-xs font-medium uppercase tracking-widest">Cartão de Transporte</p>
-              <p id="cardTypeDisplay" class="text-white font-bold text-lg mt-1">Normal</p>
+              <p
+                class="text-white/70 text-xs font-medium uppercase tracking-widest"
+              >
+                Cartão de Transporte
+              </p>
+              <p id="cardTypeDisplay" class="text-white font-bold text-lg mt-1">
+                Normal
+              </p>
             </div>
             <div class="text-right">
-              <p class="text-white/70 text-xs font-medium uppercase tracking-widest">Saldo</p>
-              <p id="currentBalance" class="text-white font-bold text-2xl">Carregando...</p>
+              <p
+                class="text-white/70 text-xs font-medium uppercase tracking-widest"
+              >
+                Saldo
+              </p>
+              <p id="currentBalance" class="text-white font-bold text-2xl">
+                Carregando...
+              </p>
             </div>
           </div>
 
@@ -532,47 +961,83 @@
           <div class="flex items-end justify-between">
             <div>
               <p class="text-white/60 text-xs mb-1">Número do Cartão</p>
-              <p id="cardNumberDisplay" class="text-white font-mono text-lg tracking-widest">**** **** **** 1234</p>
+              <p
+                id="cardNumberDisplay"
+                class="text-white font-mono text-lg tracking-widest"
+              >
+                **** **** **** 1234
+              </p>
             </div>
             <div class="text-right">
               <p class="text-white/60 text-xs mb-1">Titular</p>
-              <p id="cardHolderDisplay" class="text-white font-semibold text-sm">Usuário</p>
+              <p
+                id="cardHolderDisplay"
+                class="text-white font-semibold text-sm"
+              >
+                Usuário
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Two action options -->
         <div class="grid grid-cols-2 gap-4 mb-6">
-
           <!-- Register card -->
-          <div class="option-card register-card" onclick="showView('viewRegister')">
+          <div
+            class="option-card register-card"
+            onclick="showView('viewRegister')"
+          >
             <div class="option-icon bg-indigo-100">
               <i data-feather="plus-circle" class="w-7 h-7 text-indigo-600"></i>
             </div>
-            <p class="font-bold text-gray-900 dark:text-white text-base">Cadastrar Cartão</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Registrar novo cartão</p>
+            <p class="font-bold text-gray-900 dark:text-white text-base">
+              Cadastrar Cartão
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Registrar novo cartão
+            </p>
           </div>
 
           <!-- Recharge -->
-          <div class="option-card recharge-card" onclick="showView('viewRecharge')">
+          <div
+            class="option-card recharge-card"
+            onclick="showView('viewRecharge')"
+          >
             <div class="option-icon bg-green-100">
               <i data-feather="refresh-cw" class="w-7 h-7 text-green-600"></i>
             </div>
-            <p class="font-bold text-gray-900 dark:text-white text-base">Recarregar</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Adicionar saldo ao cartão</p>
+            <p class="font-bold text-gray-900 dark:text-white text-base">
+              Recarregar
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Adicionar saldo ao cartão
+            </p>
           </div>
-          
         </div>
 
         <!-- Last recharge info -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 flex items-center justify-between">
+        <div
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 flex items-center justify-between"
+        >
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
-              <i data-feather="clock" class="w-5 h-5 text-yellow-600 dark:text-yellow-400"></i>
+            <div
+              class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center"
+            >
+              <i
+                data-feather="clock"
+                class="w-5 h-5 text-yellow-600 dark:text-yellow-400"
+              ></i>
             </div>
             <div>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Última Recarga</p>
-              <p id="lastRechargeInfo" class="font-semibold text-gray-900 dark:text-white text-sm">Carregando...</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Última Recarga
+              </p>
+              <p
+                id="lastRechargeInfo"
+                class="font-semibold text-gray-900 dark:text-white text-sm"
+              >
+                Carregando...
+              </p>
             </div>
           </div>
           <i data-feather="chevron-right" class="w-5 h-5 text-gray-400"></i>
@@ -583,76 +1048,145 @@
       <!-- VIEW 2 – Recharge flow                   -->
       <!-- ════════════════════════════════════════ -->
       <div id="viewRecharge" class="hidden animate-slide-in-up">
-
         <!-- back -->
         <button class="back-link" onclick="showView('viewHome')">
           <i data-feather="arrow-left" class="w-4 h-4"></i> Voltar
         </button>
 
         <!-- Header card -->
-        <div class="bg-gradient-to-r from-green-400 to-emerald-600 rounded-2xl p-6 mb-6 text-white">
+        <div
+          class="bg-gradient-to-r from-green-400 to-emerald-600 rounded-2xl p-6 mb-6 text-white"
+        >
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+            <div
+              class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center"
+            >
               <i data-feather="refresh-cw" class="w-6 h-6"></i>
             </div>
             <div>
               <h2 class="text-xl font-bold">Recarregar Cartão</h2>
-              <p class="text-white/80 text-sm">Escolha o valor e a forma de pagamento</p>
+              <p class="text-white/80 text-sm">
+                Escolha o valor e a forma de pagamento
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Amount selection -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-5">
-          <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <i data-feather="dollar-sign" class="w-5 h-5 text-yellow-500"></i> Valor da Recarga
+          <h3
+            class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
+          >
+            <i data-feather="dollar-sign" class="w-5 h-5 text-yellow-500"></i>
+            Valor da Recarga
           </h3>
           <div class="grid grid-cols-2 gap-3 mb-4">
-            <button onclick="selectAmount(10)"  class="btn-amount amount-btn">R$ 10</button>
-            <button onclick="selectAmount(20)"  class="btn-amount amount-btn">R$ 20</button>
-            <button onclick="selectAmount(50)"  class="btn-amount amount-btn">R$ 50</button>
-            <button onclick="showCustomAmount()" class="btn-amount amount-btn">Outro</button>
+            <button onclick="selectAmount(10)" class="btn-amount amount-btn">
+              R$ 10
+            </button>
+            <button onclick="selectAmount(20)" class="btn-amount amount-btn">
+              R$ 20
+            </button>
+            <button onclick="selectAmount(50)" class="btn-amount amount-btn">
+              R$ 50
+            </button>
+            <button onclick="showCustomAmount()" class="btn-amount amount-btn">
+              Outro
+            </button>
           </div>
           <div id="custom-amount-div" class="hidden mb-4">
-            <input type="number" id="custom-amount" class="input-modern" placeholder="Digite o valor desejado" min="1" step="0.01" />
+            <input
+              type="number"
+              id="custom-amount"
+              class="input-modern"
+              placeholder="Digite o valor desejado"
+              min="1"
+              step="0.01"
+            />
           </div>
-          <div class="bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4">
-            <p class="text-gray-700 dark:text-white text-sm mb-1">Valor selecionado:</p>
-            <p class="text-3xl font-bold text-yellow-700 dark:text-yellow-400">R$ <span id="selected-amount">0,00</span></p>
+          <div
+            class="bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4"
+          >
+            <p class="text-gray-700 dark:text-white text-sm mb-1">
+              Valor selecionado:
+            </p>
+            <p class="text-3xl font-bold text-yellow-700 dark:text-yellow-400">
+              R$ <span id="selected-amount">0,00</span>
+            </p>
           </div>
         </div>
 
         <!-- Payment method -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-5">
-          <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <i data-feather="credit-card" class="w-5 h-5 text-yellow-500"></i> Forma de Pagamento
+          <h3
+            class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
+          >
+            <i data-feather="credit-card" class="w-5 h-5 text-yellow-500"></i>
+            Forma de Pagamento
           </h3>
           <div class="grid grid-cols-2 gap-3 mb-5">
-            <button id="cartao-button" onclick="selectPaymentMethod('cartao')" class="btn-payment payment-method-btn">
+            <button
+              id="cartao-button"
+              onclick="selectPaymentMethod('cartao')"
+              class="btn-payment payment-method-btn"
+            >
               <i data-feather="credit-card" class="w-7 h-7 mx-auto mb-1"></i>
-              <div class="font-semibold text-gray-900 dark:text-white text-sm">Cartão</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400">Déb. / Créd.</div>
+              <div class="font-semibold text-gray-900 dark:text-white text-sm">
+                Cartão
+              </div>
+              <div class="text-xs text-gray-600 dark:text-gray-400">
+                Déb. / Créd.
+              </div>
             </button>
-            <button id="pix-button" onclick="selectPaymentMethod('pix')" class="btn-payment payment-method-btn">
+            <button
+              id="pix-button"
+              onclick="selectPaymentMethod('pix')"
+              class="btn-payment payment-method-btn"
+            >
               <i data-feather="smartphone" class="w-7 h-7 mx-auto mb-1"></i>
-              <div class="font-semibold text-gray-900 dark:text-white text-sm">PIX</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400">Instantâneo</div>
+              <div class="font-semibold text-gray-900 dark:text-white text-sm">
+                PIX
+              </div>
+              <div class="text-xs text-gray-600 dark:text-gray-400">
+                Instantâneo
+              </div>
             </button>
           </div>
 
           <!-- Card fields: shows saved card or prompt to add -->
           <div id="cartao-fields" class="hidden mb-4">
-            <div id="saved-card-indicator" class="hidden saved-card-chip" onclick="openCardModal()">
+            <div
+              id="saved-card-indicator"
+              class="hidden saved-card-chip"
+              onclick="openCardModal()"
+            >
               <div class="sc-icon">
-                <i data-feather="credit-card" class="w-5 h-5 text-emerald-400"></i>
+                <i
+                  data-feather="credit-card"
+                  class="w-5 h-5 text-emerald-400"
+                ></i>
               </div>
               <div class="flex-1">
-                <p class="font-semibold text-gray-900 dark:text-white text-sm" id="saved-card-label">Cartão •••• 1234</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400" id="saved-card-sublabel">Clique para alterar os dados</p>
+                <p
+                  class="font-semibold text-gray-900 dark:text-white text-sm"
+                  id="saved-card-label"
+                >
+                  Cartão •••• 1234
+                </p>
+                <p
+                  class="text-xs text-gray-500 dark:text-gray-400"
+                  id="saved-card-sublabel"
+                >
+                  Clique para alterar os dados
+                </p>
               </div>
               <i data-feather="edit-2" class="w-4 h-4 text-gray-400"></i>
             </div>
-            <button id="add-card-btn" class="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl py-4 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:border-blue-400 hover:text-blue-500 transition" onclick="openCardModal()">
+            <button
+              id="add-card-btn"
+              class="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl py-4 flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:border-blue-400 hover:text-blue-500 transition"
+              onclick="openCardModal()"
+            >
               <i data-feather="plus"></i> Adicionar dados do cartão
             </button>
             <input type="hidden" id="card-number" />
@@ -662,18 +1196,28 @@
           </div>
 
           <!-- PIX info -->
-          <div id="pix-fields" class="hidden p-5 bg-green-50 dark:bg-gray-700 rounded-xl mb-4">
-            <h4 class="font-semibold text-green-900 dark:text-white mb-2 flex items-center gap-2">
-              <i data-feather="check-circle" class="w-5 h-5 text-green-600"></i> PIX — Pagamento Instantâneo
+          <div
+            id="pix-fields"
+            class="hidden p-5 bg-green-50 dark:bg-gray-700 rounded-xl mb-4"
+          >
+            <h4
+              class="font-semibold text-green-900 dark:text-white mb-2 flex items-center gap-2"
+            >
+              <i data-feather="check-circle" class="w-5 h-5 text-green-600"></i>
+              PIX — Pagamento Instantâneo
             </h4>
-            <p class="text-green-800 dark:text-gray-300 text-sm">Após confirmar, você receberá um QR Code para escanear e completar o pagamento.</p>
+            <p class="text-green-800 dark:text-gray-300 text-sm">
+              Após confirmar, você receberá um QR Code para escanear e completar
+              o pagamento.
+            </p>
           </div>
         </div>
 
         <!-- Finalize button -->
         <div id="finalize-button" class="hidden mb-8">
           <button onclick="finalizarRecarga()" class="btn-finalize">
-            <i data-feather="check-circle" class="w-5 h-5"></i> Finalizar Recarga
+            <i data-feather="check-circle" class="w-5 h-5"></i> Finalizar
+            Recarga
           </button>
         </div>
       </div>
@@ -682,61 +1226,149 @@
       <!-- VIEW 3 – Register card form             -->
       <!-- ════════════════════════════════════════ -->
       <div id="viewRegister" class="hidden animate-slide-in-up">
-
         <!-- back -->
         <button class="back-link" onclick="goBackFromRegister()">
           <i data-feather="arrow-left" class="w-4 h-4"></i> Voltar
         </button>
 
         <!-- Header card -->
-        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 mb-6 text-white">
+        <div
+          class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 mb-6 text-white"
+        >
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+            <div
+              class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center"
+            >
               <i data-feather="plus-circle" class="w-6 h-6"></i>
             </div>
             <div>
               <h2 class="text-xl font-bold">Cadastrar Cartão</h2>
-              <p class="text-white/80 text-sm">Registre seu cartão de transporte</p>
+              <p class="text-white/80 text-sm">
+                Registre seu cartão de transporte
+              </p>
             </div>
           </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
           <div class="space-y-5">
-
             <!-- Card number -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                <i data-feather="hash" class="w-4 h-4 inline mr-1 text-indigo-500"></i> Número do Cartão
+              <label
+                class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+              >
+                <i
+                  data-feather="hash"
+                  class="w-4 h-4 inline mr-1 text-indigo-500"
+                ></i>
+                Número do Cartão
               </label>
-              <input type="text" id="reg-card-number" class="input-modern" placeholder="0000 0000 0000 0000" maxlength="19" />
+              <input
+                type="text"
+                id="reg-card-number"
+                class="input-modern"
+                placeholder="000000 00.00.00000000-0"
+                maxlength="23"
+              />
             </div>
 
             <!-- Holder name -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                <i data-feather="user" class="w-4 h-4 inline mr-1 text-indigo-500"></i> Nome do Titular
+              <label
+                class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+              >
+                <i
+                  data-feather="user"
+                  class="w-4 h-4 inline mr-1 text-indigo-500"
+                ></i>
+                Nome do Titular
               </label>
-              <input type="text" id="reg-card-name" class="input-modern" placeholder="Nome completo" />
+              <input
+                type="text"
+                id="reg-card-name"
+                class="input-modern"
+                placeholder="Nome completo"
+              />
             </div>
 
             <!-- Card type -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                <i data-feather="tag" class="w-4 h-4 inline mr-1 text-indigo-500"></i> Tipo de Cartão
+              <label
+                class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"
+              >
+                <i
+                  data-feather="tag"
+                  class="w-4 h-4 inline mr-1 text-indigo-500"
+                ></i>
+                Tipo de Cartão
               </label>
               <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <button type="button" class="type-btn" data-type="cidadao" onclick="selectCardType('cidadao', this)">🏙️ Cidadão</button>
-                <button type="button" class="type-btn" data-type="normal" onclick="selectCardType('normal', this)">🟢 Normal</button>
-                <button type="button" class="type-btn" data-type="estudante" onclick="selectCardType('estudante', this)">🎓 Estudante</button>
-                <button type="button" class="type-btn" data-type="idoso" onclick="selectCardType('idoso', this)">👴 Idoso</button>
-                <button type="button" class="type-btn" data-type="acompanhante" onclick="selectCardType('acompanhante', this)">🤝 Acompanhante</button>
-                <button type="button" class="type-btn" data-type="carteiro" onclick="selectCardType('carteiro', this)">📬 Carteiro</button>
-                <button type="button" class="type-btn" data-type="colaborador" onclick="selectCardType('colaborador', this)">💼 Colaborador</button>
-                <button type="button" class="type-btn" data-type="pcd" onclick="selectCardType('pcd', this)">♿ PCD</button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="cidadao"
+                  onclick="selectCardType('cidadao', this)"
+                >
+                  🏙️ Cidadão
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="normal"
+                  onclick="selectCardType('normal', this)"
+                >
+                  🟢 Normal
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="estudante"
+                  onclick="selectCardType('estudante', this)"
+                >
+                  🎓 Estudante
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="idoso"
+                  onclick="selectCardType('idoso', this)"
+                >
+                  👴 Idoso
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="acompanhante"
+                  onclick="selectCardType('acompanhante', this)"
+                >
+                  🤝 Acompanhante
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="carteiro"
+                  onclick="selectCardType('carteiro', this)"
+                >
+                  📬 Carteiro
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="colaborador"
+                  onclick="selectCardType('colaborador', this)"
+                >
+                  💼 Colaborador
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  data-type="pcd"
+                  onclick="selectCardType('pcd', this)"
+                >
+                  ♿ PCD
+                </button>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -749,42 +1381,72 @@
       <!-- VIEW 4 – Recharge confirmed             -->
       <!-- ════════════════════════════════════════ -->
       <div id="viewRechargeSuccess" class="hidden animate-slide-in-up">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-          <div class="bg-gradient-to-r from-green-400 to-green-600 p-8 text-white text-center">
-            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden"
+        >
+          <div
+            class="bg-gradient-to-r from-green-400 to-green-600 p-8 text-white text-center"
+          >
+            <div
+              class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
               <i data-feather="check-circle" class="w-10 h-10"></i>
             </div>
             <h2 class="text-3xl font-bold">Recarga Confirmada!</h2>
-            <p class="text-white/80 mt-2">Seu saldo foi atualizado com sucesso</p>
+            <p class="text-white/80 mt-2">
+              Seu saldo foi atualizado com sucesso
+            </p>
           </div>
           <div class="p-8 space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div id="confirm-card-number-div" class="hidden">
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Cartão</p>
-                <p id="confirm-card-number" class="font-semibold text-gray-900 dark:text-white"></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  Cartão
+                </p>
+                <p
+                  id="confirm-card-number"
+                  class="font-semibold text-gray-900 dark:text-white"
+                ></p>
               </div>
               <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Valor</p>
-                <p id="confirm-amount" class="font-semibold text-green-600 dark:text-green-400 text-lg"></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  Valor
+                </p>
+                <p
+                  id="confirm-amount"
+                  class="font-semibold text-green-600 dark:text-green-400 text-lg"
+                ></p>
               </div>
               <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Data e Hora</p>
-                <p id="confirm-datetime" class="font-semibold text-gray-900 dark:text-white"></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  Data e Hora
+                </p>
+                <p
+                  id="confirm-datetime"
+                  class="font-semibold text-gray-900 dark:text-white"
+                ></p>
               </div>
               <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Pagamento</p>
-                <p id="confirm-payment-method" class="font-semibold text-gray-900 dark:text-white"></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  Pagamento
+                </p>
+                <p
+                  id="confirm-payment-method"
+                  class="font-semibold text-gray-900 dark:text-white"
+                ></p>
               </div>
             </div>
             <div class="border-t border-gray-200 dark:border-gray-700 pt-5">
-              <button onclick="window.location.href='dashboard.html'" class="btn-finalize">
+              <button
+                onclick="window.location.href = 'dashboard.html'"
+                class="btn-finalize"
+              >
                 <i data-feather="home" class="w-5 h-5"></i> Voltar ao Dashboard
               </button>
             </div>
           </div>
         </div>
       </div>
-
     </main>
 
     <!-- Credit Card Modal -->
@@ -793,14 +1455,30 @@
         <div class="cc-scene">
           <div class="cc-card" id="ccCard">
             <div class="cc-front">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: flex-start;
+                "
+              >
                 <div class="cc-chip"></div>
                 <div class="cc-network"><span></span><span></span></div>
               </div>
-              <div class="cc-number" id="cc-display-number">•••• •••• •••• ••••</div>
+              <div class="cc-number" id="cc-display-number">
+                •••• •••• •••• ••••
+              </div>
               <div class="cc-row">
-                <div><div class="cc-label">Titular</div><div class="cc-value" id="cc-display-name">NOME DO TITULAR</div></div>
-                <div><div class="cc-label">Validade</div><div class="cc-value" id="cc-display-expiry">MM/AA</div></div>
+                <div>
+                  <div class="cc-label">Titular</div>
+                  <div class="cc-value" id="cc-display-name">
+                    NOME DO TITULAR
+                  </div>
+                </div>
+                <div>
+                  <div class="cc-label">Validade</div>
+                  <div class="cc-value" id="cc-display-expiry">MM/AA</div>
+                </div>
               </div>
             </div>
             <div class="cc-back">
@@ -816,25 +1494,60 @@
         <!-- Step 1 -->
         <div class="cc-step active" id="cc-step-1">
           <p class="cc-title">Dados do Cartão</p>
-          <p class="cc-subtitle">Preencha as informações da frente do cartão</p>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div><label class="cc-label-text">Número do Cartão</label><input class="cc-input" id="cc-input-number" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" /></div>
-            <div><label class="cc-label-text">Nome do Titular</label><input class="cc-input" id="cc-input-name" type="text" placeholder="Como aparece no cartão" maxlength="26" /></div>
+          <p class="cc-subtitle">Preencha as informações do cartão</p>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div>
+              <label class="cc-label-text">Número do Cartão</label
+              ><input
+                class="cc-input"
+                id="cc-input-number"
+                type="text"
+                inputmode="numeric"
+                placeholder="0000 0000 0000 0000"
+                maxlength="19"
+              />
+            </div>
+            <div>
+              <label class="cc-label-text">Nome do Titular</label
+              ><input
+                class="cc-input"
+                id="cc-input-name"
+                type="text"
+                placeholder="Como aparece no cartão"
+                maxlength="26"
+              />
+            </div>
             <div class="cc-grid-2">
-              <div><label class="cc-label-text">Validade</label><input class="cc-input" id="cc-input-expiry" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" /></div>
-              <div></div>
+              <div>
+                <label class="cc-label-text">Validade</label
+                ><input
+                  class="cc-input"
+                  id="cc-input-expiry"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="MM/AA"
+                  maxlength="5"
+                />
+              </div>
+              <div>
+                <label class="cc-label-text">CVV</label
+                ><input
+                  class="cc-input"
+                  id="cc-input-cvv"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="•••"
+                  maxlength="3"
+                />
+              </div>
             </div>
           </div>
-          <button class="cc-btn-primary" onclick="ccGoToCVV()">Continuar →</button>
-          <button class="cc-btn-secondary" onclick="closeCardModal()">Cancelar</button>
-        </div>
-        <!-- Step 2 -->
-        <div class="cc-step" id="cc-step-2">
-          <p class="cc-title">Código de Segurança</p>
-          <p class="cc-subtitle">Insira o CVV no verso do cartão</p>
-          <div><label class="cc-label-text">CVV</label><input class="cc-input" id="cc-input-cvv" type="text" inputmode="numeric" placeholder="123" maxlength="4" /></div>
-          <button class="cc-btn-primary" onclick="ccConfirm()">Confirmar</button>
-          <button class="cc-btn-secondary" onclick="ccGoToFront()">← Voltar</button>
+          <button class="cc-btn-primary" onclick="ccConfirm()">
+            Confirmar
+          </button>
+          <button class="cc-btn-secondary" onclick="closeCardModal()">
+            Cancelar
+          </button>
         </div>
       </div>
     </div>
@@ -843,61 +1556,78 @@
       feather.replace();
 
       /* ——— View switching ——— */
-      const views = ['viewHome', 'viewRecharge', 'viewRegister', 'viewRechargeSuccess'];
+      const views = [
+        "viewHome",
+        "viewRecharge",
+        "viewRegister",
+        "viewRechargeSuccess",
+      ];
       function showView(id) {
-        views.forEach(v => {
+        views.forEach((v) => {
           const el = document.getElementById(v);
-          el.classList.add('hidden');
-          el.classList.remove('animate-slide-in-up');
+          el.classList.add("hidden");
+          el.classList.remove("animate-slide-in-up");
         });
         const target = document.getElementById(id);
-        target.classList.remove('hidden');
-        setTimeout(() => target.classList.add('animate-slide-in-up'), 10);
+        target.classList.remove("hidden");
+        setTimeout(() => target.classList.add("animate-slide-in-up"), 10);
         feather.replace();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       /* ——— Recharge logic ——— */
       let selectedAmount = 0;
-      let selectedPaymentMethod = '';
+      let selectedPaymentMethod = "";
 
       function selectAmount(amount) {
         selectedAmount = amount;
-        document.getElementById('selected-amount').textContent = amount.toFixed(2).replace('.', ',');
-        document.getElementById('custom-amount-div').classList.add('hidden');
-        document.getElementById('custom-amount').value = '';
-        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        document.getElementById("selected-amount").textContent = amount
+          .toFixed(2)
+          .replace(".", ",");
+        document.getElementById("custom-amount-div").classList.add("hidden");
+        document.getElementById("custom-amount").value = "";
+        document
+          .querySelectorAll(".amount-btn")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
         checkFormCompletion();
       }
 
       function showCustomAmount() {
-        document.getElementById('custom-amount-div').classList.remove('hidden');
-        document.getElementById('custom-amount').focus();
-        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        document.getElementById("custom-amount-div").classList.remove("hidden");
+        document.getElementById("custom-amount").focus();
+        document
+          .querySelectorAll(".amount-btn")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
       }
 
-      document.getElementById('custom-amount').addEventListener('input', function () {
-        const v = parseFloat(this.value) || 0;
-        selectedAmount = v;
-        document.getElementById('selected-amount').textContent = v.toFixed(2).replace('.', ',');
-        checkFormCompletion();
-      });
+      document
+        .getElementById("custom-amount")
+        .addEventListener("input", function () {
+          const v = parseFloat(this.value) || 0;
+          selectedAmount = v;
+          document.getElementById("selected-amount").textContent = v
+            .toFixed(2)
+            .replace(".", ",");
+          checkFormCompletion();
+        });
 
       function selectPaymentMethod(method) {
         selectedPaymentMethod = method;
-        ['cartao-fields', 'pix-fields'].forEach(id => {
-          document.getElementById(id).classList.add('hidden');
+        ["cartao-fields", "pix-fields"].forEach((id) => {
+          document.getElementById(id).classList.add("hidden");
         });
-        document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('active'));
-        if (method === 'cartao') {
-          document.getElementById('cartao-fields').classList.remove('hidden');
-          document.getElementById('cartao-button').classList.add('active');
-          if (!document.getElementById('card-number').value) openCardModal();
-        } else if (method === 'pix') {
-          document.getElementById('pix-fields').classList.remove('hidden');
-          document.getElementById('pix-button').classList.add('active');
+        document
+          .querySelectorAll(".payment-method-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (method === "cartao") {
+          document.getElementById("cartao-fields").classList.remove("hidden");
+          document.getElementById("cartao-button").classList.add("active");
+          if (!document.getElementById("card-number").value) openCardModal();
+        } else if (method === "pix") {
+          document.getElementById("pix-fields").classList.remove("hidden");
+          document.getElementById("pix-button").classList.add("active");
         }
         checkFormCompletion();
         feather.replace();
@@ -905,274 +1635,391 @@
 
       /* ——— Credit Card Modal ——— */
       function openCardModal() {
-        document.getElementById('cc-input-number').value = document.getElementById('card-number').value || '';
-        document.getElementById('cc-input-name').value   = document.getElementById('card-name').value || '';
-        document.getElementById('cc-input-expiry').value = document.getElementById('card-expiry').value || '';
-        document.getElementById('cc-input-cvv').value    = document.getElementById('card-cvv').value || '';
+        document.getElementById("cc-input-number").value =
+          document.getElementById("card-number").value || "";
+        document.getElementById("cc-input-name").value =
+          document.getElementById("card-name").value || "";
+        document.getElementById("cc-input-expiry").value =
+          document.getElementById("card-expiry").value || "";
+        document.getElementById("cc-input-cvv").value =
+          document.getElementById("card-cvv").value || "";
         syncCardDisplay();
-        document.getElementById('cc-step-1').classList.add('active');
-        document.getElementById('cc-step-2').classList.remove('active');
-        document.getElementById('ccCard').classList.remove('flipped');
-        document.getElementById('creditCardModal').classList.remove('hidden');
-        setTimeout(() => document.getElementById('cc-input-number').focus(), 100);
+        document.getElementById("ccCard").classList.remove("flipped");
+        document.getElementById("creditCardModal").classList.remove("hidden");
+        setTimeout(
+          () => document.getElementById("cc-input-number").focus(),
+          100,
+        );
       }
-      function closeCardModal() { document.getElementById('creditCardModal').classList.add('hidden'); }
+      function closeCardModal() {
+        document.getElementById("creditCardModal").classList.add("hidden");
+      }
       function syncCardDisplay() {
-        const num = document.getElementById('cc-input-number').value || '';
-        const formatted = num.replace(/\s/g,'').replace(/(.{4})/g,'$1 ').trim();
-        const masked = formatted.replace(/\d(?=(?:\D*\d){4})/g,'•');
-        document.getElementById('cc-display-number').textContent = masked || '•••• •••• •••• ••••';
-        document.getElementById('cc-display-name').textContent = document.getElementById('cc-input-name').value.toUpperCase() || 'NOME DO TITULAR';
-        document.getElementById('cc-display-expiry').textContent = document.getElementById('cc-input-expiry').value || 'MM/AA';
-        const cvv = document.getElementById('cc-input-cvv').value;
-        document.getElementById('cc-display-cvv').textContent = cvv ? cvv.replace(/./g,'•') : '•••';
+        const num = document.getElementById("cc-input-number").value || "";
+        const formatted = num
+          .replace(/\s/g, "")
+          .replace(/(.{4})/g, "$1 ")
+          .trim();
+        const masked = formatted.replace(/\d(?=(?:\D*\d){4})/g, "•");
+        document.getElementById("cc-display-number").textContent =
+          masked || "•••• •••• •••• ••••";
+        document.getElementById("cc-display-name").textContent =
+          document.getElementById("cc-input-name").value.toUpperCase() ||
+          "NOME DO TITULAR";
+        document.getElementById("cc-display-expiry").textContent =
+          document.getElementById("cc-input-expiry").value || "MM/AA";
+        const cvv = document.getElementById("cc-input-cvv").value;
+        document.getElementById("cc-display-cvv").textContent = cvv
+          ? cvv.replace(/./g, "•")
+          : "•••";
       }
-      ['cc-input-number','cc-input-name','cc-input-expiry','cc-input-cvv'].forEach(id => {
-        document.getElementById(id)?.addEventListener('input', syncCardDisplay);
+      [
+        "cc-input-number",
+        "cc-input-name",
+        "cc-input-expiry",
+        "cc-input-cvv",
+      ].forEach((id) => {
+        document.getElementById(id)?.addEventListener("input", syncCardDisplay);
       });
-      document.getElementById('cc-input-number').addEventListener('input', function(e) {
-        let v = e.target.value.replace(/\s/g,'').replace(/\D/g,'');
-        e.target.value = v.match(/.{1,4}/g)?.join(' ') || v;
-        syncCardDisplay();
-      });
-      document.getElementById('cc-input-expiry').addEventListener('input', function(e) {
-        let v = e.target.value.replace(/\D/g,'');
-        if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
-        e.target.value = v;
-        syncCardDisplay();
-      });
-      document.getElementById('cc-input-cvv').addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/\D/g,'');
-        syncCardDisplay();
-      });
-      function ccGoToCVV() {
-        const num  = document.getElementById('cc-input-number').value.replace(/\s/g,'');
-        const name = document.getElementById('cc-input-name').value.trim();
-        const exp  = document.getElementById('cc-input-expiry').value;
-        if (num.length < 13) { alert('Número do cartão inválido.'); return; }
-        if (!name)           { alert('Informe o nome do titular.'); return; }
-        if (exp.length < 5)  { alert('Data de validade inválida.'); return; }
-        document.getElementById('ccCard').classList.add('flipped');
-        document.getElementById('cc-step-1').classList.remove('active');
-        document.getElementById('cc-step-2').classList.add('active');
-        setTimeout(() => document.getElementById('cc-input-cvv').focus(), 400);
-      }
-      function ccGoToFront() {
-        document.getElementById('ccCard').classList.remove('flipped');
-        document.getElementById('cc-step-2').classList.remove('active');
-        document.getElementById('cc-step-1').classList.add('active');
-      }
+      document
+        .getElementById("cc-input-number")
+        .addEventListener("input", function (e) {
+          let v = e.target.value.replace(/\s/g, "").replace(/\D/g, "");
+          e.target.value = v.match(/.{1,4}/g)?.join(" ") || v;
+          syncCardDisplay();
+        });
+      document
+        .getElementById("cc-input-expiry")
+        .addEventListener("input", function (e) {
+          let v = e.target.value.replace(/\D/g, "");
+          if (v.length >= 2) v = v.substring(0, 2) + "/" + v.substring(2, 4);
+          e.target.value = v;
+          syncCardDisplay();
+        });
+      document
+        .getElementById("cc-input-cvv")
+        .addEventListener("input", function (e) {
+          e.target.value = e.target.value.replace(/\D/g, "");
+          syncCardDisplay();
+        });
+      document
+        .getElementById("cc-input-cvv")
+        .addEventListener("focus", function () {
+          document.getElementById("ccCard").classList.add("flipped");
+        });
+      document
+        .getElementById("cc-input-cvv")
+        .addEventListener("blur", function () {
+          document.getElementById("ccCard").classList.remove("flipped");
+        });
       function ccConfirm() {
-        const cvv = document.getElementById('cc-input-cvv').value;
-        if (cvv.length < 3) { alert('CVV inválido.'); return; }
-        document.getElementById('ccCard').classList.remove('flipped');
-        const num   = document.getElementById('cc-input-number').value;
-        const name  = document.getElementById('cc-input-name').value;
-        const exp   = document.getElementById('cc-input-expiry').value;
-        document.getElementById('card-number').value = num;
-        document.getElementById('card-name').value   = name;
-        document.getElementById('card-expiry').value = exp;
-        document.getElementById('card-cvv').value    = cvv;
-        const last4 = num.replace(/\s/g,'').slice(-4);
+        const num = document.getElementById("cc-input-number").value;
+        const name = document.getElementById("cc-input-name").value.trim();
+        const exp = document.getElementById("cc-input-expiry").value;
+        const cvv = document.getElementById("cc-input-cvv").value;
+        if (num.replace(/\s/g, "").length < 13) {
+          alert("Número do cartão inválido.");
+          return;
+        }
+        if (!name) {
+          alert("Informe o nome do titular.");
+          return;
+        }
+        if (exp.length < 5) {
+          alert("Data de validade inválida.");
+          return;
+        }
+        if (!cvv) {
+          alert("CVV inválido.");
+          return;
+        }
+        document.getElementById("ccCard").classList.remove("flipped");
+        document.getElementById("card-number").value = num;
+        document.getElementById("card-name").value = name;
+        document.getElementById("card-expiry").value = exp;
+        document.getElementById("card-cvv").value = cvv;
+        const last4 = num.replace(/\s/g, "").slice(-4);
         const nameDisplay = name.trim().toUpperCase();
-        document.getElementById('saved-card-label').textContent = `${nameDisplay} • •••• ${last4}`;
-        document.getElementById('saved-card-sublabel').textContent = 'Clique para alterar os dados';
-        document.getElementById('saved-card-indicator').classList.remove('hidden');
-        document.getElementById('add-card-btn').classList.add('hidden');
+        document.getElementById("saved-card-label").textContent =
+          `${nameDisplay} • •••• ${last4}`;
+        document.getElementById("saved-card-sublabel").textContent =
+          "Clique para alterar os dados";
+        document
+          .getElementById("saved-card-indicator")
+          .classList.remove("hidden");
+        document.getElementById("add-card-btn").classList.add("hidden");
         // Persiste os dados do cartão de crédito para futuras recargas
-        localStorage.setItem('saved_credit_card', JSON.stringify({ number: num, name, expiry: exp, cvv }));
-        setTimeout(() => { closeCardModal(); feather.replace(); checkFormCompletion(); }, 700);
+        localStorage.setItem(
+          "saved_credit_card",
+          JSON.stringify({ number: num, name, expiry: exp, cvv }),
+        );
+        setTimeout(() => {
+          closeCardModal();
+          feather.replace();
+          checkFormCompletion();
+        }, 700);
       }
-      document.getElementById('creditCardModal').addEventListener('click', function(e) {
-        if (e.target === this) closeCardModal();
-      });
+      document
+        .getElementById("creditCardModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeCardModal();
+        });
 
       function checkFormCompletion() {
-        const btn = document.getElementById('finalize-button');
+        const btn = document.getElementById("finalize-button");
         if (selectedAmount > 0 && selectedPaymentMethod) {
-          btn.classList.remove('hidden');
+          btn.classList.remove("hidden");
         } else {
-          btn.classList.add('hidden');
+          btn.classList.add("hidden");
         }
         feather.replace();
       }
 
       async function finalizarRecarga() {
-        if (selectedAmount <= 0) { showError('Por favor, selecione um valor para recarga.'); return; }
-        if (!selectedPaymentMethod) { showError('Por favor, selecione um método de pagamento.'); return; }
-        if (selectedPaymentMethod === 'cartao') {
-          const cn = document.getElementById('card-number').value;
-          const ce = document.getElementById('card-expiry').value;
-          const cv = document.getElementById('card-cvv').value;
-          const ca = document.getElementById('card-name').value;
-          if (!cn || !ce || !cv || !ca) { showError('Preencha todos os campos do cartão.'); return; }
+        if (selectedAmount <= 0) {
+          showError("Por favor, selecione um valor para recarga.");
+          return;
+        }
+        if (!selectedPaymentMethod) {
+          showError("Por favor, selecione um método de pagamento.");
+          return;
+        }
+        if (selectedPaymentMethod === "cartao") {
+          const cn = document.getElementById("card-number").value;
+          const ce = document.getElementById("card-expiry").value;
+          const cv = document.getElementById("card-cvv").value;
+          const ca = document.getElementById("card-name").value;
+          if (!cn || !ce || !cv || !ca) {
+            showError("Preencha todos os campos do cartão.");
+            return;
+          }
         }
 
         showProcessingAnimation();
 
         try {
-          const response = await fetch('/api/recharge', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ amount: selectedAmount, payment_method: selectedPaymentMethod })
+          const response = await fetch("/api/recharge", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              amount: selectedAmount,
+              payment_method: selectedPaymentMethod,
+            }),
           });
           const data = await response.json();
           hideProcessingAnimation();
 
           if (response.ok) {
             const newRecharge = {
-              id: Date.now(), amount: selectedAmount,
+              id: Date.now(),
+              amount: selectedAmount,
               payment_method: selectedPaymentMethod,
-              status: 'completed',
-              transaction_id: 'TXN-' + Date.now(),
-              created_at: new Date().toISOString()
+              status: "completed",
+              transaction_id: "TXN-" + Date.now(),
+              created_at: new Date().toISOString(),
             };
-            let hist = JSON.parse(localStorage.getItem('mock_recharge_history') || '[]');
+            let hist = JSON.parse(
+              localStorage.getItem("mock_recharge_history") || "[]",
+            );
             hist.unshift(newRecharge);
-            localStorage.setItem('mock_recharge_history', JSON.stringify(hist));
-            localStorage.setItem('recharge_completed', Date.now().toString());
+            localStorage.setItem("mock_recharge_history", JSON.stringify(hist));
+            localStorage.setItem("recharge_completed", Date.now().toString());
 
-            document.getElementById('confirm-amount').textContent = `R$ ${selectedAmount.toFixed(2).replace('.', ',')}`;
-            document.getElementById('confirm-datetime').textContent = new Date().toLocaleString('pt-BR');
-            document.getElementById('confirm-payment-method').textContent =
-              selectedPaymentMethod.charAt(0).toUpperCase() + selectedPaymentMethod.slice(1);
-            if (selectedPaymentMethod === 'cartao') {
-              const cn = document.getElementById('card-number').value;
-              document.getElementById('confirm-card-number').textContent = `•••• •••• •••• ${cn.slice(-4)}`;
-              document.getElementById('confirm-card-number-div').classList.remove('hidden');
+            document.getElementById("confirm-amount").textContent =
+              `R$ ${selectedAmount.toFixed(2).replace(".", ",")}`;
+            document.getElementById("confirm-datetime").textContent =
+              new Date().toLocaleString("pt-BR");
+            document.getElementById("confirm-payment-method").textContent =
+              selectedPaymentMethod.charAt(0).toUpperCase() +
+              selectedPaymentMethod.slice(1);
+            if (selectedPaymentMethod === "cartao") {
+              const cn = document.getElementById("card-number").value;
+              document.getElementById("confirm-card-number").textContent =
+                `•••• •••• •••• ${cn.slice(-4)}`;
+              document
+                .getElementById("confirm-card-number-div")
+                .classList.remove("hidden");
             } else {
-              document.getElementById('confirm-card-number-div').classList.add('hidden');
+              document
+                .getElementById("confirm-card-number-div")
+                .classList.add("hidden");
             }
 
-            showView('viewRechargeSuccess');
-            window.dispatchEvent(new Event('rechargeCompleted'));
+            showView("viewRechargeSuccess");
+            window.dispatchEvent(new Event("rechargeCompleted"));
 
             // Atualiza o bloco de última recarga imediatamente
-            const lastRechargeEl = document.getElementById('lastRechargeInfo');
+            const lastRechargeEl = document.getElementById("lastRechargeInfo");
             if (lastRechargeEl) {
               const now = new Date();
-              const formatted = now.toLocaleDateString('pt-BR', {
-                day: '2-digit', month: '2-digit', year: 'numeric'
+              const formatted = now.toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
               });
-              const amountFmt = selectedAmount.toFixed(2).replace('.', ',');
+              const amountFmt = selectedAmount.toFixed(2).replace(".", ",");
               lastRechargeEl.textContent = `${formatted} — R$ ${amountFmt}`;
             }
           } else {
-            showError('Erro ao processar recarga: ' + data.error);
+            showError("Erro ao processar recarga: " + data.error);
           }
         } catch (err) {
           console.error(err);
           hideProcessingAnimation();
-          showError('Erro ao conectar com o servidor. Tente novamente.');
+          showError("Erro ao conectar com o servidor. Tente novamente.");
         }
       }
 
       /* ——— Card registration ——— */
-      let selectedCardType = '';
-      let loadedCardType   = '';  // tipo real do cartão cadastrado (restaurado ao voltar)
+      let selectedCardType = "";
+      let loadedCardType = ""; // tipo real do cartão cadastrado (restaurado ao voltar)
 
       function selectCardType(type, btn) {
         selectedCardType = type;
-        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        document
+          .querySelectorAll(".type-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
         // update visual card color
         applyCardTypeColor(type);
       }
 
       const CARD_TYPE_LABELS = {
-        cidadao: 'Cidadão', normal: 'Normal (VT)', estudante: 'Estudante',
-        idoso: 'Idoso', acompanhante: 'Acompanhante', carteiro: 'Carteiro',
-        colaborador: 'Colaborador', pcd: 'Portador de Necess. Esp.'
+        cidadao: "Cidadão",
+        normal: "Normal (VT)",
+        estudante: "Estudante",
+        idoso: "Idoso",
+        acompanhante: "Acompanhante",
+        carteiro: "Carteiro",
+        colaborador: "Colaborador",
+        pcd: "Portador de Necess. Esp.",
       };
 
       function applyCardTypeColor(type) {
-        const card = document.querySelector('.bus-card');
+        const card = document.querySelector(".bus-card");
         // remove all type classes
-        ['cidadao','normal','estudante','idoso','acompanhante','carteiro','colaborador','pcd']
-          .forEach(t => card.classList.remove('type-' + t));
-        if (type) card.classList.add('type-' + type);
+        [
+          "cidadao",
+          "normal",
+          "estudante",
+          "idoso",
+          "acompanhante",
+          "carteiro",
+          "colaborador",
+          "pcd",
+        ].forEach((t) => card.classList.remove("type-" + t));
+        if (type) card.classList.add("type-" + type);
       }
 
       function applyCardData(data) {
         if (data.card_number) {
-          const last4 = data.card_number.replace(/\s/g, '').slice(-4);
-          document.getElementById('cardNumberDisplay').textContent = `**** **** **** ${last4}`;
+          const digits = data.card_number.replace(/\D/g, "");
+          const last4 = digits.slice(-4);
+          document.getElementById("cardNumberDisplay").textContent =
+            `•••••• ••.••.•••••${last4.slice(0, 3)}-${last4.slice(3)}`;
         }
         if (data.card_holder) {
-          document.getElementById('cardHolderDisplay').textContent = data.card_holder.split(' ')[0].toUpperCase();
+          document.getElementById("cardHolderDisplay").textContent =
+            data.card_holder.split(" ")[0].toUpperCase();
         }
         if (data.card_type) {
-          loadedCardType = data.card_type;  // guarda o tipo real para restaurar ao voltar
-          document.getElementById('cardTypeDisplay').textContent = CARD_TYPE_LABELS[data.card_type] || data.card_type;
+          loadedCardType = data.card_type; // guarda o tipo real para restaurar ao voltar
+          document.getElementById("cardTypeDisplay").textContent =
+            CARD_TYPE_LABELS[data.card_type] || data.card_type;
           applyCardTypeColor(data.card_type);
         }
         if (data.card_balance !== undefined) {
-          document.getElementById('currentBalance').textContent = `R$ ${parseFloat(data.card_balance).toFixed(2).replace('.', ',')}`;
+          document.getElementById("currentBalance").textContent =
+            `R$ ${parseFloat(data.card_balance).toFixed(2).replace(".", ",")}`;
         }
       }
 
       /* Volta da view de cadastro restaurando a cor original do cartão */
       function goBackFromRegister() {
         applyCardTypeColor(loadedCardType);
-        showView('viewHome');
+        showView("viewHome");
       }
 
       async function cadastrarCartao() {
-        const num  = document.getElementById('reg-card-number').value.trim();
-        const name = document.getElementById('reg-card-name').value.trim();
+        const num = document.getElementById("reg-card-number").value.trim();
+        const name = document.getElementById("reg-card-name").value.trim();
 
-        if (!num)  { showError('Por favor, informe o número do cartão.'); return; }
-        if (!name) { showError('Por favor, informe o nome do titular.'); return; }
-        if (!selectedCardType) { showError('Por favor, selecione o tipo do cartão.'); return; }
+        if (!num) {
+          showError("Por favor, informe o número do cartão.");
+          return;
+        }
+        if (!name) {
+          showError("Por favor, informe o nome do titular.");
+          return;
+        }
+        if (!selectedCardType) {
+          showError("Por favor, selecione o tipo do cartão.");
+          return;
+        }
 
         showProcessingAnimation();
 
         try {
-          const response = await fetch('/api/card/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ card_number: num, holder_name: name, card_type: selectedCardType })
+          const response = await fetch("/api/card/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              card_number: num,
+              holder_name: name,
+              card_type: selectedCardType,
+            }),
           });
 
           hideProcessingAnimation();
 
           if (response.ok) {
-            // Update the visual card in home view
-            const last4 = num.replace(/\s/g, '').slice(-4);
-            document.getElementById('cardNumberDisplay').textContent = `**** **** **** ${last4}`;
-            document.getElementById('cardHolderDisplay').textContent = name.split(' ')[0].toUpperCase();
-            document.getElementById('cardTypeDisplay').textContent = CARD_TYPE_LABELS[selectedCardType] || selectedCardType;
+            const digits = num.replace(/\D/g, "");
+            const last4 = digits.slice(-4);
+            document.getElementById("cardNumberDisplay").textContent =
+              `•••••• ••.••.•••••${last4.slice(0, 3)}-${last4.slice(3)}`;
+            document.getElementById("cardHolderDisplay").textContent = name
+              .split(" ")[0]
+              .toUpperCase();
+            document.getElementById("cardTypeDisplay").textContent =
+              CARD_TYPE_LABELS[selectedCardType] || selectedCardType;
             applyCardTypeColor(selectedCardType);
 
             // Store locally as fallback
-            localStorage.setItem('registered_card', JSON.stringify({ number: num, name, type: selectedCardType }));
+            localStorage.setItem(
+              "registered_card",
+              JSON.stringify({ number: num, name, type: selectedCardType }),
+            );
 
-            showSuccess('Cartão cadastrado com sucesso!');
-            showView('viewHome');
+            showSuccess("Cartão cadastrado com sucesso!");
+            showView("viewHome");
 
             // Reset form
-            document.getElementById('reg-card-number').value = '';
-            document.getElementById('reg-card-name').value = '';
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-            selectedCardType = '';
+            document.getElementById("reg-card-number").value = "";
+            document.getElementById("reg-card-name").value = "";
+            document
+              .querySelectorAll(".type-btn")
+              .forEach((b) => b.classList.remove("active"));
+            selectedCardType = "";
           } else {
             const data = await response.json().catch(() => ({}));
-            showError('Erro ao cadastrar cartão: ' + (data.error || 'Tente novamente.'));
+            showError(
+              "Erro ao cadastrar cartão: " + (data.error || "Tente novamente."),
+            );
           }
         } catch (err) {
           console.error(err);
           hideProcessingAnimation();
-          showError('Erro ao conectar com o servidor. Tente novamente.');
+          showError("Erro ao conectar com o servidor. Tente novamente.");
         }
       }
 
       /* ——— Processing overlay ——— */
       function showProcessingAnimation() {
-        const el = document.createElement('div');
-        el.id = 'processing-overlay';
-        el.className = 'processing-overlay';
+        const el = document.createElement("div");
+        el.id = "processing-overlay";
+        el.className = "processing-overlay";
         el.innerHTML = `
           <div class="processing-card">
             <div class="processing-spinner">
@@ -1192,14 +2039,15 @@
       }
 
       function hideProcessingAnimation() {
-        const el = document.getElementById('processing-overlay');
+        const el = document.getElementById("processing-overlay");
         if (el) el.remove();
       }
 
       /* ——— Toast helpers ——— */
       function showError(msg) {
-        const el = document.createElement('div');
-        el.className = 'fixed top-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded shadow-lg z-50 animate-slide-in-up';
+        const el = document.createElement("div");
+        el.className =
+          "fixed top-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded shadow-lg z-50 animate-slide-in-up";
         el.innerHTML = `<div class="flex items-center gap-2"><i data-feather="alert-circle" class="w-5 h-5"></i><span>${msg}</span></div>`;
         document.body.appendChild(el);
         feather.replace();
@@ -1207,8 +2055,9 @@
       }
 
       function showSuccess(msg) {
-        const el = document.createElement('div');
-        el.className = 'fixed top-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded shadow-lg z-50 animate-slide-in-up';
+        const el = document.createElement("div");
+        el.className =
+          "fixed top-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded shadow-lg z-50 animate-slide-in-up";
         el.innerHTML = `<div class="flex items-center gap-2"><i data-feather="check-circle" class="w-5 h-5"></i><span>${msg}</span></div>`;
         document.body.appendChild(el);
         feather.replace();
@@ -1216,108 +2065,160 @@
       }
 
       /* ——— Register card: number formatting ——— */
-      const regNumInput = document.getElementById('reg-card-number');
+      function formatPassCard(raw) {
+        const d = raw.replace(/\D/g, "").slice(0, 19);
+        let r = d.slice(0, 6);
+        if (d.length > 6) r += " " + d.slice(6, 8);
+        if (d.length > 8) r += "." + d.slice(8, 10);
+        if (d.length > 10) r += "." + d.slice(10, 18);
+        if (d.length > 18) r += "-" + d.slice(18, 19);
+        return r;
+      }
+      const regNumInput = document.getElementById("reg-card-number");
       if (regNumInput) {
-        regNumInput.addEventListener('input', function (e) {
-          let v = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-          e.target.value = v.match(/.{1,4}/g)?.join(' ') || v;
+        regNumInput.addEventListener("input", function (e) {
+          const pos = e.target.selectionStart;
+          e.target.value = formatPassCard(e.target.value);
         });
       }
 
       /* ——— Theme ——— */
       function applyTheme(isDark) {
         const html = document.documentElement;
-        if (isDark) { html.classList.add('dark'); html.classList.remove('light'); }
-        else { html.classList.remove('dark'); html.classList.add('light'); }
+        if (isDark) {
+          html.classList.add("dark");
+          html.classList.remove("light");
+        } else {
+          html.classList.remove("dark");
+          html.classList.add("light");
+        }
         feather.replace();
       }
 
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      applyTheme(savedTheme === 'dark' || (savedTheme === null && prefersDark));
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      applyTheme(savedTheme === "dark" || (savedTheme === null && prefersDark));
 
       /* ——— Load card info from API on page load ——— */
       function lockRegisterBtn() {
-        const btn = document.querySelector('#viewRegister .btn-indigo');
+        const btn = document.querySelector("#viewRegister .btn-indigo");
         if (!btn || btn.disabled) return;
         btn.disabled = true;
-        btn.style.opacity = '0.5';
-        btn.style.cursor = 'not-allowed';
-        btn.innerHTML = '<i data-feather="lock" class="w-5 h-5"></i> Cartão já cadastrado';
-        const note = document.createElement('p');
-        note.className = 'text-center text-sm text-amber-600 dark:text-amber-400 mt-3';
-        note.textContent = '⚠️ Você já possui um cartão de transporte cadastrado.';
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+        btn.innerHTML =
+          '<i data-feather="lock" class="w-5 h-5"></i> Cartão já cadastrado';
+        const note = document.createElement("p");
+        note.className =
+          "text-center text-sm text-amber-600 dark:text-amber-400 mt-3";
+        note.textContent =
+          "⚠️ Você já possui um cartão de transporte cadastrado. Se precisar alterar os dados, entre em contato com o suporte.";
         btn.parentNode.insertBefore(note, btn.nextSibling);
         feather.replace();
       }
       (async () => {
         try {
-          const res = await fetch('/api/card/info', { credentials: 'include' });
+          const res = await fetch("/api/card/info", { credentials: "include" });
           if (res.ok) {
             const data = await res.json();
             applyCardData(data);
             if (data.card_number) {
-              localStorage.setItem('registered_card', JSON.stringify({ number: data.card_number, name: data.card_holder || '', type: data.card_type || '' }));
+              localStorage.setItem(
+                "registered_card",
+                JSON.stringify({
+                  number: data.card_number,
+                  name: data.card_holder || "",
+                  type: data.card_type || "",
+                }),
+              );
               lockRegisterBtn();
             }
             return;
           }
-        } catch (_) { /* offline fallback below */ }
-        const saved = localStorage.getItem('registered_card');
+        } catch (_) {
+          /* offline fallback below */
+        }
+        const saved = localStorage.getItem("registered_card");
         if (saved) {
           const card = JSON.parse(saved);
-          applyCardData({ card_number: card.number, card_holder: card.name, card_type: card.type });
+          applyCardData({
+            card_number: card.number,
+            card_holder: card.name,
+            card_type: card.type,
+          });
           if (card.number) lockRegisterBtn();
         }
       })();
 
       /* ——— Restaura cartão de crédito salvo ——— */
       (() => {
-        const savedCC = localStorage.getItem('saved_credit_card');
+        const savedCC = localStorage.getItem("saved_credit_card");
         if (!savedCC) return;
         try {
           const cc = JSON.parse(savedCC);
-          document.getElementById('card-number').value = cc.number  || '';
-          document.getElementById('card-name').value   = cc.name    || '';
-          document.getElementById('card-expiry').value = cc.expiry  || '';
-          document.getElementById('card-cvv').value    = cc.cvv     || '';
-          const last4 = (cc.number || '').replace(/\s/g,'').slice(-4);
+          document.getElementById("card-number").value = cc.number || "";
+          document.getElementById("card-name").value = cc.name || "";
+          document.getElementById("card-expiry").value = cc.expiry || "";
+          document.getElementById("card-cvv").value = cc.cvv || "";
+          const last4 = (cc.number || "").replace(/\s/g, "").slice(-4);
           if (last4) {
-            const nameDisplay = (cc.name || '').trim().toUpperCase();
-            document.getElementById('saved-card-label').textContent = `${nameDisplay} • •••• ${last4}`;
-            document.getElementById('saved-card-sublabel').textContent = 'Clique para alterar os dados';
-            document.getElementById('saved-card-indicator').classList.remove('hidden');
-            document.getElementById('add-card-btn').classList.add('hidden');
+            const nameDisplay = (cc.name || "").trim().toUpperCase();
+            document.getElementById("saved-card-label").textContent =
+              `${nameDisplay} • •••• ${last4}`;
+            document.getElementById("saved-card-sublabel").textContent =
+              "Clique para alterar os dados";
+            document
+              .getElementById("saved-card-indicator")
+              .classList.remove("hidden");
+            document.getElementById("add-card-btn").classList.add("hidden");
           }
-        } catch(_) {}
+        } catch (_) {}
       })();
 
       /* ——— Load last recharge from API ——— */
       (async () => {
-        const el = document.getElementById('lastRechargeInfo');
+        const el = document.getElementById("lastRechargeInfo");
         try {
-          const res = await fetch('/api/transactions', { credentials: 'include' });
+          const res = await fetch("/api/transactions", {
+            credentials: "include",
+          });
           if (res.ok) {
             const transactions = await res.json();
             // Pega só recargas (transaction_type === 'recharge'), já vem ordenado por data desc
-            const lastRecharge = transactions.find(t => t.transaction_type === 'recharge');
+            const lastRecharge = transactions.find(
+              (t) => t.transaction_type === "recharge",
+            );
             if (lastRecharge) {
               const date = new Date(lastRecharge.created_at);
-              const formatted = date.toLocaleDateString('pt-BR', {
-                day: '2-digit', month: '2-digit', year: 'numeric'
+              const formatted = date.toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
               });
-              const amount = Math.abs(parseFloat(lastRecharge.amount)).toFixed(2).replace('.', ',');
+              const amount = Math.abs(parseFloat(lastRecharge.amount))
+                .toFixed(2)
+                .replace(".", ",");
               el.textContent = `${formatted} — R$ ${amount}`;
             } else {
-              el.textContent = 'Nenhuma recarga encontrada';
+              el.textContent = "Nenhuma recarga encontrada";
             }
             return;
           }
-        } catch (_) { /* sem conexão */ }
-        el.textContent = 'Indisponível no momento';
+        } catch (_) {
+          /* sem conexão */
+        }
+        el.textContent = "Indisponível no momento";
       })();
     </script>
     <script src="./js/app.js"></script>
-  <script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>
-</body>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () =>
+          navigator.serviceWorker.register("/sw.js"),
+        );
+      }
+    </script>
+  </body>
 </html>
