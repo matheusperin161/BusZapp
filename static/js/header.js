@@ -67,8 +67,8 @@
       <i data-feather="user" class="w-5 h-5"></i>
     </button>` : '';
 
-  const html = `<header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-40 relative overflow-hidden">
-    ${circles}
+  const html = `<header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-40 relative">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">${circles}</div>
     <div class="w-full px-4 py-4 flex items-center relative">
       <div class="pl-14">
         <h1 class="text-2xl font-extrabold tracking-tight"${titleId ? ` id="${titleId}"` : ''}>${title}</h1>
