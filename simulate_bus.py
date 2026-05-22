@@ -8,9 +8,13 @@ Uso:
     python simulate_bus.py --all                # simula todos as linhas ao mesmo tempo
     python simulate_bus.py --speed 3            # 3x mais rápido
 """
-import time, argparse, requests, threading
+import os, time, argparse, requests, threading
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_URL = "http://localhost:8080"
+_BUS_SECRET = os.getenv('BUS_API_SECRET', '')
 
 # Paradas por linha (mesmas do seed.py)
 LINES = {
@@ -35,8 +39,12 @@ def lerp(a, b, t): return a + (b - a) * t
 
 def send(bus_id, lat, lng, bus_number):
     try:
+        headers = {'Content-Type': 'application/json'}
+        if _BUS_SECRET:
+            headers['X-Bus-Secret'] = _BUS_SECRET
         r = requests.post(f"{BASE_URL}/api/update_location",
             json={"bus_id": bus_id, "latitude": lat, "longitude": lng, "bus_number": bus_number},
+            headers=headers,
             timeout=4)
         return r.status_code == 200
     except:

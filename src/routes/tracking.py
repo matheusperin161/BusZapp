@@ -1,12 +1,21 @@
 """Real-time bus tracking routes and Socket.IO handlers."""
+import os
 from datetime import datetime
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 
 from src.models import db
 from src.models.user import BusLocation
 from src.models.tracking import Route, StopPoint, BusSchedule
 from src.utils.geo import calculate_speed, find_next_stops_with_eta
 from src.config import GOOGLE_API_KEY
+
+
+def _check_bus_auth() -> bool:
+    """Accept driver session or static API key (for simulator/GPS devices)."""
+    if session.get('driver_id'):
+        return True
+    secret = os.getenv('BUS_API_SECRET', '')
+    return bool(secret and request.headers.get('X-Bus-Secret') == secret)
 
 tracking_bp = Blueprint('tracking', __name__, url_prefix='/api')
 
@@ -30,6 +39,9 @@ def _get_route_by_number(route_number: str) -> Route | None:
 
 @tracking_bp.route('/update_location', methods=['POST'])
 def update_location():
+    if not _check_bus_auth():
+        return jsonify({'error': 'Não autenticado'}), 401
+
     data = request.get_json() or {}
     if not all(k in data for k in ('bus_id', 'latitude', 'longitude')):
         return jsonify({'error': 'bus_id, latitude e longitude são obrigatórios'}), 400

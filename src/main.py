@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 
 from src.models import db
 from src.config import config
+from src.extensions import limiter
 
 
 socketio = SocketIO()
@@ -19,11 +20,16 @@ def create_app(env: str = 'default') -> Flask:
     app = Flask(__name__, static_folder=os.path.join(project_root, 'static'))
     app.config.from_object(config[env])
 
+    # Allowed origins: comma-separated list from env, fallback to localhost for dev
+    _raw_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:8080,http://127.0.0.1:8080')
+    allowed_origins = [o.strip() for o in _raw_origins.split(',') if o.strip()]
+
     # Extensions
-    CORS(app, supports_credentials=True)
+    CORS(app, supports_credentials=True, origins=allowed_origins)
     db.init_app(app)
-    migrate.init_app(app, db)   # habilita flask db init/migrate/upgrade
-    socketio.init_app(app, cors_allowed_origins='*')
+    migrate.init_app(app, db)
+    limiter.init_app(app)
+    socketio.init_app(app, cors_allowed_origins=allowed_origins)
 
     # Register blueprints
     from src.routes.auth import auth_bp
@@ -44,6 +50,18 @@ def create_app(env: str = 'default') -> Flask:
     # Create tables
     with app.app_context():
         db.create_all()
+
+    @app.after_request
+    def set_security_headers(response):
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Permissions-Policy'] = 'geolocation=(self), camera=(), microphone=()'
+        response.headers['X-XSS-Protection'] = '0'
+        # Remove server fingerprint headers
+        response.headers.pop('Server', None)
+        response.headers.pop('X-Powered-By', None)
+        return response
 
     # Serve frontend SPA
     @app.route('/', defaults={'path': ''})

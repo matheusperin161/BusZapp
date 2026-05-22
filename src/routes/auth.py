@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from src.models import db
 from src.models.user import User
 from src.utils.auth import login_required
+from src.extensions import limiter
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
 MAX_AVATAR_BYTES = 3 * 1024 * 1024  # 3 MB
@@ -21,6 +22,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit("5 per minute; 20 per hour")
 def register():
     from src.models.user import EmailVerificationToken
     from src.services.email_service import send_verification_email
@@ -114,6 +116,7 @@ def verify_email():
 
 
 @auth_bp.route('/resend-verification', methods=['POST'])
+@limiter.limit("3 per hour")
 def resend_verification():
     """Reenvia o e-mail de verificação para o usuário."""
     from src.models.user import EmailVerificationToken
@@ -147,6 +150,7 @@ def resend_verification():
 
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit("10 per minute; 50 per hour")
 def login():
     data = request.get_json() or {}
     email = data.get('email', '').strip().lower()
@@ -243,6 +247,7 @@ def update_profile():
 
 
 @auth_bp.route('/forgot-password', methods=['POST'])
+@limiter.limit("5 per hour")
 def forgot_password():
     from src.models.user import PasswordResetToken
     from src.services.email_service import send_password_reset_email
