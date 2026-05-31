@@ -1,192 +1,321 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login – BuszApp</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { darkMode: 'class' }</script>
-  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
-<link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#f59e0b">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="BusZapp">
-  <link rel="apple-touch-icon" href="/static/img/icon-192x192.png">
-  <link rel="stylesheet" href="./css/main.css" />
-  <style>
-    .login-bg {
-      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-    }
-    .dark .login-bg {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    }
-    .login-card {
-      background: white;
-      border-radius: 24px;
-      box-shadow: 0 25px 60px rgba(0,0,0,.2);
-      overflow: hidden;
-    }
-    .dark .login-card { background: #1e293b; }
-    .input-wrap { position: relative; margin-bottom: 1.25rem; }
-    .input-wrap input {
-      width: 100%; padding: 13px 14px 13px 44px;
-      border: 2px solid #e5e7eb; border-radius: 12px;
-      font-size: 15px; transition: all .25s ease;
-      background: #f9fafb; color: #111;
-    }
-    .dark .input-wrap input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
-    .input-wrap input:focus {
-      outline: none; border-color: #fbbf24; background: #fff;
-      box-shadow: 0 0 0 4px rgba(251,191,36,.15); transform: translateY(-1px);
-    }
-    .dark .input-wrap input:focus { background: #1e293b; }
-    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
-    .btn-submit {
-      width: 100%; padding: 13px; border: none; border-radius: 12px;
-      background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff;
-      font-size: 15px; font-weight: 600; cursor: pointer; transition: all .25s ease;
-    }
-    .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(251,191,36,.4); }
-    .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      25%      { transform: translateX(-8px); }
-      75%      { transform: translateX(8px); }
-    }
-    .shake { animation: shake .4s; }
-  </style>
-</head>
-<body>
-  <div class="login-bg min-h-screen flex items-center justify-center p-4">
-    <div class="login-card w-full max-w-4xl animate-scale-in">
-      <div class="md:flex">
-
-        <!-- Decorative panel -->
-        <div class="md:w-2/5 bg-gradient-to-b from-yellow-400 to-amber-600 p-12
-                    flex flex-col justify-center items-center text-white">
-          <div class="animate-float mb-6">
-            <div class="bg-white/20 backdrop-blur p-6 rounded-3xl">
-              <i data-feather="bus" class="w-20 h-20"></i>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login – BuszApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"
+      defer
+    ></script>
+    <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#f59e0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BusZapp" />
+    <link rel="apple-touch-icon" href="/static/img/icon-192x192.png" />
+    <link rel="stylesheet" href="./css/main.css" />
+    <style>
+      .login-bg {
+        background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      }
+      .dark .login-bg {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      }
+      .login-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+      .dark .login-card {
+        background: #1e293b;
+      }
+      .input-wrap {
+        position: relative;
+        margin-bottom: 1.25rem;
+      }
+      .input-wrap input {
+        width: 100%;
+        padding: 13px 14px 13px 44px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.25s ease;
+        background: #f9fafb;
+        color: #111;
+      }
+      .dark .input-wrap input {
+        background: #0f172a;
+        border-color: #334155;
+        color: #f1f5f9;
+      }
+      .input-wrap input:focus {
+        outline: none;
+        border-color: #fbbf24;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15);
+        transform: translateY(-1px);
+      }
+      .dark .input-wrap input:focus {
+        background: #1e293b;
+      }
+      .input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+      }
+      .btn-submit {
+        width: 100%;
+        padding: 13px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+      .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(251, 191, 36, 0.4);
+      }
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+      .shake {
+        animation: shake 0.4s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-bg min-h-screen flex items-center justify-center p-4">
+      <div class="login-card w-full max-w-4xl animate-scale-in">
+        <div class="md:flex">
+          <!-- Decorative panel -->
+          <div
+            class="md:w-2/5 bg-gradient-to-b from-yellow-400 to-amber-600 p-12 flex flex-col justify-center items-center text-white"
+          >
+            <div class="animate-float mb-6">
+              <div class="bg-white/20 backdrop-blur p-5 rounded-3xl">
+                <img
+                  src="./img/icone.png"
+                  alt="BusZapp"
+                  class="w-24 h-24 object-contain drop-shadow-lg"
+                />
+              </div>
             </div>
+            <h2 class="text-3xl font-bold mb-3">Bem-vindo!</h2>
+            <p class="text-center opacity-90">
+              Acesse sua conta e aproveite nossos serviços de mobilidade urbana.
+            </p>
           </div>
-          <h2 class="text-3xl font-bold mb-3">Bem-vindo de volta!</h2>
-          <p class="text-center opacity-90">Acesse sua conta e aproveite nossos serviços de mobilidade urbana.</p>
-        </div>
 
-        <!-- Form panel -->
-        <div class="md:w-3/5 p-10">
-          <div class="max-w-sm mx-auto">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Faça seu login</h2>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mb-7">Entre com suas credenciais para acessar o sistema</p>
+          <!-- Form panel -->
+          <div class="md:w-3/5 p-10">
+            <div class="max-w-sm mx-auto">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                Faça seu login
+              </h2>
+              <p class="text-gray-500 dark:text-gray-400 text-sm mb-7">
+                Entre com suas credenciais para acessar o sistema
+              </p>
 
-            <div id="errorBox" class="hidden mb-5 bg-red-50 dark:bg-red-900/20 border border-red-300
-                                       dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3
-                                       rounded-xl text-sm"></div>
+              <div
+                id="errorBox"
+                class="hidden mb-5 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm"
+              ></div>
 
-            <form id="loginForm" novalidate>
-              <div class="input-wrap">
-                <i data-feather="mail" class="input-icon w-4 h-4"></i>
-                <input type="email" id="email" name="email" placeholder="E-mail" autocomplete="email" required />
-              </div>
+              <form id="loginForm" novalidate>
+                <div class="input-wrap">
+                  <i data-feather="mail" class="input-icon w-4 h-4"></i>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="E-mail"
+                    autocomplete="email"
+                    required
+                  />
+                </div>
 
-              <div class="input-wrap">
-                <i data-feather="lock" class="input-icon w-4 h-4"></i>
-                <input type="password" id="password" name="password" placeholder="Senha" autocomplete="current-password" required />
-              </div>
+                <div class="input-wrap">
+                  <i data-feather="lock" class="input-icon w-4 h-4"></i>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Senha"
+                    autocomplete="current-password"
+                    required
+                  />
+                </div>
 
-              <div class="flex items-center justify-between mb-5 text-sm">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
-                  <input type="checkbox" id="remember" class="accent-yellow-500 w-4 h-4" />
-                  Lembrar de mim
-                </label>
-                <a href="forgot-password.html" class="text-yellow-600 dark:text-yellow-400 font-medium hover:underline">
-                  Esqueceu a senha?
+                <div class="flex items-center justify-between mb-5 text-sm">
+                  <label
+                    class="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300"
+                  >
+                    <input
+                      type="checkbox"
+                      id="remember"
+                      class="accent-yellow-500 w-4 h-4"
+                    />
+                    Lembrar de mim
+                  </label>
+                  <a
+                    href="forgot-password.html"
+                    class="text-yellow-600 dark:text-yellow-400 font-medium hover:underline"
+                  >
+                    Esqueceu a senha?
+                  </a>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-submit mb-5">
+                  <span id="btnLabel">Entrar</span>
+                </button>
+              </form>
+
+              <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+                Não tem conta?
+                <a
+                  href="register.html"
+                  class="text-yellow-600 dark:text-yellow-400 font-semibold hover:underline"
+                >
+                  Cadastre-se gratuitamente
+                </a>
+              </p>
+
+              <div class="mt-8 text-center">
+                <a
+                  href="index.html"
+                  class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-white transition"
+                >
+                  <i data-feather="arrow-left" class="w-4 h-4"></i> Voltar para
+                  home
                 </a>
               </div>
-
-              <button type="submit" id="submitBtn" class="btn-submit mb-5">
-                <span id="btnLabel">Entrar</span>
-              </button>
-            </form>
-
-            <p class="text-center text-sm text-gray-500 dark:text-gray-400">
-              Não tem conta?
-              <a href="register.html" class="text-yellow-600 dark:text-yellow-400 font-semibold hover:underline">
-                Cadastre-se gratuitamente
-              </a>
-            </p>
-
-            <div class="mt-8 text-center">
-              <a href="index.html" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-white transition">
-                <i data-feather="arrow-left" class="w-4 h-4"></i> Voltar para home
-              </a>
             </div>
           </div>
         </div>
-
       </div>
     </div>
-  </div>
 
-  <script src="./js/app.js"></script>
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const errorBox  = document.getElementById('errorBox');
-      const submitBtn = document.getElementById('submitBtn');
-      const btnLabel  = document.getElementById('btnLabel');
+    <script src="./js/app.js"></script>
+    <script>
+      // ── "Lembrar de mim": preenche o e-mail salvo ao abrir a página ──
+      (function restoreRememberedEmail() {
+        const remembered = localStorage.getItem("buszapp_remember_email");
+        if (remembered) {
+          document.getElementById("email").value = remembered;
+          document.getElementById("remember").checked = true;
+          // foca direto na senha pra agilizar
+          window.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("password").focus();
+          });
+        }
+      })();
 
-      errorBox.classList.add('hidden');
-      submitBtn.disabled = true;
-      btnLabel.textContent = 'Entrando…';
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const errorBox = document.getElementById("errorBox");
+          const submitBtn = document.getElementById("submitBtn");
+          const btnLabel = document.getElementById("btnLabel");
+          const remember = document.getElementById("remember").checked;
+          const email = document.getElementById("email").value.trim();
 
-      try {
-        const res = await API.post('/api/auth/login', {
-          email:    document.getElementById('email').value.trim(),
-          password: document.getElementById('password').value,
-        });
-        // Salvar ID no localStorage para isolar notificações por usuário
-        if (res.user)   localStorage.setItem('buszapp_user_id', 'u_' + res.user.id);
-        if (res.driver) { localStorage.setItem('buszapp_user_id', 'd_' + res.driver.id); localStorage.setItem('driver_id', res.driver.id); }
-        btnLabel.textContent = 'Sucesso! Redirecionando…';
-        submitBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
-        setTimeout(() => window.location.href = res.redirect || 'dashboard.html', 600);
-      } catch (err) {
-        const data = err.data || {};
-        if (data.not_verified) {
-          // E-mail não verificado — mostrar opção de reenvio
-          errorBox.innerHTML = `
+          errorBox.classList.add("hidden");
+          submitBtn.disabled = true;
+          btnLabel.textContent = "Entrando…";
+
+          try {
+            const res = await API.post("/api/auth/login", {
+              email,
+              password: document.getElementById("password").value,
+            });
+            // Lembrar de mim: persiste/limpa o e-mail
+            if (remember) {
+              localStorage.setItem("buszapp_remember_email", email);
+            } else {
+              localStorage.removeItem("buszapp_remember_email");
+            }
+            // Salvar ID no localStorage para isolar notificações por usuário
+            if (res.user)
+              localStorage.setItem("buszapp_user_id", "u_" + res.user.id);
+            if (res.driver) {
+              localStorage.setItem("buszapp_user_id", "d_" + res.driver.id);
+              localStorage.setItem("driver_id", res.driver.id);
+            }
+            btnLabel.textContent = "Sucesso! Redirecionando…";
+            submitBtn.style.background =
+              "linear-gradient(135deg,#10b981,#059669)";
+            setTimeout(
+              () => (window.location.href = res.redirect || "dashboard.html"),
+              600,
+            );
+          } catch (err) {
+            const data = err.data || {};
+            if (data.not_verified) {
+              // E-mail não verificado — mostrar opção de reenvio
+              errorBox.innerHTML = `
             ${data.error}<br>
             <button onclick="resendVerification('${data.email}')"
               style="margin-top:8px;text-decoration:underline;background:none;border:none;cursor:pointer;color:inherit;font-size:inherit"
               id="resendBtn">Reenviar link de verificação</button>`;
-        } else {
-          errorBox.textContent = data.error || 'E-mail ou senha inválidos.';
-        }
-        errorBox.classList.remove('hidden');
-        errorBox.classList.add('shake');
-        setTimeout(() => errorBox.classList.remove('shake'), 400);
-        submitBtn.disabled = false;
-        btnLabel.textContent = 'Entrar';
-      }
-    });
+            } else {
+              errorBox.textContent = data.error || "E-mail ou senha inválidos.";
+            }
+            errorBox.classList.remove("hidden");
+            errorBox.classList.add("shake");
+            setTimeout(() => errorBox.classList.remove("shake"), 400);
+            submitBtn.disabled = false;
+            btnLabel.textContent = "Entrar";
+          }
+        });
 
-    async function resendVerification(email) {
-      const btn = document.getElementById('resendBtn');
-      btn.textContent = 'Enviando...';
-      btn.disabled = true;
-      try {
-        await API.post('/api/auth/resend-verification', { email });
-        btn.textContent = '✅ Link enviado! Verifique seu e-mail.';
-      } catch(e) {
-        btn.textContent = 'Erro — tente novamente';
-        btn.disabled = false;
+      async function resendVerification(email) {
+        const btn = document.getElementById("resendBtn");
+        btn.textContent = "Enviando...";
+        btn.disabled = true;
+        try {
+          await API.post("/api/auth/resend-verification", { email });
+          btn.textContent = "✅ Link enviado! Verifique seu e-mail.";
+        } catch (e) {
+          btn.textContent = "Erro — tente novamente";
+          btn.disabled = false;
+        }
       }
-    }
-  </script>
-<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>
-</body>
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () =>
+          navigator.serviceWorker.register("/sw.js"),
+        );
+      }
+    </script>
+  </body>
 </html>
