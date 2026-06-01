@@ -231,6 +231,7 @@
                   >Li e aceito os
                   <a
                     href="#"
+                    onclick="openTermsModal(event)"
                     class="text-yellow-600 dark:text-yellow-400 font-medium hover:underline"
                     >Termos de Serviço</a
                   ></span
@@ -365,6 +366,187 @@
         }
       }
     </script>
+
+    <!-- Modal de Termos de Serviço -->
+    <div
+      id="termsModal"
+      class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onclick="closeTermsModal(event)"
+    >
+      <div
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+        onclick="event.stopPropagation()"
+      >
+        <!-- Header -->
+        <div
+          class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700"
+        >
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+            Termos de Serviço – BuszApp
+          </h2>
+          <button
+            onclick="closeTermsModal()"
+            class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+          >
+            <i data-feather="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="overflow-y-auto flex-1 p-6 space-y-4">
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            1. Aceitação dos Termos
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            Ao acessar, cadastrar-se ou utilizar o BuszApp, o usuário declara
+            estar de acordo com estes Termos de Serviço.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            2. Finalidade da Plataforma
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            O BuszApp disponibiliza serviços digitais relacionados à mobilidade
+            urbana, incluindo consulta de informações, gerenciamento de cartões
+            de transporte, recargas e funcionalidades correlatas.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            3. Cadastro e Segurança da Conta
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            O usuário é responsável pela veracidade das informações fornecidas e
+            pela confidencialidade de suas credenciais de acesso.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            4. Recargas e Transações
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            As recargas realizadas estão sujeitas à confirmação e processamento
+            por operadoras de transporte e instituições financeiras parceiras.
+            Eventuais atrasos ou indisponibilidades poderão ocorrer.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            5. Cartões Vinculados
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            O usuário é integralmente responsável pelas informações cadastradas.
+            O BuszApp não se responsabiliza por prejuízos decorrentes de dados
+            incorretos inseridos pelo usuário.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            6. Uso Indevido
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            É proibida qualquer tentativa de fraude, uso indevido da plataforma,
+            acesso não autorizado, inserção de códigos maliciosos ou utilização
+            para fins ilícitos.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            7. Disponibilidade do Serviço
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            O BuszApp poderá passar por manutenção, atualizações ou interrupções
+            temporárias sem aviso prévio.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            8. Privacidade e Proteção de Dados
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            Os dados pessoais serão tratados conforme a Política de Privacidade
+            e em conformidade com a Lei Geral de Proteção de Dados (Lei nº
+            13.709/2018).
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            9. Limitação de Responsabilidade
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            O BuszApp não se responsabiliza por falhas decorrentes de serviços
+            de terceiros, operadoras de transporte, instituições financeiras ou
+            indisponibilidades externas.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            10. Encerramento de Conta
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            A conta poderá ser suspensa ou encerrada em caso de violação destes
+            Termos, bem como por solicitação do próprio usuário.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">
+            11. Alterações dos Termos
+          </h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            Estes Termos poderão ser alterados a qualquer momento, sendo as
+            alterações comunicadas aos usuários pelos meios oficiais.
+          </p>
+
+          <h3 class="font-bold text-gray-900 dark:text-white mt-4">12. Foro</h3>
+          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+            Fica eleito o foro da Comarca de Chapecó, Santa Catarina, Brasil,
+            para dirimir quaisquer controvérsias.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div
+          class="flex gap-3 p-6 border-t border-gray-200 dark:border-gray-700"
+        >
+          <button
+            onclick="closeTermsModal()"
+            class="flex-1 py-2.5 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+          >
+            Fechar
+          </button>
+          <button
+            onclick="acceptTermsModal()"
+            class="flex-1 py-2.5 px-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-white rounded-xl font-semibold hover:shadow-lg transition"
+          >
+            Li e Aceito
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Controle do Modal de Termos de Serviço
+      function openTermsModal(event) {
+        event.preventDefault();
+        document.getElementById("termsModal").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeTermsModal(event) {
+        if (event && event.target.id !== "termsModal") return;
+        document.getElementById("termsModal").classList.add("hidden");
+        document.body.style.overflow = "auto";
+      }
+
+      function acceptTermsModal() {
+        document.getElementById("terms").checked = true;
+        closeTermsModal();
+      }
+
+      // Fechar modal com tecla Escape
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Escape" &&
+          !document.getElementById("termsModal").classList.contains("hidden")
+        ) {
+          closeTermsModal();
+        }
+      });
+
+      feather.replace();
+    </script>
+
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () =>
