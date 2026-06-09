@@ -48,9 +48,14 @@
 <!-- Sidebar Overlay -->
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-<!-- Menu Toggle -->
+<!-- Menu Toggle (home screen) -->
 <button class="menu-toggle" id="menuToggle" aria-label="Menu">
   <i data-feather="menu" class="w-6 h-6"></i>
+</button>
+
+<!-- Back Button (screens 2 and 3) -->
+<button class="menu-toggle hidden" id="backBtn" onclick="goBack()" aria-label="Voltar">
+  <i data-feather="arrow-left" class="w-6 h-6"></i>
 </button>
 
 <!-- Sidebar -->
@@ -174,7 +179,7 @@
     document.getElementById(id).style.display='flex';
     currentScreen=id;
     document.getElementById('backBtn').classList.toggle('hidden',id==='s1');
-    document.getElementById('homeBtn').classList.toggle('hidden',id!=='s1');
+    document.getElementById('menuToggle').classList.toggle('hidden',id!=='s1');
     if(typeof feather!=='undefined')feather.replace();
   }
 
