@@ -367,6 +367,11 @@ def create_route():
                               latitude=origin_lat, longitude=origin_lon, order=1))
     db.session.add(StopPoint(route_id=rt.id, name=data['destination'],
                               latitude=dest_lat, longitude=dest_lon, order=2))
+
+    # Auto-create default departure schedules so the schedules page works immediately
+    from src.routes.tracking import _create_default_schedules
+    _create_default_schedules(rt.id, str(data['route_number']))
+
     db.session.commit()
 
     return jsonify({'message': f'Linha {data["route_number"]} criada com sucesso', 'route_id': rt.id}), 201

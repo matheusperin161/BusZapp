@@ -29,7 +29,7 @@ def create_app(env: str = 'default') -> Flask:
     db.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
-    socketio.init_app(app, cors_allowed_origins=allowed_origins)
+    socketio.init_app(app, cors_allowed_origins=allowed_origins, async_mode='threading')
 
     # Register blueprints
     from src.routes.auth import auth_bp

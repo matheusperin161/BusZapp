@@ -37,6 +37,29 @@ def _get_route_by_number(route_number: str) -> Route | None:
     return Route.query.filter_by(route_name=f'Linha_{route_number}').first()
 
 
+def _create_default_schedules(route_id: int, route_number: str) -> None:
+    """Add 8 default departure times for a route that has none yet."""
+    rn = route_number
+    defaults = [
+        ('06:00', f'{rn}01', f'{rn}101', 'Manhã'),
+        ('07:30', f'{rn}02', f'{rn}102', 'Manhã'),
+        ('09:00', f'{rn}03', f'{rn}103', 'Manhã'),
+        ('12:00', f'{rn}04', f'{rn}104', 'Tarde'),
+        ('14:30', f'{rn}05', f'{rn}105', 'Tarde'),
+        ('17:00', f'{rn}06', f'{rn}106', 'Tarde'),
+        ('18:30', f'{rn}07', f'{rn}107', 'Noite'),
+        ('20:00', f'{rn}08', f'{rn}108', 'Noite'),
+    ]
+    for dep, bnum, bid, period in defaults:
+        db.session.add(BusSchedule(
+            route_id=route_id,
+            departure_time=dep,
+            bus_number=bnum,
+            bus_id=int(bid),
+            period=period,
+        ))
+
+
 @tracking_bp.route('/update_location', methods=['POST'])
 def update_location():
     if not _check_bus_auth():
@@ -153,7 +176,7 @@ def get_route(route_number):
     return jsonify({'stop_points': stop_points, 'route_id': route.id}), 200
 
 
-@tracking_bp.route('/route/<int:route_number>/schedules', methods=['GET'])
+@tracking_bp.route('/route/<route_number>/schedules', methods=['GET'])
 def get_schedules(route_number):
     route = _get_route_by_number(str(route_number))
     if not route:
@@ -163,25 +186,12 @@ def get_schedules(route_number):
         .order_by(BusSchedule.departure_time).all()
 
     if not schedules:
-        defaults = [
-            ('06:00', f'{route_number}01', int(f'{route_number}101'), 'Manhã'),
-            ('07:30', f'{route_number}02', int(f'{route_number}102'), 'Manhã'),
-            ('09:00', f'{route_number}03', int(f'{route_number}103'), 'Manhã'),
-            ('12:00', f'{route_number}04', int(f'{route_number}104'), 'Tarde'),
-            ('14:30', f'{route_number}05', int(f'{route_number}105'), 'Tarde'),
-            ('17:00', f'{route_number}06', int(f'{route_number}106'), 'Tarde'),
-            ('18:30', f'{route_number}07', int(f'{route_number}107'), 'Noite'),
-            ('20:00', f'{route_number}08', int(f'{route_number}108'), 'Noite'),
-        ]
-        for dep, bnum, bid, period in defaults:
-            db.session.add(BusSchedule(
-                route_id=route.id,
-                departure_time=dep,
-                bus_number=bnum,
-                bus_id=bid,
-                period=period,
-            ))
-        db.session.commit()
+        try:
+            _create_default_schedules(route.id, route_number)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            return jsonify([]), 200
         schedules = BusSchedule.query.filter_by(route_id=route.id, active=True)\
             .order_by(BusSchedule.departure_time).all()
 
