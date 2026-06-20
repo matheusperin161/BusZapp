@@ -316,6 +316,7 @@
             const res = await API.post("/api/auth/login", {
               email,
               password: document.getElementById("password").value,
+              remember,
             });
             // Lembrar de mim: persiste/limpa o e-mail
             if (remember) {

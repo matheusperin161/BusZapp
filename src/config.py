@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,6 +21,12 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = _get_database_url()
 
+    # Sessão: dura 30 dias quando "Lembrar de mim" estiver marcado.
+    # Sem isso, o cookie é de sessão (morre ao fechar o navegador).
+    PERMANENT_SESSION_LIFETIME = timedelta(days=30)
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
     # Pool settings — ignorados pelo SQLite, usados pelo PostgreSQL
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,       # verifica conexão antes de usar
@@ -36,6 +43,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+    SESSION_COOKIE_SECURE = True
 
 
 config = {

@@ -155,6 +155,7 @@ def login():
     data = request.get_json() or {}
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
+    remember = bool(data.get('remember', False))
 
     if not email or not password:
         return jsonify({'error': 'E-mail e senha são obrigatórios'}), 400
@@ -163,6 +164,7 @@ def login():
     from src.models.user import Driver
     driver = Driver.query.filter_by(email=email).first()
     if driver and driver.password and check_password_hash(driver.password, password):
+        session.permanent = remember
         session['driver_id'] = driver.id
         session['role'] = 'driver'
         return jsonify({
@@ -182,6 +184,7 @@ def login():
                 'email': email,
             }), 403
 
+        session.permanent = remember
         session['user_id'] = user.id
         session['role'] = user.role
         redirect = '/admin.html' if user.role == 'admin' else '/dashboard.html'
