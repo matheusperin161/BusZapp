@@ -74,6 +74,38 @@
         color: #9ca3af;
         pointer-events: none;
       }
+      .input-wrap input.has-toggle {
+        padding-right: 44px;
+      }
+      .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition:
+          color 0.2s,
+          background 0.2s;
+      }
+      .password-toggle:hover {
+        color: #6b7280;
+        background: rgba(0, 0, 0, 0.04);
+      }
+      .dark .password-toggle {
+        color: #94a3b8;
+      }
+      .dark .password-toggle:hover {
+        color: #cbd5e1;
+        background: rgba(255, 255, 255, 0.06);
+      }
       .btn-submit {
         width: 100%;
         padding: 13px;
@@ -168,10 +200,19 @@
                     type="password"
                     id="password"
                     name="password"
+                    class="has-toggle"
                     placeholder="Senha"
                     autocomplete="current-password"
                     required
                   />
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    data-target="password"
+                    aria-label="Mostrar senha"
+                  >
+                    <i data-feather="eye" class="w-4 h-4"></i>
+                  </button>
                 </div>
 
                 <div class="flex items-center justify-between mb-5 text-sm">
@@ -224,6 +265,25 @@
     </div>
 
     <script src="./js/app.js"></script>
+    <script>
+      // ── Toggle de visibilidade da senha (olho) ──
+      document.querySelectorAll(".password-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.dataset.target);
+          if (!target) return;
+          const showing = target.type === "text";
+          target.type = showing ? "password" : "text";
+          btn.innerHTML = showing
+            ? '<i data-feather="eye-off" class="w-4 h-4"></i>'
+            : '<i data-feather="eye" class="w-4 h-4"></i>';
+          btn.setAttribute(
+            "aria-label",
+            showing ? "Mostrar senha" : "Ocultar senha",
+          );
+          if (typeof feather !== "undefined") feather.replace();
+        });
+      });
+    </script>
     <script>
       // ── "Lembrar de mim": preenche o e-mail salvo ao abrir a página ──
       (function restoreRememberedEmail() {
