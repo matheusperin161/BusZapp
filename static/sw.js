@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'buszapp-v1';
+const CACHE_VERSION = 'buszapp-v2';
 
 // Static assets that are safe to cache indefinitely
 const STATIC_ASSETS = [
@@ -13,14 +13,14 @@ const STATIC_ASSETS = [
 
 // Pages cached on first visit (network-first, fallback to cache)
 const PAGE_ASSETS = [
-  '/dashboard.html',
-  '/acompanhamento.html',
-  '/recarga.html',
-  '/profile.html',
-  '/rating.html',
-  '/login.html',
-  '/register.html',
-  '/forgot-password.html',
+  '/dashboard',
+  '/acompanhamento',
+  '/recarga',
+  '/profile',
+  '/rating',
+  '/login',
+  '/register',
+  '/forgot-password',
 ];
 
 // API prefixes — always network-only (real-time data)
@@ -88,7 +88,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() =>
           caches.match(request).then((cached) =>
-            cached || caches.match('/login.html')
+            cached || caches.match('/login')
           )
         )
     );

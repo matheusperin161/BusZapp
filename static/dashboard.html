@@ -80,22 +80,22 @@
 
   <!-- Sidebar -->
   <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
-    <a href="dashboard.html" class="sidebar-item gap-3">
+    <a href="/dashboard" class="sidebar-item gap-3">
       <i data-feather="home"></i><span>Página Inicial</span>
     </a>
-    <a id="sidebarDrivers" href="add-driver.html" class="sidebar-item hidden gap-3">
+    <a id="sidebarDrivers" href="/add-driver" class="sidebar-item hidden gap-3">
       <i data-feather="users"></i><span>Gerenciar Motoristas</span>
     </a>
-    <a id="sidebarFleet" href="add-vehicle.html" class="sidebar-item hidden gap-3">
+    <a id="sidebarFleet" href="/add-vehicle" class="sidebar-item hidden gap-3">
       <i data-feather="truck"></i><span>Gerenciar Frota</span>
     </a>
-    <a id="sidebarRoutes" href="admin-rotas.html" class="sidebar-item hidden gap-3">
+    <a id="sidebarRoutes" href="/admin-rotas" class="sidebar-item hidden gap-3">
       <i data-feather="map"></i><span>Gerenciar Rotas</span>
     </a>
     <a id="sidebarHistory" href="#" class="sidebar-item hidden gap-3">
       <i data-feather="clock"></i><span>Histórico de Recarga</span>
     </a>
-    <a href="rating.html" class="sidebar-item gap-3">
+    <a href="/rating" class="sidebar-item gap-3">
       <i data-feather="star"></i><span>Avaliação</span>
     </a>
       <div class="mt-auto">
@@ -142,15 +142,15 @@
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-3 gap-4 mb-8 animate-fade-in-up">
-      <button class="action-btn" onclick="window.location.href='recarga.html'">
+      <button class="action-btn" onclick="window.location.href='/recarga'">
         <div class="icon-wrap"><i data-feather="credit-card" class="w-6 h-6 text-white"></i></div>
         <span>Cartão</span>
       </button>
-      <button class="action-btn" onclick="window.location.href='acompanhamento.html'">
+      <button class="action-btn" onclick="window.location.href='/acompanhamento'">
         <div class="icon-wrap"><i data-feather="map-pin" class="w-6 h-6 text-white"></i></div>
         <span>Rastrear</span>
       </button>
-      <button class="action-btn" onclick="window.location.href='rating.html'">
+      <button class="action-btn" onclick="window.location.href='/rating'">
         <div class="icon-wrap"><i data-feather="star" class="w-6 h-6 text-white"></i></div>
         <span>Avaliar</span>
       </button>
@@ -193,11 +193,11 @@
       if (!user) return;
 
       document.getElementById('welcomeMsg').innerHTML =
-        `<i data-feather="user" class="w-4 h-4"></i><span>Olá, <strong>${escapeHtml(user.username)}</strong>!</span>`;
+        `<i data-feather="user" class="w-4 h-4"></i><span>${greeting(`<strong>${escapeHtml(user.username)}</strong>`)}!</span>`;
       if (typeof feather !== 'undefined') feather.replace();
 
       if (user.role === 'admin') {
-        window.location.replace('admin.html');
+        window.location.replace('/admin');
         return;
       }
 

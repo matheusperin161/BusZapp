@@ -58,21 +58,14 @@
 
 <!-- Header -->
 <header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-50">
-  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <div class="bg-white/20 backdrop-blur p-2 rounded-xl"><i data-feather="bus" class="w-7 h-7"></i></div>
-      <div>
-        <h1 class="text-xl font-bold">BuszApp</h1>
-        <p class="text-xs opacity-80">Painel Administrativo</p>
-      </div>
-    </div>
+  <div class="container mx-auto px-4 py-4 flex justify-end items-center">
     <div class="flex items-center gap-2">
       <span id="adminUsername" class="text-sm font-semibold opacity-90 hidden sm:block"></span>
       <button id="themeToggleBtn" onclick="toggleDark()"
               class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema">
         <i data-feather="moon" class="w-5 h-5" id="themeIcon"></i>
       </button>
-      <button onclick="window.location.href='profile.html'"
+      <button onclick="window.location.href='/profile'"
               class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Perfil">
         <i data-feather="user" class="w-5 h-5"></i>
       </button>
@@ -127,7 +120,7 @@
   </div>
 
   <!-- Tab Navigation -->
-  <div class="flex gap-2 flex-wrap mb-6 overflow-x-auto pb-1">
+  <div class="flex gap-2 flex-wrap mb-6 py-2 px-1 -mx-1">
     <button class="admin-tab active" id="tab-btn-drivers" onclick="showTab('drivers')">
       <i data-feather="users" class="w-4 h-4"></i> Motoristas
     </button>
@@ -236,7 +229,7 @@
         </select>
         <button onclick="mapRefresh()"
                 class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2 rounded-xl transition text-sm">
-          <i data-feather="refresh-cw" class="w-4 h-4"></i> Atualizar
+          <i data-feather="refresh-cw" class="w-4 h-4" id="mapRefreshIcon"></i> Atualizar
         </button>
       </div>
     </div>
@@ -1275,11 +1268,15 @@ async function mapInit(){
 }
 
 async function mapRefresh(){
+  const icon=document.getElementById('mapRefreshIcon');
+  if(icon)icon.classList.add('animate-spin');
   try{
     mapAllLocs=await API.get('/api/admin/all-bus-locations');
     mapFilterLine();
   }catch(e){
     document.getElementById('mapStatus').textContent='Erro ao carregar localização dos ônibus.';
+  }finally{
+    if(icon)icon.classList.remove('animate-spin');
   }
 }
 
@@ -1530,20 +1527,31 @@ async function cardSave(){
 // ── LOGOUT ─────────────────────────────────────────────────────────────────
 async function doLogout(){
   try{await API.post('/api/auth/logout',{});}catch(e){}
-  window.location.href='/login.html';
+  window.location.href='/login';
 }
 
 // ── BOOT ───────────────────────────────────────────────────────────────────
+function maskCpf(e){
+  let v=e.target.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  e.target.value=v;
+}
+function maskCnh(e){e.target.value=e.target.value.replace(/\D/g,'').slice(0,11);}
 document.addEventListener('DOMContentLoaded',async()=>{
   if(typeof feather!=='undefined')feather.replace();
 
   const user=await checkAuth(true);
   if(!user){return;}
-  if(user.role!=='admin'){window.location.href='/dashboard.html';return;}
-  document.getElementById('adminUsername').textContent=user.username;
+  if(user.role!=='admin'){window.location.href='/dashboard';return;}
+  document.getElementById('adminUsername').textContent=greeting(user.username);
 
   await Promise.all([loadStats(),drvLoad()]);
   if(typeof feather!=='undefined')feather.replace();
+
+  document.getElementById('drvCpf').addEventListener('input',maskCpf);
+  document.getElementById('drvCnh').addEventListener('input',maskCnh);
 
   // Auto-refresh stats every 30 s so the bus counter stays current
   setInterval(loadStats, 30000);

@@ -2,7 +2,7 @@
   "name": "BusZapp",
   "short_name": "BusZapp",
   "description": "Rastreie ônibus em tempo real e gerencie seu cartão de transporte.",
-  "start_url": "/dashboard.html",
+  "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -24,13 +24,13 @@
     {
       "name": "Rastrear Ônibus",
       "short_name": "Rastrear",
-      "url": "/acompanhamento.html",
+      "url": "/acompanhamento",
       "icons": [{ "src": "/static/img/icon-96x96.png", "sizes": "96x96" }]
     },
     {
       "name": "Meu Cartão",
       "short_name": "Cartão",
-      "url": "/recarga.html",
+      "url": "/recarga",
       "icons": [{ "src": "/static/img/icon-96x96.png", "sizes": "96x96" }]
     }
   ],

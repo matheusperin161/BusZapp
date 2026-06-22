@@ -124,22 +124,22 @@
 
   <!-- Sidebar -->
   <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
-    <a href="dashboard.html" class="sidebar-item gap-3">
+    <a href="/dashboard" class="sidebar-item gap-3">
       <i data-feather="home"></i><span>Página Inicial</span>
     </a>
-    <a id="sidebarDrivers" href="add-driver.html" class="sidebar-item hidden gap-3">
+    <a id="sidebarDrivers" href="/add-driver" class="sidebar-item hidden gap-3">
       <i data-feather="users"></i><span>Gerenciar Motoristas</span>
     </a>
-    <a id="sidebarFleet" href="add-vehicle.html" class="sidebar-item hidden gap-3">
+    <a id="sidebarFleet" href="/add-vehicle" class="sidebar-item hidden gap-3">
       <i data-feather="truck"></i><span>Gerenciar Frota</span>
     </a>
-    <a id="sidebarRoutes" href="admin-rotas.html" class="sidebar-item hidden gap-3">
+    <a id="sidebarRoutes" href="/admin-rotas" class="sidebar-item hidden gap-3">
       <i data-feather="map"></i><span>Gerenciar Rotas</span>
     </a>
-    <a href="rating.html" class="sidebar-item gap-3">
+    <a href="/rating" class="sidebar-item gap-3">
       <i data-feather="star"></i><span>Avaliação</span>
     </a>
-    <a href="profile.html" class="sidebar-item gap-3 bg-white/20">
+    <a href="/profile" class="sidebar-item gap-3 bg-white/20">
       <i data-feather="user"></i><span>Meu Perfil</span>
     </a>
     <div class="mt-auto">
@@ -195,7 +195,7 @@
             <i data-feather="credit-card" class="w-3.5 h-3.5"></i> Saldo
           </p>
           <p id="cardBalance" class="text-3xl font-bold relative z-10">R$ 0,00</p>
-          <a href="recarga.html" class="text-xs opacity-70 mt-1 block hover:opacity-100 underline relative z-10">Recarregar →</a>
+          <a href="/recarga" class="text-xs opacity-70 mt-1 block hover:opacity-100 underline relative z-10">Recarregar →</a>
         </div>
       </div>
     </div>
@@ -284,21 +284,21 @@
             Ações Rápidas
           </h3>
           <div class="flex flex-col gap-2">
-            <a href="recarga.html"
+            <a href="/recarga"
                class="flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-300">
               <div class="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
                 <i data-feather="credit-card" class="w-4 h-4 text-yellow-600"></i>
               </div>
               <span class="text-sm font-medium">Recarregar cartão</span>
             </a>
-            <a href="acompanhamento.html"
+            <a href="/acompanhamento"
                class="flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-300">
               <div class="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
                 <i data-feather="map-pin" class="w-4 h-4 text-yellow-600"></i>
               </div>
               <span class="text-sm font-medium">Rastrear ônibus</span>
             </a>
-            <a href="rating.html"
+            <a href="/rating"
                class="flex items-center gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-300">
               <div class="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
                 <i data-feather="star" class="w-4 h-4 text-yellow-600"></i>
@@ -445,9 +445,9 @@
           document.getElementById('sidebarRoutes').classList.remove('hidden');
           // Redirect back button and sidebar home link to admin panel
           const backBtn = document.getElementById('backBtn');
-          if (backBtn) backBtn.onclick = () => window.location.href = 'admin.html';
-          const homeLink = document.querySelector('a[href="dashboard.html"]');
-          if (homeLink) homeLink.href = 'admin.html';
+          if (backBtn) backBtn.onclick = () => window.location.href = '/admin';
+          const homeLink = document.querySelector('a[href="/dashboard"]');
+          if (homeLink) homeLink.href = '/admin';
           // Hide user-only sections and expand form to full width
           document.getElementById('profileBalanceCard')?.classList.add('hidden');
           document.getElementById('profileSideCol')?.classList.add('hidden');
@@ -460,7 +460,7 @@
 
         if (typeof feather !== 'undefined') feather.replace();
       } catch (e) {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
       }
     }
 

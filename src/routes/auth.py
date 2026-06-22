@@ -77,20 +77,20 @@ def verify_email():
         return '''<html><body style="font-family:Arial;text-align:center;padding:60px">
             <h2 style="color:#e53e3e">❌ Token inválido</h2>
             <p>Link de verificação inválido.</p>
-            <a href="/login.html">Ir para o login</a></body></html>''', 400
+            <a href="/login">Ir para o login</a></body></html>''', 400
 
     record = EmailVerificationToken.query.filter_by(token=token).first()
     if not record or not record.is_valid():
         return '''<html><body style="font-family:Arial;text-align:center;padding:60px">
             <h2 style="color:#e53e3e">❌ Link expirado</h2>
             <p>Este link de verificação expirou ou já foi usado.</p>
-            <a href="/login.html">Ir para o login</a></body></html>''', 400
+            <a href="/login">Ir para o login</a></body></html>''', 400
 
     user = db.session.get(User, record.user_id)
     if not user:
         return '''<html><body style="font-family:Arial;text-align:center;padding:60px">
             <h2 style="color:#e53e3e">❌ Usuário não encontrado</h2>
-            <a href="/login.html">Ir para o login</a></body></html>''', 404
+            <a href="/login">Ir para o login</a></body></html>''', 404
 
     user.email_verified = True
     record.used = True
@@ -98,7 +98,7 @@ def verify_email():
 
     return '''<html>
     <head><meta charset="UTF-8"><title>E-mail confirmado — BusZapp</title>
-    <meta http-equiv="refresh" content="4;url=/login.html">
+    <meta http-equiv="refresh" content="4;url=/login">
     </head>
     <body style="font-family:Arial,sans-serif;text-align:center;padding:80px 20px;background:#fffbeb">
       <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:48px 40px;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
@@ -108,7 +108,7 @@ def verify_email():
           Sua conta foi ativada com sucesso.<br>
           Redirecionando para o login em instantes...
         </p>
-        <a href="/login.html" style="display:inline-block;margin-top:24px;background:linear-gradient(135deg,#fbbf24,#f97316);color:#fff;text-decoration:none;padding:12px 32px;border-radius:10px;font-weight:700">
+        <a href="/login" style="display:inline-block;margin-top:24px;background:linear-gradient(135deg,#fbbf24,#f97316);color:#fff;text-decoration:none;padding:12px 32px;border-radius:10px;font-weight:700">
           Fazer login agora
         </a>
       </div>
@@ -170,7 +170,7 @@ def login():
         return jsonify({
             'message': 'Login realizado com sucesso',
             'role': 'driver',
-            'redirect': '/motorista.html',
+            'redirect': '/motorista',
             'driver': driver.to_dict(),
         }), 200
 
@@ -187,7 +187,7 @@ def login():
         session.permanent = remember
         session['user_id'] = user.id
         session['role'] = user.role
-        redirect = '/admin.html' if user.role == 'admin' else '/dashboard.html'
+        redirect = '/admin' if user.role == 'admin' else '/dashboard'
         return jsonify({
             'message': 'Login realizado com sucesso',
             'role': user.role,

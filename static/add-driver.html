@@ -345,9 +345,19 @@
   const saved=localStorage.getItem('theme'),prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
   if(saved==='dark'||(saved===null&&prefersDark))document.documentElement.classList.add('dark');
 
+  function maskCpf(e){
+    let v=e.target.value.replace(/\D/g,'').slice(0,11);
+    if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+    else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+    else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+    e.target.value=v;
+  }
+  function maskCnh(e){e.target.value=e.target.value.replace(/\D/g,'').slice(0,11);}
   document.addEventListener('DOMContentLoaded',()=>{
     loadBusLines();loadDrivers();
     if(typeof feather!=='undefined')feather.replace();
+    document.getElementById('dCpf').addEventListener('input',maskCpf);
+    document.getElementById('dCnh').addEventListener('input',maskCnh);
   });
 </script>
 <script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>

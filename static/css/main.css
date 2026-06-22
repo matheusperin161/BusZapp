@@ -17,6 +17,8 @@
   --shadow-hover:    0 12px 40px rgba(245,158,11,0.22);
   --radius-card:     1rem;
   --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-collapsed: 70px;
+  --sidebar-expanded:  260px;
 }
 
 .dark {
@@ -75,86 +77,248 @@
 /* ── Sidebar ───────────────────────────────────────────────────── */
 .sidebar {
   position: fixed;
-  left: -300px;
+  left: calc(-1 * var(--sidebar-expanded));
   top: 0;
-  width: 300px;
+  width: var(--sidebar-expanded);
   height: 100vh;
   height: 100dvh;
   background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 50%, var(--color-primary-dark) 100%);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-  transition: left var(--transition-base);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
   z-index: 1000;
-  padding-top: 80px;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  transition: left var(--transition-base), width var(--transition-base), box-shadow var(--transition-base);
 }
 
+/* Mobile: hamburger toggles .open */
 .sidebar.open { left: 0; }
 
+/* Desktop: always visible, hover to expand */
+@media (min-width: 768px) {
+  .sidebar {
+    left: 0;
+    width: var(--sidebar-collapsed);
+    overflow: hidden;
+  }
+  .sidebar:hover {
+    width: var(--sidebar-expanded);
+    box-shadow: 4px 0 28px rgba(0, 0, 0, 0.18);
+    overflow-y: auto;
+  }
+  body:has(#sidebar) {
+    margin-left: var(--sidebar-collapsed);
+  }
+}
+
+/* ── Sidebar Logo ───────────────────────────────────────────────── */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  height: 70px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 8px;
+}
+
+.sidebar-logo-icon {
+  flex-shrink: 0;
+  width: var(--sidebar-collapsed);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-logo-icon svg {
+  width: 26px !important;
+  height: 26px !important;
+  color: white;
+  stroke: white;
+}
+
+.sidebar-logo-icon img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.sidebar-logo-text {
+  font-weight: 700;
+  font-size: 17px;
+  color: white;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.2s ease 0.06s, transform 0.2s ease 0.06s;
+}
+
+.sidebar:hover .sidebar-logo-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Sidebar Items ───────────────────────────────────────────────── */
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 16px 24px;
-  margin: 4px 12px;
+  padding: 13px 0 13px 17px;
+  margin: 3px 8px;
   color: white;
   text-decoration: none;
   border-radius: 12px;
-  transition: all var(--transition-base);
+  transition: background-color var(--transition-base);
   position: relative;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  background: none;
+  border: none;
+  width: calc(100% - 16px);
+  font-family: inherit;
+  text-align: left;
 }
 
-.sidebar-item:hover {
+.sidebar-item:hover,
+.sidebar-item.sidebar-item-active {
   background-color: rgba(255, 255, 255, 0.2);
-  transform: translateX(6px);
 }
 
 .sidebar-item::before {
   content: '';
   position: absolute;
-  left: 0; top: 50%;
+  left: 0;
+  top: 50%;
   transform: translateY(-50%);
-  width: 4px; height: 0;
+  width: 3px;
+  height: 0;
   background: white;
   border-radius: 0 4px 4px 0;
   transition: height var(--transition-base);
 }
 
-.sidebar-item:hover::before { height: 70%; }
+.sidebar-item:hover::before { height: 60%; }
 
-.sidebar-item i  { margin-right: 14px; width: 22px; height: 22px; }
-.sidebar-item span { font-size: 15px; font-weight: 500; }
+.sidebar-item > i,
+.sidebar-item > svg {
+  flex-shrink: 0;
+  width: 20px !important;
+  height: 20px !important;
+  display: block;
+}
 
-/* ── Menu Toggle ───────────────────────────────────────────────── */
+.sidebar-item > span {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.2s ease 0.08s, transform 0.2s ease 0.08s;
+  pointer-events: none;
+}
+
+.sidebar:hover .sidebar-item > span {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Mobile: labels always visible when sidebar is open */
+@media (max-width: 767px) {
+  .sidebar-item > span,
+  .sidebar-logo-text {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Menu Toggle (mobile only) ─────────────────────────────────── */
 .menu-toggle {
   position: fixed;
-  left: 20px; top: 20px;
+  left: 16px;
+  top: 14px;
   z-index: 1001;
-  width: 44px; height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
   background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
   color: white;
   border: none;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: var(--shadow-card);
   transition: all var(--transition-base);
 }
 
 .menu-toggle:hover { transform: scale(1.08); box-shadow: var(--shadow-hover); }
 
-/* ── Sidebar Overlay ───────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .menu-toggle { display: none; }
+}
+
+/* ── Sidebar Overlay (mobile only) ─────────────────────────────── */
 .sidebar-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.4);
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
   z-index: 999;
   display: none;
   backdrop-filter: blur(2px);
 }
+
 .sidebar-overlay.visible { display: block; }
+
+@media (min-width: 768px) {
+  .sidebar-overlay { display: none !important; }
+}
+
+/* ── Custom Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c5cc;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+::-webkit-scrollbar-corner {
+  background: #e5e7eb;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c5cc #e5e7eb;
+}
+
+.dark {
+  scrollbar-color: #4b5563 #374151;
+}
 
 /* ── Cards ─────────────────────────────────────────────────────── */
 .card {

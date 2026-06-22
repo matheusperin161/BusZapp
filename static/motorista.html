@@ -494,7 +494,7 @@
 
   <!-- Sidebar -->
   <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação">
-    <a href="motorista.html" class="sidebar-item gap-3">
+    <a href="/motorista" class="sidebar-item gap-3">
       <i data-feather="truck"></i><span>Painel Motorista</span>
     </a>
     <div class="mt-auto">
@@ -681,10 +681,10 @@
     function logout() {
       if (typeof API !== 'undefined') {
         API.post('/api/logout', {}).catch(() => {}).finally(() => {
-          window.location.href = 'login.html';
+          window.location.href = '/login';
         });
       } else {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
       }
     }
 
