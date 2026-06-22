@@ -485,7 +485,9 @@ body:has(.bz-bottom-nav) main { padding-bottom: calc(var(--bottom-nav-height) + 
 }
 
 /* ── 7. Buttons ───────────────────────────────────────────────────── */
-.bz-btn {
+.bz-btn,
+.btn-primary,
+.btn-danger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -501,8 +503,12 @@ body:has(.bz-bottom-nav) main { padding-bottom: calc(var(--bottom-nav-height) + 
   text-decoration: none;
   line-height: 1;
 }
-.bz-btn:disabled { opacity: .5; cursor: not-allowed; }
-.bz-btn:not(:disabled):active { transform: translateY(0); }
+.bz-btn:disabled,
+.btn-primary:disabled,
+.btn-danger:disabled { opacity: .5; cursor: not-allowed; }
+.bz-btn:not(:disabled):active,
+.btn-primary:not(:disabled):active,
+.btn-danger:not(:disabled):active { transform: translateY(0); }
 
 .bz-btn-primary,
 .btn-primary {
