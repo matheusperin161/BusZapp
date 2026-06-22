@@ -38,20 +38,26 @@ const Toast = (() => {
     return container;
   }
 
-  const ICONS = {
-    success: '✓', error: '✕', warning: '⚠', info: 'ℹ',
+  const FEATHER_ICON = {
+    success: 'check-circle',
+    error:   'alert-circle',
+    warning: 'alert-triangle',
+    info:    'info',
   };
 
   function show(message, type = 'info', duration = 4000) {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
-      <span style="font-size:1.1rem;flex-shrink:0">${ICONS[type] || ICONS.info}</span>
-      <span style="flex:1;font-size:.875rem">${escapeHtml(message)}</span>
-      <button class="toast-dismiss" onclick="this.closest('.toast').remove()" aria-label="Fechar"
-        style="background:none;border:none;cursor:pointer;font-size:1rem;color:inherit;opacity:.6;">✕</button>
+      <i data-feather="${FEATHER_ICON[type] || FEATHER_ICON.info}" class="toast-icon"></i>
+      <span class="toast-message">${escapeHtml(message)}</span>
+      <button type="button" class="toast-dismiss" aria-label="Fechar">
+        <i data-feather="x" class="w-4 h-4"></i>
+      </button>
     `;
+    toast.querySelector('.toast-dismiss').addEventListener('click', () => toast.remove());
     getContainer().appendChild(toast);
+    if (typeof window.feather !== 'undefined') window.feather.replace();
     if (duration > 0) setTimeout(() => toast.remove(), duration);
     return toast;
   }
