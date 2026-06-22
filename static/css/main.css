@@ -366,10 +366,28 @@ html { scrollbar-width: thin; scrollbar-color: #c1c5cc #e5e7eb; }
   top: 0;
   z-index: 40;
 }
+.bz-header-titles {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  min-width: 0;
+}
 .bz-header-title {
   font-weight: 800;
   color: var(--color-text);
   font-size: var(--font-md);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bz-header-subtitle {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .bz-header-actions {
   margin-left: auto;
@@ -404,6 +422,7 @@ html { scrollbar-width: thin; scrollbar-color: #c1c5cc #e5e7eb; }
     padding: 0 var(--space-4);
   }
   .bz-header-title { color: white; }
+  .bz-header-subtitle { color: rgba(255, 255, 255, .85); }
   .bz-header-icon-btn {
     background: rgba(255,255,255,.22);
     border-color: transparent;
