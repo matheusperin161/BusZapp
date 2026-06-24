@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BuszApp – Sistema Inteligente de Mobilidade Urbana</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { darkMode: 'class' }</script>
+  <script>tailwind.config = { darkMode: 'class', theme: { extend: { screens: { xs: '400px' } } } }</script>
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
   <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
   <link rel="manifest" href="/manifest.json">
@@ -30,33 +30,33 @@
 <body class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
 
   <header class="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-md z-50">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-xl shadow">
-          <i data-feather="bus" class="w-7 h-7 text-white"></i>
+    <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-2">
+      <a href="index.html" class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-xl shadow shrink-0">
+          <i data-feather="bus" class="w-6 h-6 sm:w-7 sm:h-7 text-white"></i>
         </div>
-        <div>
-          <h1 class="text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">BuszApp</h1>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Mobilidade Inteligente</p>
+        <div class="min-w-0">
+          <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent leading-tight">BuszApp</h1>
+          <p class="hidden sm:block text-xs text-gray-500 dark:text-gray-400">Mobilidade Inteligente</p>
         </div>
-      </div>
-      <div class="flex items-center gap-3">
+      </a>
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
         <button onclick="DarkMode.toggle()" class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition" aria-label="Tema">
           <i data-feather="moon" class="w-5 h-5 text-gray-600 dark:text-gray-300"></i>
         </button>
-        <a href="login.html" class="px-4 py-2 rounded-xl text-yellow-600 dark:text-yellow-400 font-semibold text-sm hover:bg-yellow-50 dark:hover:bg-gray-700 transition">Entrar</a>
-        <a href="register.html" class="btn-primary text-sm">Cadastrar-se</a>
+        <a href="login.html" class="hidden xs:inline-block px-3 sm:px-4 py-2 rounded-xl text-yellow-600 dark:text-yellow-400 font-semibold text-sm hover:bg-yellow-50 dark:hover:bg-gray-700 transition">Entrar</a>
+        <a href="register.html" class="btn-primary text-sm whitespace-nowrap px-4 py-2">Cadastrar-se</a>
       </div>
     </div>
   </header>
 
-  <section class="hero-bg pt-28 pb-20 text-white relative overflow-hidden">
+  <section class="hero-bg pt-24 sm:pt-28 pb-16 sm:pb-20 text-white relative overflow-hidden">
     <div class="container mx-auto px-6 text-center relative z-10">
-      <div class="animate-float inline-block mb-8">
-        <img src="./img/bus_auto.webp" alt="BuszApp" class="w-48 sm:w-60 mx-auto drop-shadow-2xl rounded-2xl" onerror="this.style.display='none'" />
+      <div class="animate-float inline-block mb-6 sm:mb-8 max-w-full">
+        <img src="./img/bus_auto.webp" alt="BuszApp" class="w-40 sm:w-60 max-w-full h-auto mx-auto drop-shadow-2xl rounded-2xl" onerror="this.style.display='none'" />
       </div>
-      <h2 class="text-4xl sm:text-5xl font-bold mb-5 leading-tight">Mobilidade Urbana<br/><span class="opacity-90">Inteligente e Conectada</span></h2>
-      <p class="text-lg opacity-90 max-w-2xl mx-auto mb-10">Rastreie ônibus em tempo real, gerencie seu cartão e avalie o serviço — tudo em um só lugar.</p>
+      <h2 class="text-3xl sm:text-5xl font-bold mb-5 leading-tight">Mobilidade Urbana<br/><span class="opacity-90">Inteligente e Conectada</span></h2>
+      <p class="text-base sm:text-lg opacity-90 max-w-2xl mx-auto mb-8 sm:mb-10">Rastreie ônibus em tempo real, gerencie seu cartão e avalie o serviço — tudo em um só lugar.</p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a href="register.html" class="bg-white text-yellow-600 px-8 py-3.5 rounded-2xl font-bold hover:shadow-2xl hover:-translate-y-1 transition-all">Começar agora</a>
         <a href="login.html" class="bg-white/20 backdrop-blur border border-white/40 text-white px-8 py-3.5 rounded-2xl font-semibold hover:bg-white/30 transition">Já tenho conta</a>
