@@ -183,7 +183,7 @@ html { scrollbar-width: thin; scrollbar-color: #c1c5cc #e5e7eb; }
 .sidebar-logo {
   display: flex;
   align-items: center;
-  height: 70px;
+  height: var(--header-height);
   flex-shrink: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   margin-bottom: 8px;
@@ -614,6 +614,27 @@ body:has(.bz-bottom-nav) main { padding-bottom: calc(var(--bottom-nav-height) + 
   margin-bottom: 6px;
   letter-spacing: .3px;
 }
+
+/* ── 8b. Selects (seta customizada, remove visual nativo do browser) ─ */
+select,
+select.form-input,
+select.input-modern,
+select.input-field,
+select.bz-input,
+.bz-select,
+.dark select.form-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+  padding-right: 42px;
+  cursor: pointer;
+}
+/* Esconde a seta nativa no Edge/IE */
+select::-ms-expand { display: none; }
 
 /* ── 9. Badges ────────────────────────────────────────────────────── */
 .bz-badge,

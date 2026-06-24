@@ -26,7 +26,7 @@
 (function () {
   const s = document.currentScript;
 
-  const title       = s.dataset.title       || 'BusZapp';
+  const title       = s.dataset.title       || 'BuszApp';
   const subtitle    = s.dataset.subtitle    || '';
   const showTheme   = s.dataset.showTheme   !== 'false';
   const showNotif   = s.dataset.showNotifications === 'true';
