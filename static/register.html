@@ -172,7 +172,9 @@
 
             <!-- Tela pós-cadastro: confirmar e-mail -->
             <div id="verifyEmailBox" class="hidden text-center py-4">
-              <div style="font-size: 52px; margin-bottom: 12px">📬</div>
+              <div style="margin-bottom: 12px">
+                <i data-feather="mail" class="w-12 h-12 mx-auto"></i>
+              </div>
               <h3
                 class="text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-2"
               >
@@ -429,7 +431,8 @@
         btn.textContent = "Enviando...";
         try {
           await API.post("/api/auth/resend-verification", { email });
-          btn.textContent = "✅ Enviado!";
+          btn.innerHTML = '<i data-feather="check-circle"></i> Enviado!';
+          if (typeof feather !== "undefined") feather.replace();
           setTimeout(() => {
             btn.disabled = false;
             btn.textContent = "Reenviar link";

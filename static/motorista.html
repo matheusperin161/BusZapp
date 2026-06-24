@@ -572,7 +572,7 @@
       <div class="card-title">Escolha seu horário</div>
       <div class="schedule-list" id="schedule-list">
         <div class="empty-state">
-          <span class="icon">🕐</span>
+          <span class="icon"><i data-feather="clock" class="w-10 h-10"></i></span>
           Selecione uma rota para ver os horários
         </div>
       </div>
@@ -608,7 +608,7 @@
       </div>
 
       <div class="gps-row">
-        <div class="gps-icon">📡</div>
+        <div class="gps-icon"><i data-feather="radio" class="w-5 h-5"></i></div>
         <div class="gps-info">
           <div class="gps-label">Precisão GPS</div>
           <div class="gps-accuracy" id="gps-accuracy">Aguardando...</div>
@@ -622,7 +622,7 @@
         🚌 Iniciar Trajeto
       </button>
       <button class="btn btn-stop" id="btn-stop" onclick="stopTrip()" style="display:none">
-        ⏹ Encerrar Trajeto
+        <i data-feather="square" class="w-5 h-5"></i> Encerrar Trajeto
       </button>
     </div>
 
@@ -637,16 +637,16 @@
 
       <div class="incident-grid">
         <button class="incident-btn atraso"   onclick="selectIncident('atraso')"   id="inc-atraso">
-          <span class="inc-icon">⏰</span><span>Atraso</span>
+          <span class="inc-icon"><i data-feather="clock" class="w-6 h-6"></i></span><span>Atraso</span>
         </button>
         <button class="incident-btn pane"     onclick="selectIncident('pane')"     id="inc-pane">
-          <span class="inc-icon">🔧</span><span>Pane mecânica</span>
+          <span class="inc-icon"><i data-feather="tool" class="w-6 h-6"></i></span><span>Pane mecânica</span>
         </button>
         <button class="incident-btn acidente" onclick="selectIncident('acidente')" id="inc-acidente">
-          <span class="inc-icon">⚠️</span><span>Acidente</span>
+          <span class="inc-icon"><i data-feather="alert-triangle" class="w-6 h-6"></i></span><span>Acidente</span>
         </button>
         <button class="incident-btn outro"    onclick="selectIncident('outro')"    id="inc-outro">
-          <span class="inc-icon">📋</span><span>Outro</span>
+          <span class="inc-icon"><i data-feather="clipboard" class="w-6 h-6"></i></span><span>Outro</span>
         </button>
       </div>
       <textarea
@@ -656,7 +656,7 @@
         placeholder="Descrição adicional (opcional)..."
       ></textarea>
       <button class="btn btn-incident-send" id="btn-incident-send" onclick="sendIncident()" disabled style="margin-top:10px">
-        📢 Alertar Passageiros
+        <i data-feather="volume-2" class="w-5 h-5"></i> Alertar Passageiros
       </button>
     </div>
 
@@ -726,6 +726,7 @@
       li.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${type}">${msg}</span>`;
       list.prepend(li);
       while (list.children.length > 30) list.removeChild(list.lastChild);
+      if (typeof feather !== 'undefined') feather.replace();
     }
 
     // ── Status dot ──────────────────────────────────────────────────────────
@@ -786,14 +787,16 @@
       const card = document.getElementById('schedules-card');
       const list = document.getElementById('schedule-list');
       card.style.display = 'block';
-      list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Carregando horários...</div>';
+      list.innerHTML = '<div class="empty-state"><span class="icon"><i data-feather="loader" class="w-10 h-10"></i></span>Carregando horários...</div>';
+      if (typeof feather !== 'undefined') feather.replace();
 
       try {
         const res = await fetch(`${SERVER_URL}/api/route/${selectedRoute.number}/schedules`);
         const data = await res.json();
         renderSchedules(data);
       } catch (e) {
-        list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Erro ao carregar horários</div>';
+        list.innerHTML = '<div class="empty-state"><span class="icon"><i data-feather="x-circle" class="w-10 h-10"></i></span>Erro ao carregar horários</div>';
+        if (typeof feather !== 'undefined') feather.replace();
         log('Erro ao carregar horários', 'error');
       }
     }
@@ -801,7 +804,8 @@
     function renderSchedules(schedules) {
       const list = document.getElementById('schedule-list');
       if (!schedules.length) {
-        list.innerHTML = '<div class="empty-state"><span class="icon">🕐</span>Nenhum horário disponível</div>';
+        list.innerHTML = '<div class="empty-state"><span class="icon"><i data-feather="clock" class="w-10 h-10"></i></span>Nenhum horário disponível</div>';
+        if (typeof feather !== 'undefined') feather.replace();
         return;
       }
 
@@ -935,7 +939,7 @@
           sendCount++;
           document.getElementById('stat-sends').textContent = sendCount;
           setStatus(true, 'Transmitindo');
-          if (sendCount % 5 === 0) log(`📍 ${sendCount} atualizações enviadas`, 'success');
+          if (sendCount % 5 === 0) log(`<i data-feather="map-pin"></i> ${sendCount} atualizações enviadas`, 'success');
         } else {
           log(`Erro ao enviar localização (${res.status})`, 'error');
           setStatus(false, 'Erro');
@@ -1012,7 +1016,7 @@
 
       setStatus(false, 'Offline');
       document.getElementById('incident-card').style.display = 'none';
-      log(`⏹ Trajeto encerrado. Total: ${sendCount} atualizações enviadas.`, 'warn');
+      log(`<i data-feather="square"></i> Trajeto encerrado. Total: ${sendCount} atualizações enviadas.`, 'warn');
       sendCount = 0;
 
       // Notifica o servidor que o trajeto foi encerrado (remove do mapa do admin)
@@ -1041,7 +1045,8 @@
       const desc = document.getElementById('incident-desc').value.trim();
       const btn  = document.getElementById('btn-incident-send');
       btn.disabled = true;
-      btn.textContent = '⏳ Enviando...';
+      btn.innerHTML = '<i data-feather="loader" class="w-5 h-5"></i> Enviando...';
+      if (typeof feather !== 'undefined') feather.replace();
 
       const driverId = localStorage.getItem('driver_id') || null;
 
@@ -1072,7 +1077,7 @@
 
         if (res.ok) {
           const label = typeLabels[selectedIncidentType] || 'Ocorrência';
-          log(`📢 "${label}" enviado — passageiros notificados`, 'success');
+          log(`<i data-feather="volume-2"></i> "${label}" enviado — passageiros notificados`, 'success');
           selectedIncidentType = null;
           document.querySelectorAll('.incident-btn').forEach(b => {
             b.style.opacity = '';
@@ -1080,17 +1085,20 @@
           });
           document.getElementById('incident-desc').value = '';
           btn.disabled = true;
-          btn.textContent = '📢 Alertar Passageiros';
+          btn.innerHTML = '<i data-feather="volume-2" class="w-5 h-5"></i> Alertar Passageiros';
+          if (typeof feather !== 'undefined') feather.replace();
         } else {
           const data = await res.json();
           log(`Erro ao enviar ocorrência: ${data.error || 'desconhecido'}`, 'error');
           btn.disabled = false;
-          btn.textContent = '📢 Alertar Passageiros';
+          btn.innerHTML = '<i data-feather="volume-2" class="w-5 h-5"></i> Alertar Passageiros';
+          if (typeof feather !== 'undefined') feather.replace();
         }
       } catch (e) {
         log('Sem conexão ao enviar ocorrência', 'error');
         btn.disabled = false;
-        btn.textContent = '📢 Alertar Passageiros';
+        btn.innerHTML = '<i data-feather="volume-2" class="w-5 h-5"></i> Alertar Passageiros';
+        if (typeof feather !== 'undefined') feather.replace();
       }
     }
 

@@ -480,7 +480,7 @@
       </div>
       <!-- Coluna direita: mapa + coordenadas -->
       <div>
-        <label class="text-xs font-semibold text-gray-500 mb-2 block">CLIQUE NO MAPA: 1º Origem (🟡), 2º Destino (🔴)</label>
+        <label class="text-xs font-semibold text-gray-500 mb-2 block">CLIQUE NO MAPA: 1º Origem (<svg width="10" height="10" viewBox="0 0 10 10" style="display:inline-block;vertical-align:middle"><circle cx="5" cy="5" r="5" fill="#f59e0b"/></svg>), 2º Destino (<svg width="10" height="10" viewBox="0 0 10 10" style="display:inline-block;vertical-align:middle"><circle cx="5" cy="5" r="5" fill="#ef4444"/></svg>)</label>
         <div id="routePickMap"></div>
         <div class="grid grid-cols-2 gap-3 mt-2">
           <div><label class="text-xs font-semibold text-gray-500 mb-1 block">LAT ORIGEM</label>
@@ -935,7 +935,7 @@ function rtRender(){
         <div class="flex-1 min-w-0">
           <p class="font-bold text-gray-900 dark:text-white text-sm">${esc(r.route_name)}</p>
           <p class="text-xs text-gray-400">${r.stop_count} parada(s)
-            ${r.driver?` · 🧑 ${esc(r.driver.name)}`:''}
+            ${r.driver?` · <i data-feather="user" class="w-3.5 h-3.5 inline align-middle"></i> ${esc(r.driver.name)}`:''}
             ${r.vehicle?` · 🚌 ${esc(r.vehicle.plate)}`:''}
           </p>
         </div>

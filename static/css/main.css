@@ -413,19 +413,37 @@ html { scrollbar-width: thin; scrollbar-color: #c1c5cc #e5e7eb; }
   width: 38px;
   height: 38px;
   border-radius: var(--radius-md);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  background: transparent;
+  border: none;
   color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--transition-base), border-color var(--transition-base);
+  transition: background var(--transition-base);
 }
 .bz-header-icon-btn:hover {
   background: var(--color-surface-2);
-  border-color: var(--color-border-strong);
 }
+
+/* Botão "Voltar" embutido no header */
+.bz-header-back {
+  width: 38px;
+  height: 38px;
+  margin-left: -6px;
+  margin-right: 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-base);
+}
+.bz-header-back:hover { background: var(--color-surface-2); }
 
 @media (max-width: 767px) {
   .bz-header {
@@ -437,14 +455,16 @@ html { scrollbar-width: thin; scrollbar-color: #c1c5cc #e5e7eb; }
   }
   .bz-header-title { color: white; }
   .bz-header-subtitle { color: rgba(255, 255, 255, .85); }
+  .bz-header-back { color: white; }
+  .bz-header-back:hover { background: rgba(255, 255, 255, .22); }
   .bz-header-icon-btn {
-    background: rgba(255,255,255,.22);
-    border-color: transparent;
+    background: transparent;
+    border: none;
     color: white;
     width: 34px;
     height: 34px;
   }
-  .bz-header-icon-btn:hover { background: rgba(255,255,255,.34); }
+  .bz-header-icon-btn:hover { background: rgba(255,255,255,.22); }
 }
 
 /* ── 6. Bottom Nav (mobile only) ──────────────────────────────────── */

@@ -55,11 +55,6 @@
   <i data-feather="menu" class="w-6 h-6"></i>
 </button>
 
-<!-- Back Button (screens 2 and 3) -->
-<button class="menu-toggle hidden" id="backBtn" onclick="goBack()" aria-label="Voltar">
-  <i data-feather="arrow-left" class="w-6 h-6"></i>
-</button>
-
 <!-- Sidebar -->
 <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
   <a href="/dashboard" class="sidebar-item gap-3">
@@ -92,6 +87,23 @@
         data-show-profile="true"
         data-title-id="headerTitle"
         data-subtitle-id="headerSub"></script>
+
+<!-- Botão "Voltar" embutido no header (substitui o botão flutuante) -->
+<script>
+  (function () {
+    const header = document.querySelector('.bz-header');
+    if (!header || document.getElementById('backBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'backBtn';
+    btn.type = 'button';
+    btn.className = 'bz-header-back hidden';
+    btn.setAttribute('aria-label', 'Voltar');
+    btn.innerHTML = '<i data-feather="arrow-left" class="w-5 h-5"></i>';
+    btn.addEventListener('click', () => goBack());
+    header.insertBefore(btn, header.firstChild);
+    if (typeof feather !== 'undefined') feather.replace();
+  })();
+</script>
 
 <!-- SCREEN 1: Lines -->
 <main id="s1" class="screen active container mx-auto px-4 py-8 flex-grow">
@@ -143,7 +155,7 @@
       <div id="map" style="height:100%;min-height:420px"></div>
       <!-- Waiting overlay shown until first GPS update -->
       <div id="waitingOverlay" class="waiting-overlay">
-        <div class="text-5xl mb-4" id="overlayIcon">🕐</div>
+        <div class="mb-4" id="overlayIcon"><i data-feather="clock" class="w-12 h-12 mx-auto text-gray-400"></i></div>
         <p class="font-bold text-gray-700 dark:text-white text-lg" id="overlayTitle">Trajeto não iniciado</p>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center px-6" id="overlayMsg">
           O motorista ainda não iniciou este trajeto.<br>Aguarde o início para acompanhar em tempo real.
@@ -350,7 +362,8 @@
       const c=L.circleMarker([stop.lat,stop.lng],{
         radius:(isFirst||isLast)?10:7,fillColor:color,color:'#fff',weight:2.5,fillOpacity:1
       }).addTo(map);
-      c.bindPopup(`<b>${esc(stop.name)}</b><br><small>${isFirst?'🟡 Origem':isLast?'🔴 Destino':'🟢 Parada'}</small>`);
+      const dotSvg=`<svg width="9" height="9" viewBox="0 0 9 9" style="display:inline-block;vertical-align:middle;margin-right:4px"><circle cx="4.5" cy="4.5" r="4.5" fill="${color}"/></svg>`;
+      c.bindPopup(`<b>${esc(stop.name)}</b><br><small>${dotSvg}${isFirst?'Origem':isLast?'Destino':'Parada'}</small>`);
       stopMarkers.push(c);
     });
   }
@@ -416,7 +429,8 @@
           applyLocationData(json.data);
         } else if(json.trip_active){
           // Driver started but GPS not received yet
-          document.getElementById('overlayIcon').textContent='📡';
+          document.getElementById('overlayIcon').innerHTML='<i data-feather="radio" class="w-12 h-12 mx-auto text-gray-400"></i>';
+          if(typeof feather!=='undefined')feather.replace();
           document.getElementById('overlayTitle').textContent='Aguardando localização';
           document.getElementById('overlayMsg').textContent='O motorista iniciou o trajeto. Aguardando dados de GPS…';
         }

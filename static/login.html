@@ -364,7 +364,9 @@
         btn.disabled = true;
         try {
           await API.post("/api/auth/resend-verification", { email });
-          btn.textContent = "✅ Link enviado! Verifique seu e-mail.";
+          btn.innerHTML =
+            '<i data-feather="check-circle"></i> Link enviado! Verifique seu e-mail.';
+          if (typeof feather !== "undefined") feather.replace();
         } catch (e) {
           btn.textContent = "Erro — tente novamente";
           btn.disabled = false;

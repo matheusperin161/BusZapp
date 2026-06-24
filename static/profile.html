@@ -173,7 +173,7 @@
             <img id="avatarImg" src="" alt="Foto de perfil" class="hidden" />
           </div>
           <div class="avatar-overlay">
-            <span>📷<br>Alterar<br>foto</span>
+            <span class="flex flex-col items-center gap-1"><i data-feather="camera" class="w-6 h-6"></i>Alterar foto</span>
           </div>
         </div>
         <div class="flex-1 text-center md:text-left">
@@ -190,14 +190,6 @@
               <i data-feather="calendar" class="w-3.5 h-3.5"></i> <span id="memberSinceText">—</span>
             </span>
           </div>
-        </div>
-        <!-- Saldo -->
-        <div id="profileBalanceCard" class="balance-card text-white p-5 min-w-[180px] text-center flex-shrink-0 relative z-10">
-          <p class="text-xs opacity-80 mb-1 flex items-center justify-center gap-1">
-            <i data-feather="credit-card" class="w-3.5 h-3.5"></i> Saldo
-          </p>
-          <p id="cardBalance" class="text-3xl font-bold relative z-10">R$ 0,00</p>
-          <a href="/recarga" class="text-xs opacity-70 mt-1 block hover:opacity-100 underline relative z-10">Recarregar →</a>
         </div>
       </div>
     </div>
@@ -431,7 +423,6 @@
         document.getElementById('userEmail').textContent     = data.email;
         document.getElementById('usernameInput').value       = data.username;
         document.getElementById('emailInput').value          = data.email;
-        document.getElementById('cardBalance').textContent   = fmtCurrency(data.card_balance);
         document.getElementById('memberSinceText').textContent = 'Membro desde ' + fmtDate(data.created_at);
         setAvatar(data.profile_picture || null);
 

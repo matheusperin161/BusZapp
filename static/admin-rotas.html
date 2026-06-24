@@ -80,7 +80,7 @@
       </button>
     </div>
     <div id="stopsList" class="mb-4"></div>
-    <p class="text-xs text-gray-400 dark:text-gray-500">💡 Clique no mapa ao adicionar uma parada para preencher as coordenadas automaticamente.</p>
+    <p class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1"><i data-feather="info" class="w-3.5 h-3.5"></i> Clique no mapa ao adicionar uma parada para preencher as coordenadas automaticamente.</p>
   </div>
 
 </main>
@@ -120,7 +120,7 @@
         </div>
       </div>
       <div>
-        <label class="text-xs font-semibold text-gray-500 mb-2 block">CLIQUE NO MAPA: primeiro Origem (🟡), depois Destino (🔴)</label>
+        <label class="text-xs font-semibold text-gray-500 mb-2 block">CLIQUE NO MAPA: primeiro Origem (<svg width="10" height="10" viewBox="0 0 10 10" style="display:inline-block;vertical-align:middle"><circle cx="5" cy="5" r="5" fill="#f59e0b"/></svg>), depois Destino (<svg width="10" height="10" viewBox="0 0 10 10" style="display:inline-block;vertical-align:middle"><circle cx="5" cy="5" r="5" fill="#ef4444"/></svg>)</label>
         <div id="pickMapRoute"></div>
         <div class="grid grid-cols-2 gap-3 mt-2">
           <div>
@@ -288,9 +288,10 @@
     renderTabs();
     document.getElementById('routePanel').classList.remove('hidden');
     document.getElementById('routeTitle').textContent=r.route_name;
-    const driverInfo = r.driver ? `🧑 ${r.driver.name} (${r.driver.code})` : '🧑 Sem motorista';
-    const vehicleInfo = r.vehicle ? `🚌 ${r.vehicle.model} — ${r.vehicle.plate}` : '🚌 Sem veículo';
-    document.getElementById('routeSub').textContent=`${r.stop_count} parada(s)  ·  ${driverInfo}  ·  ${vehicleInfo}`;
+    const driverInfo = r.driver ? `<i data-feather="user" class="w-3.5 h-3.5 inline align-middle"></i> ${esc(r.driver.name)} (${esc(r.driver.code)})` : '<i data-feather="user" class="w-3.5 h-3.5 inline align-middle"></i> Sem motorista';
+    const vehicleInfo = r.vehicle ? `🚌 ${esc(r.vehicle.model)} — ${esc(r.vehicle.plate)}` : '🚌 Sem veículo';
+    document.getElementById('routeSub').innerHTML=`${r.stop_count} parada(s)  ·  ${driverInfo}  ·  ${vehicleInfo}`;
+    if(typeof feather!=='undefined')feather.replace();
     renderStops(r.stops||[]);
   }
 

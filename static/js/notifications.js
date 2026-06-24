@@ -127,24 +127,24 @@ class NotificationManager {
     document.getElementById('noNotificationsMessage')?.remove();
 
     const TYPE_META = {
-      success:    { icon: '✅', bg: '#d1fae5', color: '#059669' },
+      success:    { icon: '<i data-feather="check-circle"></i>', bg: '#d1fae5', color: '#059669' },
       line_delay: { icon: '🚌', bg: '#ffedd5', color: '#ea580c' },
-      warning:    { icon: '⚠️', bg: '#fef9c3', color: '#ca8a04' },
-      error:      { icon: '❌', bg: '#fee2e2', color: '#dc2626' },
-      low_balance:{ icon: '💰', bg: '#ede9fe', color: '#7c3aed' },
-      info:       { icon: 'ℹ️', bg: '#dbeafe', color: '#2563eb' },
+      warning:    { icon: '<i data-feather="alert-triangle"></i>', bg: '#fef9c3', color: '#ca8a04' },
+      error:      { icon: '<i data-feather="x-circle"></i>', bg: '#fee2e2', color: '#dc2626' },
+      low_balance:{ icon: '<i data-feather="dollar-sign"></i>', bg: '#ede9fe', color: '#7c3aed' },
+      info:       { icon: '<i data-feather="info"></i>', bg: '#dbeafe', color: '#2563eb' },
     };
-    const meta = TYPE_META[n.type] || { icon: '🔔', bg: '#fef3c7', color: '#d97706' };
+    const meta = TYPE_META[n.type] || { icon: '<i data-feather="bell"></i>', bg: '#fef3c7', color: '#d97706' };
 
     const el = document.createElement('div');
     el.dataset.notifId = n.id;
     el.className = `notification-item ${n.type}${n.read ? '' : ' unread'}`;
     el.innerHTML = `
-      <div class="notif-type-icon" style="background:${meta.bg}">${meta.icon}</div>
+      <div class="notif-type-icon" style="background:${meta.bg};color:${meta.color}">${meta.icon}</div>
       <div class="notif-content">
         <div class="notif-top">
           <p class="notification-title">${escapeHtml(n.title)}</p>
-          <button data-close="${n.id}" class="notif-close-btn" aria-label="Fechar">✕</button>
+          <button data-close="${n.id}" class="notif-close-btn" aria-label="Fechar"><i data-feather="x"></i></button>
         </div>
         <p class="notification-message">${escapeHtml(n.message)}</p>
         <p class="notification-time">${n.time}</p>
@@ -164,6 +164,8 @@ class NotificationManager {
     });
 
     list.prepend(el);
+
+    if (typeof feather !== 'undefined') feather.replace();
   }
 
   _renderAll() {

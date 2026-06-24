@@ -352,10 +352,11 @@
   </section>
 
   <footer class="bg-gray-800 text-gray-400 text-center py-6 text-sm">
-    <p>© 2025 BuszApp — Sistema Inteligente de Mobilidade Urbana.</p>
+    <p>© <span id="footerYear">2025</span> BuszApp — Sistema Inteligente de Mobilidade Urbana.</p>
   </footer>
 
   <script src="./js/app.js"></script>
+<script>document.getElementById("footerYear").textContent=new Date().getFullYear();</script>
 <script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>
 </body>
 </html>

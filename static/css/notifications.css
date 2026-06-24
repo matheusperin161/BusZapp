@@ -30,14 +30,9 @@
   border-radius: 12px;
   border: none;
   background: transparent;
-  color: white;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
   position: relative;
-}
-.notif-bell-btn:hover {
-  background: rgba(255,255,255,0.15);
-  transform: scale(1.06);
 }
 
 /* ── Badge de não-lidos ── */

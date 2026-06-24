@@ -1299,7 +1299,9 @@
                   data-type="cidadao"
                   onclick="selectCardType('cidadao', this)"
                 >
-                  🏙️ Cidadão
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="home" class="w-4 h-4"></i> Cidadão</span
+                  >
                 </button>
                 <button
                   type="button"
@@ -1307,7 +1309,9 @@
                   data-type="normal"
                   onclick="selectCardType('normal', this)"
                 >
-                  🟢 Normal
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="user" class="w-4 h-4"></i> Normal</span
+                  >
                 </button>
                 <button
                   type="button"
@@ -1315,7 +1319,10 @@
                   data-type="estudante"
                   onclick="selectCardType('estudante', this)"
                 >
-                  🎓 Estudante
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="book-open" class="w-4 h-4"></i>
+                    Estudante</span
+                  >
                 </button>
                 <button
                   type="button"
@@ -1323,7 +1330,9 @@
                   data-type="idoso"
                   onclick="selectCardType('idoso', this)"
                 >
-                  👴 Idoso
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="user" class="w-4 h-4"></i> Idoso</span
+                  >
                 </button>
                 <button
                   type="button"
@@ -1331,7 +1340,10 @@
                   data-type="acompanhante"
                   onclick="selectCardType('acompanhante', this)"
                 >
-                  🤝 Acompanhante
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="users" class="w-4 h-4"></i>
+                    Acompanhante</span
+                  >
                 </button>
                 <button
                   type="button"
@@ -1339,7 +1351,9 @@
                   data-type="carteiro"
                   onclick="selectCardType('carteiro', this)"
                 >
-                  📬 Carteiro
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="mail" class="w-4 h-4"></i> Carteiro</span
+                  >
                 </button>
                 <button
                   type="button"
@@ -1347,7 +1361,10 @@
                   data-type="colaborador"
                   onclick="selectCardType('colaborador', this)"
                 >
-                  💼 Colaborador
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="briefcase" class="w-4 h-4"></i>
+                    Colaborador</span
+                  >
                 </button>
                 <button
                   type="button"
@@ -1355,7 +1372,9 @@
                   data-type="pcd"
                   onclick="selectCardType('pcd', this)"
                 >
-                  ♿ PCD
+                  <span class="inline-flex items-center justify-center gap-1"
+                    ><i data-feather="heart" class="w-4 h-4"></i> PCD</span
+                  >
                 </button>
               </div>
             </div>
@@ -2102,9 +2121,9 @@
           '<i data-feather="lock" class="w-5 h-5"></i> Cartão já cadastrado';
         const note = document.createElement("p");
         note.className =
-          "text-center text-sm text-amber-600 dark:text-amber-400 mt-3";
-        note.textContent =
-          "⚠️ Você já possui um cartão de transporte cadastrado. Se precisar alterar os dados, entre em contato com o suporte.";
+          "text-center text-sm text-amber-600 dark:text-amber-400 mt-3 flex items-center justify-center gap-1";
+        note.innerHTML =
+          '<i data-feather="alert-triangle" class="w-4 h-4"></i><span>Você já possui um cartão de transporte cadastrado. Se precisar alterar os dados, entre em contato com o suporte.</span>';
         btn.parentNode.insertBefore(note, btn.nextSibling);
         feather.replace();
       }

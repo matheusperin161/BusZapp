@@ -60,7 +60,7 @@
         </div>
         <div id="notificationList" class="notif-list">
           <div id="noNotificationsMessage" class="notif-empty">
-            <div class="notif-empty-icon">🔔</div>
+            <div class="notif-empty-icon"><i data-feather="bell"></i></div>
             <p class="notif-empty-title">Nenhuma notificação</p>
             <p class="notif-empty-sub">Você está em dia!</p>
           </div>
