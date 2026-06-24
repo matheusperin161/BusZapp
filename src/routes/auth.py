@@ -249,11 +249,22 @@ def update_profile():
         return jsonify({'error': 'Erro ao atualizar perfil'}), 500
 
 
+def _generate_unique_reset_code():
+    """Gera um código numérico de 6 dígitos que não colide com nenhum existente."""
+    from src.models.user import PasswordResetToken
+    for _ in range(20):
+        code = f"{secrets.randbelow(1_000_000):06d}"
+        if not PasswordResetToken.query.filter_by(token=code).first():
+            return code
+    # fallback extremamente improvável: garante unicidade com timestamp
+    return f"{secrets.randbelow(1_000_000):06d}{int(datetime.utcnow().timestamp())}"[:6]
+
+
 @auth_bp.route('/forgot-password', methods=['POST'])
 @limiter.limit("5 per hour")
 def forgot_password():
     from src.models.user import PasswordResetToken
-    from src.services.email_service import send_password_reset_email
+    from src.services.email_service import send_password_reset_code_email
 
     data = request.get_json() or {}
     email = data.get('email', '').strip().lower()
@@ -264,26 +275,52 @@ def forgot_password():
     user = User.query.filter_by(email=email).first()
 
     if not user:
-        return jsonify({'message': 'Se o e-mail estiver cadastrado, você receberá instruções para redefinir sua senha'}), 200
+        return jsonify({'message': 'Se o e-mail estiver cadastrado, você receberá um código para redefinir sua senha.'}), 200
 
-    # Invalida tokens anteriores
+    # Invalida códigos anteriores
     PasswordResetToken.query.filter_by(user_id=user.id, used=False).update({'used': True})
 
-    token = secrets.token_urlsafe(32)
+    code = _generate_unique_reset_code()
     reset_token = PasswordResetToken(
         user_id=user.id,
-        token=token,
-        expires_at=datetime.utcnow() + timedelta(hours=1),
+        token=code,
+        expires_at=datetime.utcnow() + timedelta(minutes=15),
     )
     db.session.add(reset_token)
     db.session.commit()
 
-    sent = send_password_reset_email(email, user.username, token)
+    sent = send_password_reset_code_email(email, user.username, code)
 
     return jsonify({
-        'message': 'Se o e-mail estiver cadastrado, você receberá instruções para redefinir sua senha.',
+        'message': 'Se o e-mail estiver cadastrado, você receberá um código para redefinir sua senha.',
         'email_sent': sent,
     }), 200
+
+
+@auth_bp.route('/verify-reset-code', methods=['POST'])
+@limiter.limit("15 per hour")
+def verify_reset_code():
+    """Valida o código de 6 dígitos enviado por e-mail (antes de mostrar a tela de nova senha)."""
+    from src.models.user import PasswordResetToken
+
+    data  = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    code  = (data.get('code') or '').strip()
+
+    if not code:
+        return jsonify({'error': 'Informe o código recebido por e-mail'}), 400
+
+    reset = PasswordResetToken.query.filter_by(token=code, used=False).first()
+    if not reset or not reset.is_valid():
+        return jsonify({'error': 'Código inválido ou expirado'}), 400
+
+    # Se o e-mail foi informado, confere se pertence ao dono do código
+    if email:
+        user = db.session.get(User, reset.user_id)
+        if not user or user.email != email:
+            return jsonify({'error': 'Código inválido ou expirado'}), 400
+
+    return jsonify({'message': 'Código verificado com sucesso', 'code': code}), 200
 
 
 @auth_bp.route('/reset-password', methods=['POST'])
@@ -291,21 +328,21 @@ def reset_password():
     from src.models.user import PasswordResetToken
 
     data = request.get_json() or {}
-    token      = data.get('reset_token', '').strip()
-    user_id    = data.get('user_id')
+    # Aceita 'code' (novo fluxo) ou 'reset_token' (compatibilidade com link antigo)
+    code = (data.get('code') or data.get('reset_token') or '').strip()
     new_password     = data.get('new_password', '')
     confirm_password = data.get('confirm_password', '')
 
-    if not token or not new_password or not confirm_password:
+    if not code or not new_password or not confirm_password:
         return jsonify({'error': 'Todos os campos são obrigatórios'}), 400
     if new_password != confirm_password:
         return jsonify({'error': 'As senhas não coincidem'}), 400
     if len(new_password) < 6:
         return jsonify({'error': 'A senha deve ter pelo menos 6 caracteres'}), 400
 
-    reset = PasswordResetToken.query.filter_by(token=token).first()
+    reset = PasswordResetToken.query.filter_by(token=code).first()
     if not reset or not reset.is_valid():
-        return jsonify({'error': 'Token inválido ou expirado. Solicite uma nova redefinição.'}), 400
+        return jsonify({'error': 'Código inválido ou expirado. Solicite uma nova redefinição.'}), 400
 
     user = db.session.get(User, reset.user_id)
     if not user:
