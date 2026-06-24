@@ -1,174 +1,243 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard – BuszApp</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { darkMode: 'class' }</script>
-  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
-  <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#f59e0b">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="BusZapp">
-  <link rel="apple-touch-icon" href="/static/img/icon-192x192.png">
-  <link rel="stylesheet" href="./css/main.css" />
-  <link rel="stylesheet" href="./css/notifications.css" />
-  <style>
-    /* Específicos da dashboard: action tiles e linha de transação */
-    .action-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      padding: 16px 12px; border-radius: 14px; cursor: pointer;
-      background: var(--color-surface); transition: all .25s; border: none;
-      box-shadow: var(--shadow-md);
-    }
-    .action-btn:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-    .action-btn .icon-wrap {
-      width: 48px; height: 48px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--gradient-brand); color: white;
-    }
-    .action-btn span { font-size: 12px; font-weight: 600; color: var(--color-warning-fg); }
-    .dark .action-btn span { color: var(--color-warning-fg); }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard – BuszApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"
+      defer
+    ></script>
+    <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#f59e0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="BusZapp" />
+    <link rel="apple-touch-icon" href="/static/img/icon-192x192.png" />
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/notifications.css" />
+    <style>
+      /* Específicos da dashboard: action tiles e linha de transação */
+      .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 16px 12px;
+        border-radius: 14px;
+        cursor: pointer;
+        background: var(--color-surface);
+        transition: all 0.25s;
+        border: none;
+        box-shadow: var(--shadow-md);
+      }
+      .action-btn:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+      }
+      .action-btn .icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--gradient-brand);
+        color: white;
+      }
+      .action-btn span {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--color-warning-fg);
+      }
+      .dark .action-btn span {
+        color: var(--color-warning-fg);
+      }
 
-    .tx-item {
-      display: flex; align-items: center; gap: 12px; padding: 12px 0;
-      border-bottom: 1px solid var(--color-border);
-    }
-    .tx-item:last-child { border-bottom: none; }
-  </style>
-</head>
-<body class="bg-yellow-50 dark:bg-gray-900 min-h-screen">
+      .tx-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .tx-item:last-child {
+        border-bottom: none;
+      }
+    </style>
+  </head>
+  <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen">
+    <!-- Header (auto-renderizado) -->
+    <script
+      src="./js/header.js"
+      data-title="BuszApp"
+      data-subtitle-id="headerSub"
+      data-show-theme="true"
+      data-show-notifications="true"
+      data-show-profile="true"
+    ></script>
 
-  <!-- Header (auto-renderizado) -->
-  <script src="./js/header.js"
-          data-title="BuszApp"
-          data-subtitle-id="headerSub"
-          data-subtitle="Painel de Controle"
-          data-show-theme="true"
-          data-show-notifications="true"
-          data-show-profile="true"></script>
-
-  <!-- Main -->
-  <main class="container mx-auto px-4 py-8 max-w-5xl">
-
-    <!-- Balance Card -->
-    <div class="bz-balance-card animate-fade-in-up" style="padding: 32px; border-radius: 24px">
-      <div class="flex items-start justify-between mb-4">
-        <div>
-          <p class="bz-balance-card-label flex items-center gap-1.5">
-            <i data-feather="credit-card" class="w-4 h-4"></i> Saldo do Cartão
-          </p>
-          <p id="cardBalance" class="text-5xl font-bold mt-2">R$ 0,00</p>
-          <p class="bz-balance-card-sub">Atualizado agora</p>
+    <!-- Main -->
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+      <!-- Balance Card -->
+      <div
+        class="bz-balance-card animate-fade-in-up"
+        style="padding: 32px; border-radius: 24px"
+      >
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <p class="bz-balance-card-label flex items-center gap-1.5">
+              <i data-feather="credit-card" class="w-4 h-4"></i> Saldo do Cartão
+            </p>
+            <p id="cardBalance" class="text-5xl font-bold mt-2">R$ 0,00</p>
+            <p class="bz-balance-card-sub">Atualizado agora</p>
+          </div>
+          <div class="bg-white/20 p-4 rounded-2xl">
+            <i data-feather="bus" class="w-10 h-10"></i>
+          </div>
         </div>
-        <div class="bg-white/20 p-4 rounded-2xl">
-          <i data-feather="bus" class="w-10 h-10"></i>
+
+        <div
+          id="welcomeMsg"
+          class="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2 text-sm w-fit"
+        >
+          <i data-feather="user" class="w-4 h-4"></i>
+          <span>Bem-vindo!</span>
         </div>
       </div>
 
-      <div id="welcomeMsg" class="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2 text-sm w-fit">
-        <i data-feather="user" class="w-4 h-4"></i>
-        <span>Bem-vindo!</span>
-      </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-3 gap-4 mb-8 mt-8 animate-fade-in-up">
-      <button class="action-btn" onclick="window.location.href='/recarga'">
-        <div class="icon-wrap"><i data-feather="credit-card" class="w-6 h-6"></i></div>
-        <span>Cartão</span>
-      </button>
-      <button class="action-btn" onclick="window.location.href='/acompanhamento'">
-        <div class="icon-wrap"><i data-feather="map-pin" class="w-6 h-6"></i></div>
-        <span>Rastrear</span>
-      </button>
-      <button class="action-btn" onclick="window.location.href='/rating'">
-        <div class="icon-wrap"><i data-feather="star" class="w-6 h-6"></i></div>
-        <span>Avaliar</span>
-      </button>
-    </div>
-
-    <!-- Transactions -->
-    <div class="bz-card animate-fade-in-up">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="bz-card-title flex items-center gap-2">
-          <i data-feather="list" class="w-5 h-5" style="color: var(--color-primary)"></i> Últimas transações
-        </h2>
-        <button onclick="openHistoryModal()" class="bz-btn bz-btn-ghost bz-btn-sm">Ver todas</button>
-      </div>
-      <div id="transactionList">
-        <p class="text-sm text-gray-400 text-center py-4">Carregando…</p>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- History Modal -->
-  <div id="historyModal" class="bz-modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Histórico de transações">
-    <div class="bz-modal-box" style="max-width: 700px">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="bz-modal-title">Histórico de Transações</h3>
-        <button onclick="Modal.close('historyModal')" class="bz-btn bz-btn-ghost bz-btn-icon" aria-label="Fechar">
-          <i data-feather="x" class="w-5 h-5"></i>
+      <!-- Quick Actions -->
+      <div class="grid grid-cols-3 gap-4 mb-8 mt-8 animate-fade-in-up">
+        <button class="action-btn" onclick="window.location.href = '/recarga'">
+          <div class="icon-wrap">
+            <i data-feather="credit-card" class="w-6 h-6"></i>
+          </div>
+          <span>Cartão</span>
+        </button>
+        <button
+          class="action-btn"
+          onclick="window.location.href = '/acompanhamento'"
+        >
+          <div class="icon-wrap">
+            <i data-feather="map-pin" class="w-6 h-6"></i>
+          </div>
+          <span>Rastrear</span>
+        </button>
+        <button class="action-btn" onclick="window.location.href = '/rating'">
+          <div class="icon-wrap">
+            <i data-feather="star" class="w-6 h-6"></i>
+          </div>
+          <span>Avaliar</span>
         </button>
       </div>
-      <div id="historyList"></div>
+
+      <!-- Transactions -->
+      <div class="bz-card animate-fade-in-up">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="bz-card-title flex items-center gap-2">
+            <i
+              data-feather="list"
+              class="w-5 h-5"
+              style="color: var(--color-primary)"
+            ></i>
+            Últimas transações
+          </h2>
+          <button
+            onclick="openHistoryModal()"
+            class="bz-btn bz-btn-ghost bz-btn-sm"
+          >
+            Ver todas
+          </button>
+        </div>
+        <div id="transactionList">
+          <p class="text-sm text-gray-400 text-center py-4">Carregando…</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- History Modal -->
+    <div
+      id="historyModal"
+      class="bz-modal-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Histórico de transações"
+    >
+      <div class="bz-modal-box" style="max-width: 700px">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="bz-modal-title">Histórico de Transações</h3>
+          <button
+            onclick="Modal.close('historyModal')"
+            class="bz-btn bz-btn-ghost bz-btn-icon"
+            aria-label="Fechar"
+          >
+            <i data-feather="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div id="historyList"></div>
+      </div>
     </div>
-  </div>
 
-  <script src="./js/app.js"></script>
-  <script src="./js/sidebar.js" data-role="passageiro"></script>
-  <script src="./js/bottom-nav.js" data-role="passageiro"></script>
-  <script src="./js/modal.js"></script>
-  <script src="./js/notifications.js"></script>
-  <script>
-    // ── Init ──────────────────────────────────────────────────────────────────
-    async function init() {
-      const user = await checkAuth(true);
-      if (!user) return;
+    <script src="./js/app.js"></script>
+    <script src="./js/sidebar.js" data-role="passageiro"></script>
+    <script src="./js/bottom-nav.js" data-role="passageiro"></script>
+    <script src="./js/modal.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script>
+      // ── Init ──────────────────────────────────────────────────────────────────
+      async function init() {
+        const user = await checkAuth(true);
+        if (!user) return;
 
-      document.getElementById('welcomeMsg').innerHTML =
-        `<i data-feather="user" class="w-4 h-4"></i><span>${greeting(`<strong>${escapeHtml(user.username)}</strong>`)}!</span>`;
-      if (typeof feather !== 'undefined') feather.replace();
+        document.getElementById("welcomeMsg").innerHTML =
+          `<i data-feather="user" class="w-4 h-4"></i><span>${greeting(`<strong>${escapeHtml(user.username)}</strong>`)}!</span>`;
+        if (typeof feather !== "undefined") feather.replace();
 
-      if (user.role === 'admin') {
-        window.location.replace('/admin');
-        return;
+        if (user.role === "admin") {
+          window.location.replace("/admin");
+          return;
+        }
+
+        await loadBalance();
+        await loadRecentTransactions();
+
+        setInterval(loadBalance, 30_000);
       }
 
-      await loadBalance();
-      await loadRecentTransactions();
-
-      setInterval(loadBalance, 30_000);
-    }
-
-    // ── Balance ───────────────────────────────────────────────────────────────
-    async function loadBalance() {
-      try {
-        const { balance } = await API.get('/api/balance');
-        document.getElementById('cardBalance').textContent = formatCurrency(balance);
-        if (window.NotificationSystem) window.NotificationSystem.checkLowBalance(balance);
-      } catch { /* handled by checkAuth */ }
-    }
-
-    // ── Transactions ──────────────────────────────────────────────────────────
-    async function loadRecentTransactions() {
-      const list = document.getElementById('transactionList');
-      try {
-        const txs = await API.get('/api/transactions');
-        renderTransactions(txs.slice(0, 5), list);
-      } catch {
-        list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Não foi possível carregar.</p>';
+      // ── Balance ───────────────────────────────────────────────────────────────
+      async function loadBalance() {
+        try {
+          const { balance } = await API.get("/api/balance");
+          document.getElementById("cardBalance").textContent =
+            formatCurrency(balance);
+          if (window.NotificationSystem)
+            window.NotificationSystem.checkLowBalance(balance);
+        } catch {
+          /* handled by checkAuth */
+        }
       }
-    }
 
-    function renderTransactions(txs, container) {
-      if (!txs.length) {
-        container.innerHTML = `
+      // ── Transactions ──────────────────────────────────────────────────────────
+      async function loadRecentTransactions() {
+        const list = document.getElementById("transactionList");
+        try {
+          const txs = await API.get("/api/transactions");
+          renderTransactions(txs.slice(0, 5), list);
+        } catch {
+          list.innerHTML =
+            '<p class="text-sm text-gray-400 text-center py-4">Não foi possível carregar.</p>';
+        }
+      }
+
+      function renderTransactions(txs, container) {
+        if (!txs.length) {
+          container.innerHTML = `
           <div class="text-center py-8">
             <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
               <i data-feather="inbox" class="w-7 h-7 text-gray-400 dark:text-gray-500"></i>
@@ -176,67 +245,79 @@
             <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Nenhuma transação encontrada.</p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Suas recargas e usos aparecerão aqui.</p>
           </div>`;
-        feather.replace();
-        return;
-      }
-      container.innerHTML = txs.map(tx => {
-        const isPositive = tx.amount > 0;
-        const color = isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400';
-        const icon  = isPositive ? 'arrow-up-circle' : 'arrow-down-circle';
-        return `
+          feather.replace();
+          return;
+        }
+        container.innerHTML = txs
+          .map((tx) => {
+            const isPositive = tx.amount > 0;
+            const color = isPositive
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-500 dark:text-red-400";
+            const icon = isPositive ? "arrow-up-circle" : "arrow-down-circle";
+            return `
           <div class="tx-item">
             <i data-feather="${icon}" class="w-5 h-5 flex-shrink-0 ${color}"></i>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-800 dark:text-white truncate">${escapeHtml(tx.description || '—')}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white truncate">${escapeHtml(tx.description || "—")}</p>
               <p class="text-xs text-gray-400">${formatDate(tx.created_at)}</p>
             </div>
-            <span class="${color} font-semibold text-sm">${isPositive ? '+' : ''}${formatCurrency(tx.amount)}</span>
+            <span class="${color} font-semibold text-sm">${isPositive ? "+" : ""}${formatCurrency(tx.amount)}</span>
           </div>
         `;
-      }).join('');
-      if (typeof feather !== 'undefined') feather.replace();
-    }
-
-    // ── History Modal ─────────────────────────────────────────────────────────
-    async function openHistoryModal() {
-      Sidebar.close();
-      Modal.open('historyModal');
-      const list = document.getElementById('historyList');
-      list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Carregando…</p>';
-      try {
-        const txs = await API.get('/api/transactions');
-        renderTransactions(txs, list);
-      } catch {
-        list.innerHTML = '<p class="text-sm text-red-400 text-center py-4">Erro ao carregar histórico.</p>';
+          })
+          .join("");
+        if (typeof feather !== "undefined") feather.replace();
       }
-    }
 
-    // ── Theme Icon ────────────────────────────────────────────────────────────
-    function updateThemeIcon() {
-      const btn = document.getElementById('themeToggle');
-      if (!btn) return;
-      const isDark = DarkMode.isDark();
-      btn.innerHTML = isDark
-        ? '<i data-feather="sun" class="w-5 h-5"></i>'
-        : '<i data-feather="moon" class="w-5 h-5"></i>';
-      if (typeof feather !== 'undefined') feather.replace();
-    }
+      // ── History Modal ─────────────────────────────────────────────────────────
+      async function openHistoryModal() {
+        Sidebar.close();
+        Modal.open("historyModal");
+        const list = document.getElementById("historyList");
+        list.innerHTML =
+          '<p class="text-sm text-gray-400 text-center py-4">Carregando…</p>';
+        try {
+          const txs = await API.get("/api/transactions");
+          renderTransactions(txs, list);
+        } catch {
+          list.innerHTML =
+            '<p class="text-sm text-red-400 text-center py-4">Erro ao carregar histórico.</p>';
+        }
+      }
 
-    // ── Refresh on focus ──────────────────────────────────────────────────────
-    window.addEventListener('focus', loadBalance);
+      // ── Theme Icon ────────────────────────────────────────────────────────────
+      function updateThemeIcon() {
+        const btn = document.getElementById("themeToggle");
+        if (!btn) return;
+        const isDark = DarkMode.isDark();
+        btn.innerHTML = isDark
+          ? '<i data-feather="sun" class="w-5 h-5"></i>'
+          : '<i data-feather="moon" class="w-5 h-5"></i>';
+        if (typeof feather !== "undefined") feather.replace();
+      }
 
-    // ── Boot ──────────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-      init();
-      updateThemeIcon();
-    });
+      // ── Refresh on focus ──────────────────────────────────────────────────────
+      window.addEventListener("focus", loadBalance);
 
-    function escapeHtml(str = '') {
-      const d = document.createElement('div');
-      d.textContent = str;
-      return d.innerHTML;
-    }
-  </script>
-  <script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>
-</body>
+      // ── Boot ──────────────────────────────────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", () => {
+        init();
+        updateThemeIcon();
+      });
+
+      function escapeHtml(str = "") {
+        const d = document.createElement("div");
+        d.textContent = str;
+        return d.innerHTML;
+      }
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () =>
+          navigator.serviceWorker.register("/sw.js"),
+        );
+      }
+    </script>
+  </body>
 </html>
