@@ -16,6 +16,8 @@
   <meta name="apple-mobile-web-app-title" content="BusZapp">
   <link rel="apple-touch-icon" href="/static/img/icon-192x192.png">
   <link rel="stylesheet" href="./css/main.css"/>
+  <link rel="stylesheet" href="./css/notifications.css"/>
+  <script src="./js/notifications.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -56,33 +58,12 @@
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
 
-<!-- Header -->
-<header class="bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 text-white shadow-xl sticky top-0 z-50">
-  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <div class="bg-white/20 backdrop-blur p-2 rounded-xl"><i data-feather="bus" class="w-7 h-7"></i></div>
-      <div>
-        <h1 class="text-xl font-bold">BuszApp</h1>
-        <p class="text-xs opacity-80">Painel Administrativo</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <span id="adminUsername" class="text-sm font-semibold opacity-90 hidden sm:block"></span>
-      <button id="themeToggleBtn" onclick="toggleDark()"
-              class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Alternar tema">
-        <i data-feather="moon" class="w-5 h-5" id="themeIcon"></i>
-      </button>
-      <button onclick="window.location.href='profile.html'"
-              class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Perfil">
-        <i data-feather="user" class="w-5 h-5"></i>
-      </button>
-      <button onclick="doLogout()"
-              class="p-2.5 rounded-xl hover:bg-white/20 transition" title="Sair">
-        <i data-feather="log-out" class="w-5 h-5"></i>
-      </button>
-    </div>
-  </div>
-</header>
+<!-- Header (auto-renderizado) -->
+<script src="./js/header.js"
+        data-title="BuszApp"
+        data-show-theme="true"
+        data-show-notifications="true"
+        data-show-profile="true"></script>
 
 <main class="container mx-auto px-4 py-6 max-w-7xl">
 
@@ -127,7 +108,7 @@
   </div>
 
   <!-- Tab Navigation -->
-  <div class="flex gap-2 flex-wrap mb-6 overflow-x-auto pb-1">
+  <div class="flex gap-2 flex-wrap mb-6 py-2 px-1 -mx-1">
     <button class="admin-tab active" id="tab-btn-drivers" onclick="showTab('drivers')">
       <i data-feather="users" class="w-4 h-4"></i> Motoristas
     </button>
@@ -236,7 +217,7 @@
         </select>
         <button onclick="mapRefresh()"
                 class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-4 py-2 rounded-xl transition text-sm">
-          <i data-feather="refresh-cw" class="w-4 h-4"></i> Atualizar
+          <i data-feather="refresh-cw" class="w-4 h-4" id="mapRefreshIcon"></i> Atualizar
         </button>
       </div>
     </div>
@@ -468,28 +449,36 @@
      MODALS – ROTAS
 ════════════════════════════════════════════════════════ -->
 <div id="rtNewModal" class="modal-overlay hidden">
-  <div class="modal-box" style="max-width:560px">
+  <div class="modal-box" style="max-width:880px">
     <div class="flex justify-between items-center mb-5">
       <h3 class="text-lg font-bold text-gray-900 dark:text-white">Nova Linha</h3>
       <button onclick="rtCloseNewModal()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
         <i data-feather="x" class="w-5 h-5"></i>
       </button>
     </div>
-    <div class="space-y-3">
-      <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NÚMERO DA LINHA *</label>
-          <input id="rtNum" type="text" placeholder="Ex: 6" class="form-input"/></div>
-        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">TARIFA (R$) *</label>
-          <input id="rtFare" type="number" step="0.01" placeholder="4.50" class="form-input"/></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
+      <!-- Coluna esquerda: dados da linha -->
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NÚMERO DA LINHA *</label>
+            <input id="rtNum" type="text" placeholder="Ex: 6" class="form-input"/></div>
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">TARIFA (R$) *</label>
+            <input id="rtFare" type="number" min="0" step="0.01" placeholder="4.50" class="form-input"/></div>
+        </div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NOME DA LINHA *</label>
+          <input id="rtName" type="text" placeholder="Centro - Bairro São Pedro" class="form-input"/></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">ORIGEM *</label>
+            <input id="rtOrigin" type="text" placeholder="Terminal Central" class="form-input"/></div>
+          <div><label class="text-xs font-semibold text-gray-500 mb-1 block">DESTINO *</label>
+            <input id="rtDest" type="text" placeholder="Bairro São Pedro" class="form-input"/></div>
+        </div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">MOTORISTA RESPONSÁVEL</label>
+          <select id="rtDriver" class="form-input"><option value="">Sem motorista atribuído</option></select></div>
+        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">VEÍCULO PRINCIPAL</label>
+          <select id="rtVehicle" class="form-input"><option value="">Sem veículo atribuído</option></select></div>
       </div>
-      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">NOME DA LINHA *</label>
-        <input id="rtName" type="text" placeholder="Centro - Bairro São Pedro" class="form-input"/></div>
-      <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">ORIGEM *</label>
-          <input id="rtOrigin" type="text" placeholder="Terminal Central" class="form-input"/></div>
-        <div><label class="text-xs font-semibold text-gray-500 mb-1 block">DESTINO *</label>
-          <input id="rtDest" type="text" placeholder="Bairro São Pedro" class="form-input"/></div>
-      </div>
+      <!-- Coluna direita: mapa + coordenadas -->
       <div>
         <label class="text-xs font-semibold text-gray-500 mb-2 block">CLIQUE NO MAPA: 1º Origem (🟡), 2º Destino (🔴)</label>
         <div id="routePickMap"></div>
@@ -504,10 +493,6 @@
             <input id="rtDestLon" type="number" step="0.000001" class="form-input" placeholder="-52.63635"/></div>
         </div>
       </div>
-      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">MOTORISTA RESPONSÁVEL</label>
-        <select id="rtDriver" class="form-input"><option value="">Sem motorista atribuído</option></select></div>
-      <div><label class="text-xs font-semibold text-gray-500 mb-1 block">VEÍCULO PRINCIPAL</label>
-        <select id="rtVehicle" class="form-input"><option value="">Sem veículo atribuído</option></select></div>
     </div>
     <div id="rtNewError" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl"></div>
     <div class="flex gap-3 mt-5">
@@ -934,8 +919,11 @@ async function rtLoad(){
 function rtRender(){
   const el=document.getElementById('rtList');
   if(!rtRoutes.length){
-    el.innerHTML='<p class="text-gray-400 text-center py-10">Nenhuma rota cadastrada. Clique em "Nova Linha".</p>';
-    return;
+    el.innerHTML=`<div class="text-center py-12 text-gray-400 dark:text-gray-500">
+      <i data-feather="map" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+      <p class="font-semibold">Nenhuma rota cadastrada</p>
+      <p class="text-sm mt-1">Clique em "Nova Linha" para começar</p></div>`;
+    if(typeof feather!=='undefined')feather.replace();return;
   }
   el.innerHTML=rtRoutes.map(r=>`
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
@@ -1058,6 +1046,16 @@ async function rtSaveNew(){
   if(!body.route_number||!body.route_name||!body.origin||!body.destination||!body.fare||
      !body.origin_lat||!body.origin_lon||!body.dest_lat||!body.dest_lon){
     errEl.textContent='Preencha todos os campos e marque origem e destino no mapa.';
+    errEl.classList.remove('hidden');return;
+  }
+  const fareNum=parseFloat(body.fare);
+  if(isNaN(fareNum)||fareNum<0){
+    errEl.textContent='A tarifa não pode ser negativa.';
+    errEl.classList.remove('hidden');return;
+  }
+  const lineNum=parseFloat(body.route_number);
+  if(!isNaN(lineNum)&&lineNum<0){
+    errEl.textContent='O número da linha não pode ser negativo.';
     errEl.classList.remove('hidden');return;
   }
   try{
@@ -1208,7 +1206,11 @@ function ratRender(list){
   }else statsEl.innerHTML='';
 
   if(!list.length){
-    el.innerHTML='<p class="text-gray-400 text-center py-10">Nenhuma avaliação encontrada.</p>';return;
+    el.innerHTML=`<div class="text-center py-12 text-gray-400 dark:text-gray-500">
+      <i data-feather="star" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+      <p class="font-semibold">Nenhuma avaliação encontrada</p>
+      <p class="text-sm mt-1">As avaliações dos passageiros aparecerão aqui</p></div>`;
+    if(typeof feather!=='undefined')feather.replace();return;
   }
   el.innerHTML=`
     <div class="overflow-x-auto">
@@ -1275,11 +1277,15 @@ async function mapInit(){
 }
 
 async function mapRefresh(){
+  const icon=document.getElementById('mapRefreshIcon');
+  if(icon)icon.classList.add('animate-spin');
   try{
     mapAllLocs=await API.get('/api/admin/all-bus-locations');
     mapFilterLine();
   }catch(e){
     document.getElementById('mapStatus').textContent='Erro ao carregar localização dos ônibus.';
+  }finally{
+    if(icon)icon.classList.remove('animate-spin');
   }
 }
 
@@ -1530,20 +1536,30 @@ async function cardSave(){
 // ── LOGOUT ─────────────────────────────────────────────────────────────────
 async function doLogout(){
   try{await API.post('/api/auth/logout',{});}catch(e){}
-  window.location.href='/login.html';
+  window.location.href='/login';
 }
 
 // ── BOOT ───────────────────────────────────────────────────────────────────
+function maskCpf(e){
+  let v=e.target.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  e.target.value=v;
+}
+function maskCnh(e){e.target.value=e.target.value.replace(/\D/g,'').slice(0,11);}
 document.addEventListener('DOMContentLoaded',async()=>{
   if(typeof feather!=='undefined')feather.replace();
 
   const user=await checkAuth(true);
   if(!user){return;}
-  if(user.role!=='admin'){window.location.href='/dashboard.html';return;}
-  document.getElementById('adminUsername').textContent=user.username;
+  if(user.role!=='admin'){window.location.href='/dashboard';return;}
 
   await Promise.all([loadStats(),drvLoad()]);
   if(typeof feather!=='undefined')feather.replace();
+
+  document.getElementById('drvCpf').addEventListener('input',maskCpf);
+  document.getElementById('drvCnh').addEventListener('input',maskCnh);
 
   // Auto-refresh stats every 30 s so the bus counter stays current
   setInterval(loadStats, 30000);

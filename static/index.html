@@ -25,16 +25,93 @@
     }
     .dark .feature-card { background:rgba(45,55,72,0.95); }
     .feature-card:hover { transform:translateY(-8px); box-shadow:0 24px 48px rgba(251,191,36,.28); }
+
+    /* ===== Hero animado: cidade cinza + ônibus parado na esquerda ===== */
+    .hero-anim {
+      min-height: 540px;
+      background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 55%, #6b7280 100%);
+    }
+    .dark .hero-anim { background: linear-gradient(135deg,#1e293b 0%,#0f172a 100%); }
+    .city-scene {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    }
+    /* Camadas de parallax (cada uma com 2 SVGs lado a lado, 100vw cada) */
+    .city-layer {
+      position: absolute; left: 0; bottom: 92px;
+      width: 200vw; height: 180px; display: flex;
+      will-change: transform;
+    }
+    .city-layer svg { width: 100vw; height: 100%; flex: 0 0 100vw; display: block; }
+    .city-layer--far  { bottom: 110px; height: 140px; animation: city-scroll 25s linear infinite; opacity: .55; }
+    .city-layer--near { bottom:  92px; height: 200px; animation: city-scroll 10s linear infinite; opacity: .85; }
+    @keyframes city-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-100vw); }
+    }
+    /* Rua */
+    .road {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: 92px; overflow: hidden;
+      background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%);
+      box-shadow: inset 0 6px 12px rgba(0,0,0,.35);
+    }
+    .dark .road { background: linear-gradient(180deg, #111827 0%, #030712 100%); }
+    .road-dashes {
+      position: absolute; left: 0; top: 42px;
+      width: 200vw; height: 4px; display: flex; gap: 40px;
+      animation: dashes-scroll 0.6s linear infinite;
+      will-change: transform;
+    }
+    .road-dashes span { flex: 0 0 40px; height: 100%; background: #e5e7eb; }
+    @keyframes dashes-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-80px); }
+    }
+    .road::after {
+      content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+      background: rgba(255,255,255,.18);
+    }
+    /* Ônibus — completamente parado na esquerda, só as rodas giram */
+    .bus-anim {
+      position: absolute; bottom: 38px; left: 24px;
+      width: 260px; height: 120px;
+      filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
+    }
+    .bus-anim svg { width: 100%; height: 100%; }
+    .wheel { transform-origin: center; transform-box: fill-box; animation: spin 0.35s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Painel com blur atrás do título / subtítulo */
+    .hero-text-panel {
+      display: inline-block;
+      padding: 1.5rem 2rem;
+      border-radius: 1.5rem;
+      background: rgba(17, 24, 39, 0.35);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+    }
+    .dark .hero-text-panel { background: rgba(15, 23, 42, 0.55); }
+
+    @media (max-width: 640px) {
+      .hero-anim { min-height: 560px; }
+      .bus-anim { width: 160px; height: 76px; bottom: 26px; left: 50%; transform: translateX(-50%); }
+      .city-layer--far  { bottom: 76px; height: 110px; }
+      .city-layer--near { bottom: 60px; height: 150px; }
+      .road { height: 56px; }
+      .road::before { top: 26px; }
+      .hero-text-panel { padding: 1rem 1.25rem; }
+    }
+
   </style>
 </head>
 <body class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
 
   <header class="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-md z-50">
     <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-2">
-      <a href="index.html" class="flex items-center gap-2 sm:gap-3 min-w-0">
-        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-xl shadow shrink-0">
-          <i data-feather="bus" class="w-6 h-6 sm:w-7 sm:h-7 text-white"></i>
-        </div>
+      <a href="/" class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <img src="./img/icone.png" alt="BuszApp" class="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow shrink-0" />
         <div class="min-w-0">
           <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent leading-tight">BuszApp</h1>
           <p class="hidden sm:block text-xs text-gray-500 dark:text-gray-400">Mobilidade Inteligente</p>
@@ -44,22 +121,214 @@
         <button onclick="DarkMode.toggle()" class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition" aria-label="Tema">
           <i data-feather="moon" class="w-5 h-5 text-gray-600 dark:text-gray-300"></i>
         </button>
-        <a href="login.html" class="hidden xs:inline-block px-3 sm:px-4 py-2 rounded-xl text-yellow-600 dark:text-yellow-400 font-semibold text-sm hover:bg-yellow-50 dark:hover:bg-gray-700 transition">Entrar</a>
-        <a href="register.html" class="btn-primary text-sm whitespace-nowrap px-4 py-2">Cadastrar-se</a>
+        <a href="/login" class="hidden xs:inline-block px-3 sm:px-4 py-2 rounded-xl text-yellow-600 dark:text-yellow-400 font-semibold text-sm hover:bg-yellow-50 dark:hover:bg-gray-700 transition">Entrar</a>
+        <a href="/register" class="btn-primary text-sm whitespace-nowrap px-4 py-2">Cadastrar-se</a>
       </div>
     </div>
   </header>
 
-  <section class="hero-bg pt-24 sm:pt-28 pb-16 sm:pb-20 text-white relative overflow-hidden">
-    <div class="container mx-auto px-6 text-center relative z-10">
-      <div class="animate-float inline-block mb-6 sm:mb-8 max-w-full">
-        <img src="./img/bus_auto.webp" alt="BuszApp" class="w-40 sm:w-60 max-w-full h-auto mx-auto drop-shadow-2xl rounded-2xl" onerror="this.style.display='none'" />
+  <section class="hero-anim pt-28 pb-12 text-white relative overflow-hidden">
+    <!-- Cenário urbano animado -->
+    <div class="city-scene" aria-hidden="true">
+      <!-- Camada distante (prédios menores e claros) -->
+      <div class="city-layer city-layer--far">
+        <svg viewBox="0 0 1200 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="rgba(55,65,81,0.45)">
+            <rect x="0"    y="60"  width="80"  height="80"/>
+            <rect x="90"   y="35"  width="60"  height="105"/>
+            <rect x="160"  y="75"  width="100" height="65"/>
+            <rect x="270"  y="20"  width="70"  height="120"/>
+            <rect x="350"  y="55"  width="120" height="85"/>
+            <rect x="480"  y="70"  width="80"  height="70"/>
+            <rect x="570"  y="30"  width="90"  height="110"/>
+            <rect x="670"  y="60"  width="110" height="80"/>
+            <rect x="790"  y="45"  width="70"  height="95"/>
+            <rect x="870"  y="80"  width="100" height="60"/>
+            <rect x="980"  y="35"  width="80"  height="105"/>
+            <rect x="1070" y="60"  width="130" height="80"/>
+          </g>
+        </svg>
+        <svg viewBox="0 0 1200 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="rgba(55,65,81,0.45)">
+            <rect x="0"    y="60"  width="80"  height="80"/>
+            <rect x="90"   y="35"  width="60"  height="105"/>
+            <rect x="160"  y="75"  width="100" height="65"/>
+            <rect x="270"  y="20"  width="70"  height="120"/>
+            <rect x="350"  y="55"  width="120" height="85"/>
+            <rect x="480"  y="70"  width="80"  height="70"/>
+            <rect x="570"  y="30"  width="90"  height="110"/>
+            <rect x="670"  y="60"  width="110" height="80"/>
+            <rect x="790"  y="45"  width="70"  height="95"/>
+            <rect x="870"  y="80"  width="100" height="60"/>
+            <rect x="980"  y="35"  width="80"  height="105"/>
+            <rect x="1070" y="60"  width="130" height="80"/>
+          </g>
+        </svg>
       </div>
-      <h2 class="text-3xl sm:text-5xl font-bold mb-5 leading-tight">Mobilidade Urbana<br/><span class="opacity-90">Inteligente e Conectada</span></h2>
-      <p class="text-base sm:text-lg opacity-90 max-w-2xl mx-auto mb-8 sm:mb-10">Rastreie ônibus em tempo real, gerencie seu cartão e avalie o serviço — tudo em um só lugar.</p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="register.html" class="bg-white text-yellow-600 px-8 py-3.5 rounded-2xl font-bold hover:shadow-2xl hover:-translate-y-1 transition-all">Começar agora</a>
-        <a href="login.html" class="bg-white/20 backdrop-blur border border-white/40 text-white px-8 py-3.5 rounded-2xl font-semibold hover:bg-white/30 transition">Já tenho conta</a>
+
+      <!-- Camada próxima (prédios maiores com janelas) -->
+      <div class="city-layer city-layer--near">
+        <svg viewBox="0 0 1200 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="rgba(31,41,55,0.75)">
+            <rect x="0"    y="60"  width="110" height="140"/>
+            <rect x="120"  y="20"  width="90"  height="180"/>
+            <rect x="220"  y="80"  width="140" height="120"/>
+            <rect x="370"  y="40"  width="100" height="160"/>
+            <rect x="480"  y="10"  width="80"  height="190"/>
+            <rect x="570"  y="70"  width="120" height="130"/>
+            <rect x="700"  y="30"  width="110" height="170"/>
+            <rect x="820"  y="60"  width="130" height="140"/>
+            <rect x="960"  y="20"  width="90"  height="180"/>
+            <rect x="1060" y="50"  width="140" height="150"/>
+          </g>
+          <g fill="rgba(229,231,235,0.85)">
+            <!-- janelas iluminadas, distribuídas pelos prédios -->
+            <rect x="15"  y="80"  width="10" height="12"/><rect x="35"  y="80"  width="10" height="12"/><rect x="55"  y="80"  width="10" height="12"/><rect x="75"  y="80"  width="10" height="12"/>
+            <rect x="15"  y="105" width="10" height="12"/><rect x="35"  y="105" width="10" height="12"/><rect x="55"  y="105" width="10" height="12"/><rect x="75"  y="105" width="10" height="12"/>
+            <rect x="135" y="40"  width="10" height="12"/><rect x="155" y="40"  width="10" height="12"/><rect x="175" y="40"  width="10" height="12"/>
+            <rect x="135" y="70"  width="10" height="12"/><rect x="155" y="70"  width="10" height="12"/><rect x="175" y="70"  width="10" height="12"/>
+            <rect x="135" y="100" width="10" height="12"/><rect x="155" y="100" width="10" height="12"/><rect x="175" y="100" width="10" height="12"/>
+            <rect x="240" y="100" width="10" height="12"/><rect x="260" y="100" width="10" height="12"/><rect x="280" y="100" width="10" height="12"/><rect x="300" y="100" width="10" height="12"/><rect x="320" y="100" width="10" height="12"/>
+            <rect x="240" y="130" width="10" height="12"/><rect x="260" y="130" width="10" height="12"/><rect x="280" y="130" width="10" height="12"/><rect x="300" y="130" width="10" height="12"/><rect x="320" y="130" width="10" height="12"/>
+            <rect x="385" y="60"  width="10" height="12"/><rect x="405" y="60"  width="10" height="12"/><rect x="425" y="60"  width="10" height="12"/>
+            <rect x="385" y="90"  width="10" height="12"/><rect x="405" y="90"  width="10" height="12"/><rect x="425" y="90"  width="10" height="12"/>
+            <rect x="495" y="35"  width="10" height="12"/><rect x="525" y="35"  width="10" height="12"/>
+            <rect x="495" y="65"  width="10" height="12"/><rect x="525" y="65"  width="10" height="12"/>
+            <rect x="495" y="95"  width="10" height="12"/><rect x="525" y="95"  width="10" height="12"/>
+            <rect x="585" y="90"  width="10" height="12"/><rect x="605" y="90"  width="10" height="12"/><rect x="625" y="90"  width="10" height="12"/><rect x="645" y="90"  width="10" height="12"/>
+            <rect x="585" y="120" width="10" height="12"/><rect x="605" y="120" width="10" height="12"/><rect x="625" y="120" width="10" height="12"/><rect x="645" y="120" width="10" height="12"/>
+            <rect x="715" y="50"  width="10" height="12"/><rect x="735" y="50"  width="10" height="12"/><rect x="755" y="50"  width="10" height="12"/><rect x="775" y="50"  width="10" height="12"/>
+            <rect x="715" y="80"  width="10" height="12"/><rect x="735" y="80"  width="10" height="12"/><rect x="755" y="80"  width="10" height="12"/><rect x="775" y="80"  width="10" height="12"/>
+            <rect x="835" y="80"  width="10" height="12"/><rect x="855" y="80"  width="10" height="12"/><rect x="875" y="80"  width="10" height="12"/><rect x="895" y="80"  width="10" height="12"/><rect x="915" y="80"  width="10" height="12"/>
+            <rect x="975" y="40"  width="10" height="12"/><rect x="995" y="40"  width="10" height="12"/><rect x="1015" y="40" width="10" height="12"/><rect x="1035" y="40" width="10" height="12"/>
+            <rect x="1075" y="70" width="10" height="12"/><rect x="1095" y="70" width="10" height="12"/><rect x="1115" y="70" width="10" height="12"/><rect x="1135" y="70" width="10" height="12"/><rect x="1155" y="70" width="10" height="12"/>
+          </g>
+        </svg>
+        <svg viewBox="0 0 1200 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <g fill="rgba(31,41,55,0.75)">
+            <rect x="0"    y="60"  width="110" height="140"/>
+            <rect x="120"  y="20"  width="90"  height="180"/>
+            <rect x="220"  y="80"  width="140" height="120"/>
+            <rect x="370"  y="40"  width="100" height="160"/>
+            <rect x="480"  y="10"  width="80"  height="190"/>
+            <rect x="570"  y="70"  width="120" height="130"/>
+            <rect x="700"  y="30"  width="110" height="170"/>
+            <rect x="820"  y="60"  width="130" height="140"/>
+            <rect x="960"  y="20"  width="90"  height="180"/>
+            <rect x="1060" y="50"  width="140" height="150"/>
+          </g>
+          <g fill="rgba(229,231,235,0.85)">
+            <rect x="15"  y="80"  width="10" height="12"/><rect x="35"  y="80"  width="10" height="12"/><rect x="55"  y="80"  width="10" height="12"/><rect x="75"  y="80"  width="10" height="12"/>
+            <rect x="15"  y="105" width="10" height="12"/><rect x="35"  y="105" width="10" height="12"/><rect x="55"  y="105" width="10" height="12"/><rect x="75"  y="105" width="10" height="12"/>
+            <rect x="135" y="40"  width="10" height="12"/><rect x="155" y="40"  width="10" height="12"/><rect x="175" y="40"  width="10" height="12"/>
+            <rect x="135" y="70"  width="10" height="12"/><rect x="155" y="70"  width="10" height="12"/><rect x="175" y="70"  width="10" height="12"/>
+            <rect x="135" y="100" width="10" height="12"/><rect x="155" y="100" width="10" height="12"/><rect x="175" y="100" width="10" height="12"/>
+            <rect x="240" y="100" width="10" height="12"/><rect x="260" y="100" width="10" height="12"/><rect x="280" y="100" width="10" height="12"/><rect x="300" y="100" width="10" height="12"/><rect x="320" y="100" width="10" height="12"/>
+            <rect x="240" y="130" width="10" height="12"/><rect x="260" y="130" width="10" height="12"/><rect x="280" y="130" width="10" height="12"/><rect x="300" y="130" width="10" height="12"/><rect x="320" y="130" width="10" height="12"/>
+            <rect x="385" y="60"  width="10" height="12"/><rect x="405" y="60"  width="10" height="12"/><rect x="425" y="60"  width="10" height="12"/>
+            <rect x="385" y="90"  width="10" height="12"/><rect x="405" y="90"  width="10" height="12"/><rect x="425" y="90"  width="10" height="12"/>
+            <rect x="495" y="35"  width="10" height="12"/><rect x="525" y="35"  width="10" height="12"/>
+            <rect x="495" y="65"  width="10" height="12"/><rect x="525" y="65"  width="10" height="12"/>
+            <rect x="495" y="95"  width="10" height="12"/><rect x="525" y="95"  width="10" height="12"/>
+            <rect x="585" y="90"  width="10" height="12"/><rect x="605" y="90"  width="10" height="12"/><rect x="625" y="90"  width="10" height="12"/><rect x="645" y="90"  width="10" height="12"/>
+            <rect x="585" y="120" width="10" height="12"/><rect x="605" y="120" width="10" height="12"/><rect x="625" y="120" width="10" height="12"/><rect x="645" y="120" width="10" height="12"/>
+            <rect x="715" y="50"  width="10" height="12"/><rect x="735" y="50"  width="10" height="12"/><rect x="755" y="50"  width="10" height="12"/><rect x="775" y="50"  width="10" height="12"/>
+            <rect x="715" y="80"  width="10" height="12"/><rect x="735" y="80"  width="10" height="12"/><rect x="755" y="80"  width="10" height="12"/><rect x="775" y="80"  width="10" height="12"/>
+            <rect x="835" y="80"  width="10" height="12"/><rect x="855" y="80"  width="10" height="12"/><rect x="875" y="80"  width="10" height="12"/><rect x="895" y="80"  width="10" height="12"/><rect x="915" y="80"  width="10" height="12"/>
+            <rect x="975" y="40"  width="10" height="12"/><rect x="995" y="40"  width="10" height="12"/><rect x="1015" y="40" width="10" height="12"/><rect x="1035" y="40" width="10" height="12"/>
+            <rect x="1075" y="70" width="10" height="12"/><rect x="1095" y="70" width="10" height="12"/><rect x="1115" y="70" width="10" height="12"/><rect x="1135" y="70" width="10" height="12"/><rect x="1155" y="70" width="10" height="12"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Rua com faixas animadas -->
+      <div class="road">
+        <div class="road-dashes">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- Ônibus quadrado, totalmente cinza -->
+      <div class="bus-anim">
+        <svg viewBox="0 0 280 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- corpo retangular -->
+          <rect x="10" y="20" width="260" height="70" fill="#9ca3af" stroke="#1f2937" stroke-width="2.5"/>
+
+          <!-- linha de teto -->
+          <rect x="10" y="20" width="260" height="4" fill="#6b7280"/>
+
+          <!-- janelas laterais (todas iguais, retangulares) -->
+          <rect x="20"  y="30" width="38" height="24" fill="#cbd5e1" stroke="#1f2937" stroke-width="1.5"/>
+          <rect x="62"  y="30" width="38" height="24" fill="#cbd5e1" stroke="#1f2937" stroke-width="1.5"/>
+          <rect x="104" y="30" width="38" height="24" fill="#cbd5e1" stroke="#1f2937" stroke-width="1.5"/>
+          <rect x="146" y="30" width="38" height="24" fill="#cbd5e1" stroke="#1f2937" stroke-width="1.5"/>
+          <rect x="188" y="30" width="38" height="24" fill="#cbd5e1" stroke="#1f2937" stroke-width="1.5"/>
+          <!-- para-brisa (mesmo formato quadrado) -->
+          <rect x="230" y="30" width="34" height="24" fill="#cbd5e1" stroke="#1f2937" stroke-width="1.5"/>
+
+          <!-- faixa lateral cinza -->
+          <rect x="10" y="62" width="260" height="6" fill="#4b5563"/>
+
+          <!-- porta dianteira -->
+          <rect x="232" y="68" width="22" height="22" fill="#1f2937" stroke="#111827" stroke-width="1"/>
+          <line x1="243" y1="69" x2="243" y2="89" stroke="#6b7280" stroke-width="1"/>
+
+          <!-- porta traseira -->
+          <rect x="80" y="68" width="22" height="22" fill="#1f2937" stroke="#111827" stroke-width="1"/>
+          <line x1="91" y1="69" x2="91" y2="89" stroke="#6b7280" stroke-width="1"/>
+
+          <!-- placa de número da rota -->
+          <rect x="18" y="72" width="28" height="14" fill="#1f2937"/>
+          <text x="32" y="82" font-family="monospace" font-weight="bold" font-size="8" fill="#e5e7eb" text-anchor="middle">A12</text>
+
+          <!-- farol frontal quadrado -->
+          <rect x="260" y="70" width="8" height="8" fill="#e5e7eb" stroke="#1f2937" stroke-width="1"/>
+
+          <!-- arcos das rodas (quadrados) -->
+          <rect x="40" y="80" width="44" height="10" fill="#1f2937"/>
+          <rect x="190" y="80" width="44" height="10" fill="#1f2937"/>
+
+          <!-- roda dianteira -->
+          <g class="wheel">
+            <circle cx="212" cy="94" r="14" fill="#111827"/>
+            <circle cx="212" cy="94" r="11" fill="#1f2937" stroke="#4b5563" stroke-width="0.8"/>
+            <circle cx="212" cy="94" r="5" fill="#9ca3af"/>
+            <circle cx="212" cy="94" r="1.5" fill="#1f2937"/>
+            <line x1="212" y1="82" x2="212" y2="106" stroke="#6b7280" stroke-width="1.5"/>
+            <line x1="200" y1="94" x2="224" y2="94" stroke="#6b7280" stroke-width="1.5"/>
+            <line x1="203" y1="85" x2="221" y2="103" stroke="#6b7280" stroke-width="1.2"/>
+            <line x1="221" y1="85" x2="203" y2="103" stroke="#6b7280" stroke-width="1.2"/>
+          </g>
+          <!-- roda traseira -->
+          <g class="wheel">
+            <circle cx="62" cy="94" r="14" fill="#111827"/>
+            <circle cx="62" cy="94" r="11" fill="#1f2937" stroke="#4b5563" stroke-width="0.8"/>
+            <circle cx="62" cy="94" r="5" fill="#9ca3af"/>
+            <circle cx="62" cy="94" r="1.5" fill="#1f2937"/>
+            <line x1="62" y1="82" x2="62" y2="106" stroke="#6b7280" stroke-width="1.5"/>
+            <line x1="50" y1="94" x2="74" y2="94" stroke="#6b7280" stroke-width="1.5"/>
+            <line x1="53" y1="85" x2="71" y2="103" stroke="#6b7280" stroke-width="1.2"/>
+            <line x1="71" y1="85" x2="53" y2="103" stroke="#6b7280" stroke-width="1.2"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Conteúdo em primeiro plano -->
+    <div class="container mx-auto px-6 text-center relative z-10">
+      <div class="hero-text-panel mx-auto max-w-3xl mb-6 sm:mb-10">
+        <h2 class="text-2xl sm:text-5xl font-bold mb-3 sm:mb-5 leading-tight">Mobilidade Urbana<br/><span class="opacity-90">Inteligente e Conectada</span></h2>
+        <p class="text-sm sm:text-lg opacity-90 max-w-2xl mx-auto">Rastreie ônibus em tempo real, gerencie seu cartão e avalie o serviço — tudo em um só lugar.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+        <a href="/register" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all">Começar agora</a>
+        <a href="/login" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all">Já tenho conta</a>
       </div>
     </div>
   </section>
@@ -79,7 +348,7 @@
   <section class="hero-bg py-16 text-center text-white">
     <h2 class="text-3xl font-bold mb-4">Pronto para começar?</h2>
     <p class="opacity-90 mb-8">Crie sua conta gratuita e transforme sua experiência no transporte público.</p>
-    <a href="register.html" class="bg-white text-yellow-600 px-10 py-3.5 rounded-2xl font-bold inline-block hover:shadow-xl hover:-translate-y-1 transition-all">Criar conta grátis</a>
+    <a href="/register" class="bg-white text-yellow-600 px-10 py-3.5 rounded-2xl font-bold inline-block hover:shadow-xl hover:-translate-y-1 transition-all">Criar conta grátis</a>
   </section>
 
   <footer class="bg-gray-800 text-gray-400 text-center py-6 text-sm">

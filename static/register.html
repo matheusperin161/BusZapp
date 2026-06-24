@@ -35,6 +35,9 @@
         position: relative;
         margin-bottom: 1.1rem;
       }
+      .input-wrap > div:has(> input) {
+        position: relative;
+      }
       .input-wrap input {
         width: 100%;
         padding: 12px 14px 12px 44px;
@@ -60,6 +63,9 @@
       .dark .input-wrap input:focus {
         background: #1e293b;
       }
+      .input-wrap input.has-toggle {
+        padding-right: 44px;
+      }
       .input-icon {
         position: absolute;
         left: 14px;
@@ -67,6 +73,35 @@
         transform: translateY(-50%);
         color: #9ca3af;
         pointer-events: none;
+      }
+      .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition:
+          color 0.2s,
+          background 0.2s;
+      }
+      .password-toggle:hover {
+        color: #6b7280;
+        background: rgba(0, 0, 0, 0.04);
+      }
+      .dark .password-toggle {
+        color: #94a3b8;
+      }
+      .dark .password-toggle:hover {
+        color: #cbd5e1;
+        background: rgba(255, 255, 255, 0.06);
       }
       .btn-submit {
         width: 100%;
@@ -160,7 +195,7 @@
                 Reenviar link
               </button>
               <a
-                href="login.html"
+                href="/login"
                 class="text-xs text-yellow-600 dark:text-yellow-400 hover:underline"
                 >Ir para o login</a
               >
@@ -190,14 +225,25 @@
               </div>
 
               <div class="input-wrap">
-                <i data-feather="lock" class="input-icon w-4 h-4"></i>
-                <input
-                  type="password"
-                  id="password"
-                  placeholder="Senha (mín. 6 caracteres)"
-                  autocomplete="new-password"
-                  required
-                />
+                <div>
+                  <i data-feather="lock" class="input-icon w-4 h-4"></i>
+                  <input
+                    type="password"
+                    id="password"
+                    class="has-toggle"
+                    placeholder="Senha (mín. 6 caracteres)"
+                    autocomplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    data-target="password"
+                    aria-label="Mostrar senha"
+                  >
+                    <i data-feather="eye" class="w-4 h-4"></i>
+                  </button>
+                </div>
                 <div class="mt-1.5 flex gap-1">
                   <div id="s1" class="strength-bar flex-1 bg-gray-200"></div>
                   <div id="s2" class="strength-bar flex-1 bg-gray-200"></div>
@@ -212,10 +258,19 @@
                 <input
                   type="password"
                   id="confirmPassword"
+                  class="has-toggle"
                   placeholder="Confirme a senha"
                   autocomplete="new-password"
                   required
                 />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  data-target="confirmPassword"
+                  aria-label="Mostrar senha"
+                >
+                  <i data-feather="eye" class="w-4 h-4"></i>
+                </button>
               </div>
 
               <label
@@ -246,14 +301,14 @@
             <p class="text-center text-sm text-gray-500 dark:text-gray-400">
               Já tem conta?
               <a
-                href="login.html"
+                href="/login"
                 class="text-yellow-600 dark:text-yellow-400 font-semibold hover:underline"
                 >Faça login</a
               >
             </p>
             <div class="mt-6 text-center">
               <a
-                href="index.html"
+                href="/"
                 class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-white transition"
               >
                 <i data-feather="arrow-left" class="w-4 h-4"></i> Voltar para
@@ -266,6 +321,25 @@
     </div>
 
     <script src="./js/app.js"></script>
+    <script>
+      // ── Toggle de visibilidade da senha (olho) ──
+      document.querySelectorAll(".password-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.dataset.target);
+          if (!target) return;
+          const showing = target.type === "text";
+          target.type = showing ? "password" : "text";
+          btn.innerHTML = showing
+            ? '<i data-feather="eye-off" class="w-4 h-4"></i>'
+            : '<i data-feather="eye" class="w-4 h-4"></i>';
+          btn.setAttribute(
+            "aria-label",
+            showing ? "Mostrar senha" : "Ocultar senha",
+          );
+          if (typeof feather !== "undefined") feather.replace();
+        });
+      });
+    </script>
     <script>
       // Password strength indicator
       const COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e"];

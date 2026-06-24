@@ -1,6 +1,6 @@
 """Application factory and entry point."""
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, redirect, send_from_directory
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -63,13 +63,29 @@ def create_app(env: str = 'default') -> Flask:
         response.headers.pop('X-Powered-By', None)
         return response
 
-    # Serve frontend SPA
+    # Serve frontend SPA com URLs sem .html
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def serve(path):
         static_folder = app.static_folder
+
+        # URLs sem .html: redireciona /<page>.html para /<page>
+        # (exceto arquivos de verificação do Google, que bots não seguem redirect)
+        if path.endswith('.html') and not path.startswith('google'):
+            clean = '' if path == 'index.html' else path[:-5]
+            return redirect('/' + clean, code=301)
+
+        # Serve arquivos estáticos existentes (CSS, JS, imagens, sw, manifest, google-verify)
         if path and os.path.exists(os.path.join(static_folder, path)):
             return send_from_directory(static_folder, path)
+
+        # URL limpa → arquivo .html correspondente (/login → login.html)
+        if path:
+            html_path = os.path.join(static_folder, path + '.html')
+            if os.path.exists(html_path):
+                return send_from_directory(static_folder, path + '.html')
+
+        # Fallback: index.html
         index = os.path.join(static_folder, 'index.html')
         if os.path.exists(index):
             return send_from_directory(static_folder, 'index.html')

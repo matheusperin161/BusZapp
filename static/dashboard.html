@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { darkMode: 'class' }</script>
   <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js" defer></script>
-<link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
+  <link rel="shortcut icon" href="./img/icone.png" type="image/x-icon" />
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#f59e0b">
   <meta name="mobile-web-app-capable" content="yes">
@@ -18,97 +18,35 @@
   <link rel="stylesheet" href="./css/main.css" />
   <link rel="stylesheet" href="./css/notifications.css" />
   <style>
-    .balance-card {
-      background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
-      border-radius: 1.5rem;
-      position: relative; overflow: hidden;
-    }
-    .balance-card::before, .balance-card::after {
-      content:''; position:absolute; border-radius:50%;
-      background: rgba(255,255,255,0.1);
-    }
-    .balance-card::before { width:200px;height:200px; top:-80px;right:-60px; }
-    .balance-card::after  { width:140px;height:140px; bottom:-50px;left:-40px; }
-
+    /* Específicos da dashboard: action tiles e linha de transação */
     .action-btn {
-      display:flex; flex-direction:column; align-items:center; gap:6px;
-      padding:16px 12px; border-radius:14px; cursor:pointer;
-      background:white; transition:all .25s; border:none;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 16px 12px; border-radius: 14px; cursor: pointer;
+      background: var(--color-surface); transition: all .25s; border: none;
+      box-shadow: var(--shadow-md);
     }
-    .dark .action-btn { background:#2d3748; }
-    .action-btn:hover { transform:translateY(-4px); box-shadow:0 10px 28px rgba(245,158,11,0.2); }
+    .action-btn:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
     .action-btn .icon-wrap {
-      width:48px;height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg,#fbbf24,#f59e0b);
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--gradient-brand); color: white;
     }
-    .action-btn span { font-size:12px; font-weight:600; color:#92400e; }
-    .dark .action-btn span { color:#fde68a; }
+    .action-btn span { font-size: 12px; font-weight: 600; color: var(--color-warning-fg); }
+    .dark .action-btn span { color: var(--color-warning-fg); }
 
-    /* Transaction list */
     .tx-item {
-      display:flex; align-items:center; gap:12px; padding:12px 0;
-      border-bottom:1px solid #fef3c7;
+      display: flex; align-items: center; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid var(--color-border);
     }
-    .dark .tx-item { border-bottom-color:#4a5568; }
-    .tx-item:last-child { border-bottom:none; }
-
-    /* History modal */
-    .modal-overlay {
-      position:fixed;inset:0;background:rgba(0,0,0,.5);
-      z-index:2000;display:none;align-items:center;justify-content:center;
-      backdrop-filter:blur(2px);
-    }
-    .modal-overlay.active { display:flex; }
-    .modal-box {
-      background:white;border-radius:18px;
-      max-width:700px;width:90%;max-height:80vh;overflow-y:auto;
-      box-shadow:0 25px 60px rgba(0,0,0,.25);
-    }
-    .dark .modal-box { background:#1e293b; }
+    .tx-item:last-child { border-bottom: none; }
   </style>
 </head>
 <body class="bg-yellow-50 dark:bg-gray-900 min-h-screen">
 
-  <!-- Sidebar Overlay -->
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
-
-  <!-- Menu Toggle -->
-  <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-    <i data-feather="menu" class="w-6 h-6"></i>
-  </button>
-
-  <!-- Sidebar -->
-  <nav class="sidebar flex flex-col pb-4" id="sidebar" aria-label="Navegação principal">
-    <a href="dashboard.html" class="sidebar-item gap-3">
-      <i data-feather="home"></i><span>Página Inicial</span>
-    </a>
-    <a id="sidebarDrivers" href="add-driver.html" class="sidebar-item hidden gap-3">
-      <i data-feather="users"></i><span>Gerenciar Motoristas</span>
-    </a>
-    <a id="sidebarFleet" href="add-vehicle.html" class="sidebar-item hidden gap-3">
-      <i data-feather="truck"></i><span>Gerenciar Frota</span>
-    </a>
-    <a id="sidebarRoutes" href="admin-rotas.html" class="sidebar-item hidden gap-3">
-      <i data-feather="map"></i><span>Gerenciar Rotas</span>
-    </a>
-    <a id="sidebarHistory" href="#" class="sidebar-item hidden gap-3">
-      <i data-feather="clock"></i><span>Histórico de Recarga</span>
-    </a>
-    <a href="rating.html" class="sidebar-item gap-3">
-      <i data-feather="star"></i><span>Avaliação</span>
-    </a>
-      <div class="mt-auto">
-        <button onclick="logout()" class="sidebar-item gap-3">
-          <i data-feather="log-out"></i><span>Sair</span>
-        </button>
-      </div>
-  </nav>
-
-  <!-- Header -->
+  <!-- Header (auto-renderizado) -->
   <script src="./js/header.js"
-          data-icon="bus"
           data-title="BuszApp"
+          data-subtitle-id="headerSub"
           data-subtitle="Painel de Controle"
           data-show-theme="true"
           data-show-notifications="true"
@@ -118,51 +56,49 @@
   <main class="container mx-auto px-4 py-8 max-w-5xl">
 
     <!-- Balance Card -->
-    <div class="balance-card text-white p-8 shadow-2xl mb-8 animate-fade-in-up">
-      <div class="relative z-10">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <p class="text-sm font-medium opacity-80 flex items-center gap-1.5 mb-2">
-              <i data-feather="credit-card" class="w-4 h-4"></i> Saldo do Cartão
-            </p>
-            <p id="cardBalance" class="text-5xl font-bold">R$ 0,00</p>
-            <p class="text-xs opacity-70 mt-1">Atualizado agora</p>
-          </div>
-          <div class="bg-white/20 p-4 rounded-2xl">
-            <i data-feather="bus" class="w-10 h-10"></i>
-          </div>
+    <div class="bz-balance-card animate-fade-in-up" style="padding: 32px; border-radius: 24px">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="bz-balance-card-label flex items-center gap-1.5">
+            <i data-feather="credit-card" class="w-4 h-4"></i> Saldo do Cartão
+          </p>
+          <p id="cardBalance" class="text-5xl font-bold mt-2">R$ 0,00</p>
+          <p class="bz-balance-card-sub">Atualizado agora</p>
         </div>
+        <div class="bg-white/20 p-4 rounded-2xl">
+          <i data-feather="bus" class="w-10 h-10"></i>
+        </div>
+      </div>
 
-        <div id="welcomeMsg" class="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2 text-sm w-fit">
-          <i data-feather="user" class="w-4 h-4"></i>
-          <span>Bem-vindo!</span>
-        </div>
+      <div id="welcomeMsg" class="flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2 text-sm w-fit">
+        <i data-feather="user" class="w-4 h-4"></i>
+        <span>Bem-vindo!</span>
       </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-3 gap-4 mb-8 animate-fade-in-up">
-      <button class="action-btn" onclick="window.location.href='recarga.html'">
-        <div class="icon-wrap"><i data-feather="credit-card" class="w-6 h-6 text-white"></i></div>
+    <div class="grid grid-cols-3 gap-4 mb-8 mt-8 animate-fade-in-up">
+      <button class="action-btn" onclick="window.location.href='/recarga'">
+        <div class="icon-wrap"><i data-feather="credit-card" class="w-6 h-6"></i></div>
         <span>Cartão</span>
       </button>
-      <button class="action-btn" onclick="window.location.href='acompanhamento.html'">
-        <div class="icon-wrap"><i data-feather="map-pin" class="w-6 h-6 text-white"></i></div>
+      <button class="action-btn" onclick="window.location.href='/acompanhamento'">
+        <div class="icon-wrap"><i data-feather="map-pin" class="w-6 h-6"></i></div>
         <span>Rastrear</span>
       </button>
-      <button class="action-btn" onclick="window.location.href='rating.html'">
-        <div class="icon-wrap"><i data-feather="star" class="w-6 h-6 text-white"></i></div>
+      <button class="action-btn" onclick="window.location.href='/rating'">
+        <div class="icon-wrap"><i data-feather="star" class="w-6 h-6"></i></div>
         <span>Avaliar</span>
       </button>
     </div>
 
     <!-- Transactions -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 animate-fade-in-up">
+    <div class="bz-card animate-fade-in-up">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
-          <i data-feather="list" class="w-5 h-5 text-yellow-500"></i> Últimas transações
+        <h2 class="bz-card-title flex items-center gap-2">
+          <i data-feather="list" class="w-5 h-5" style="color: var(--color-primary)"></i> Últimas transações
         </h2>
-        <button onclick="openHistoryModal()" class="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">Ver todas</button>
+        <button onclick="openHistoryModal()" class="bz-btn bz-btn-ghost bz-btn-sm">Ver todas</button>
       </div>
       <div id="transactionList">
         <p class="text-sm text-gray-400 text-center py-4">Carregando…</p>
@@ -172,19 +108,22 @@
   </main>
 
   <!-- History Modal -->
-  <div id="historyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Histórico de transações">
-    <div class="modal-box">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-        <h3 class="font-bold text-gray-800 dark:text-white">Histórico de Transações</h3>
-        <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white" aria-label="Fechar">
+  <div id="historyModal" class="bz-modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Histórico de transações">
+    <div class="bz-modal-box" style="max-width: 700px">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="bz-modal-title">Histórico de Transações</h3>
+        <button onclick="Modal.close('historyModal')" class="bz-btn bz-btn-ghost bz-btn-icon" aria-label="Fechar">
           <i data-feather="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <div id="historyList" class="p-6"></div>
+      <div id="historyList"></div>
     </div>
   </div>
 
   <script src="./js/app.js"></script>
+  <script src="./js/sidebar.js" data-role="passageiro"></script>
+  <script src="./js/bottom-nav.js" data-role="passageiro"></script>
+  <script src="./js/modal.js"></script>
   <script src="./js/notifications.js"></script>
   <script>
     // ── Init ──────────────────────────────────────────────────────────────────
@@ -193,11 +132,11 @@
       if (!user) return;
 
       document.getElementById('welcomeMsg').innerHTML =
-        `<i data-feather="user" class="w-4 h-4"></i><span>Olá, <strong>${escapeHtml(user.username)}</strong>!</span>`;
+        `<i data-feather="user" class="w-4 h-4"></i><span>${greeting(`<strong>${escapeHtml(user.username)}</strong>`)}!</span>`;
       if (typeof feather !== 'undefined') feather.replace();
 
       if (user.role === 'admin') {
-        window.location.replace('admin.html');
+        window.location.replace('/admin');
         return;
       }
 
@@ -205,13 +144,6 @@
       await loadRecentTransactions();
 
       setInterval(loadBalance, 30_000);
-
-      // History sidebar link
-      document.getElementById('sidebarHistory').classList.remove('hidden');
-      document.getElementById('sidebarHistory').addEventListener('click', e => {
-        e.preventDefault();
-        openHistoryModal();
-      });
     }
 
     // ── Balance ───────────────────────────────────────────────────────────────
@@ -267,10 +199,8 @@
 
     // ── History Modal ─────────────────────────────────────────────────────────
     async function openHistoryModal() {
-      // Close sidebar AND its blur overlay before opening the modal
-      document.getElementById('sidebar')?.classList.remove('open');
-      document.getElementById('sidebarOverlay')?.classList.remove('visible');
-      document.getElementById('historyModal').classList.add('active');
+      Sidebar.close();
+      Modal.open('historyModal');
       const list = document.getElementById('historyList');
       list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Carregando…</p>';
       try {
@@ -281,24 +211,10 @@
       }
     }
 
-    function closeHistoryModal() {
-      document.getElementById('historyModal').classList.remove('active');
-      // Also ensure the sidebar overlay is hidden (belt-and-suspenders fix)
-      document.getElementById('sidebarOverlay')?.classList.remove('visible');
-    }
-
-    document.getElementById('historyModal').addEventListener('click', e => {
-      if (e.target === document.getElementById('historyModal')) closeHistoryModal();
-    });
-
-    // Close modal on Escape key
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeHistoryModal();
-    });
-
     // ── Theme Icon ────────────────────────────────────────────────────────────
     function updateThemeIcon() {
       const btn = document.getElementById('themeToggle');
+      if (!btn) return;
       const isDark = DarkMode.isDark();
       btn.innerHTML = isDark
         ? '<i data-feather="sun" class="w-5 h-5"></i>'
@@ -321,6 +237,6 @@
       return d.innerHTML;
     }
   </script>
-<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>
+  <script>if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>
 </body>
 </html>
