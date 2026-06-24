@@ -354,6 +354,20 @@ html { scrollbar-width: thin; scrollbar-color: #c1c5cc #e5e7eb; }
   .sidebar-overlay { display: none !important; }
 }
 
+/* No mobile, a navegação é feita pela bottom-nav: esconde a sidebar,
+   o botão hambúrguer e o overlay. (Não usar a classe .menu-toggle aqui,
+   pois ela também estiliza o botão "Voltar" em algumas telas.) */
+@media (max-width: 767px) {
+  .bz-sidebar,
+  .sidebar,
+  #menuToggle,
+  .bz-menu-toggle,
+  .bz-sidebar-overlay,
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
 /* ── 5. Header ────────────────────────────────────────────────────── */
 .bz-header {
   background: var(--color-surface);

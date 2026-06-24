@@ -273,5 +273,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const user = await API.get('/api/auth/profile');
     Sidebar.applyRole(user);
+    if (window.BottomNav) window.BottomNav.applyRole(user);
   } catch {}
 });
