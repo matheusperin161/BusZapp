@@ -143,3 +143,23 @@ A aplicação conta com um fluxo de pagamento para recarga de saldo integrado, p
 - **Saldo**: O saldo (`card_balance`) recebe a somatória da quantia aprovada.
 - **Histórico**: A operação entra no extrato retornado por `GET /api/transactions`.
 - **Validação de Catraca**: Ao atingir o crédito, o passageiro pode utilizar a rota com `POST /api/use-transport`, onde o valor da tarifa correspondente é deduzido deste saldo. Caso o saldo atinja o limiar baixo (R$ 5,00), um aviso extra de "Saldo Baixo" será notificado.
+
+## Motoristas e viagens (RF23 / rastreamento)
+
+Depois de atualizar o código num banco existente, rode a migração (copia cada motorista da antiga
+tabela `driver` para `motoristas` e cria o acesso `User` com perfil `motorista`, mantendo e-mail e senha):
+
+```bash
+flask --app wsgi db upgrade
+```
+
+A migração tolera o `db.create_all()` que roda na subida do app, mas **faça backup antes**: o
+`downgrade` não é suportado. Motoristas migrados ficam sem categoria/validade da CNH (a listagem
+avisa) até o admin completar o cadastro.
+
+Testes automatizados (SQLite em memória):
+
+```bash
+pip install pytest
+python -m pytest
+```
