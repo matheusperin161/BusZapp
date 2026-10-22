@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request, session
 from sqlalchemy import func
 
 from src.models import db
-from src.models.user import BusRoute, BusLocation, Notification, Rating, Driver, DriverTrip
+from src.models.user import BusRoute, BusLocation, Notification, Rating, Motorista, DriverTrip
 from src.utils.auth import login_required
 
 bus_bp = Blueprint('bus', __name__, url_prefix='/api')
@@ -180,7 +180,7 @@ def get_ratings_stats():
 @bus_bp.route('/incidents', methods=['POST'])
 def create_incident():
     """Motorista registra uma ocorrência durante o trajeto."""
-    from src.models.user import Driver, DriverIncident
+    from src.models.user import Motorista, DriverIncident
 
     data = request.get_json() or {}
 
@@ -206,7 +206,7 @@ def create_incident():
     if inc_type not in VALID_TYPES:
         return jsonify({'error': f'Tipo inválido. Use: {", ".join(VALID_TYPES)}'}), 400
 
-    driver = db.session.get(Driver, driver_id)
+    driver = db.session.get(Motorista, driver_id)
     if not driver:
         return jsonify({'error': 'Motorista não encontrado'}), 404
 
@@ -240,7 +240,7 @@ def create_incident():
     if description:
         parts.append(description)
 
-    message = ' '.join(parts) if parts else f'Reportado pelo motorista {driver.name}.'
+    message = ' '.join(parts) if parts else f'Reportado pelo motorista {driver.nome}.'
 
     from src.models.user import User
     users = User.query.filter(User.role.in_(['user', 'admin'])).all()

@@ -678,42 +678,9 @@ async function drvLoadBusLines(){
   }catch(e){}
 }
 
-function drvOpenModal(){
-  drvEditingId=null;
-  document.getElementById('drvModalTitle').textContent='Novo Motorista';
-  ['drvName','drvEmail','drvCpf','drvCnh','drvCode','drvPassword'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('drvBusLine').value='';
-  document.getElementById('drvPassReq').textContent='*';
-  document.getElementById('drvPassHint').classList.add('hidden');
-  document.getElementById('drvModalError').classList.add('hidden');
-  document.getElementById('drvModal').classList.remove('hidden');
-  drvLoadBusLines();
-  if(typeof feather!=='undefined')feather.replace();
-}
-
-async function drvOpenEdit(id){
-  try{
-    const d=await API.get(`/api/admin/drivers/${id}`);
-    drvEditingId=id;
-    document.getElementById('drvModalTitle').textContent='Editar Motorista';
-    document.getElementById('drvName').value=d.name;
-    document.getElementById('drvEmail').value=d.email;
-    document.getElementById('drvCpf').value=d.cpf;
-    document.getElementById('drvCnh').value=d.cnh;
-    document.getElementById('drvCode').value=d.code;
-    document.getElementById('drvPassword').value='';
-    document.getElementById('drvPassReq').textContent='(opcional)';
-    document.getElementById('drvPassHint').classList.remove('hidden');
-    document.getElementById('drvModalError').classList.add('hidden');
-    document.getElementById('drvModal').classList.remove('hidden');
-    await drvLoadBusLines();
-    const sel=document.getElementById('drvBusLine');
-    let found=false;
-    for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===d.bus_line){sel.selectedIndex=i;found=true;break;}}
-    if(!found&&d.bus_line){const o=document.createElement('option');o.value=d.bus_line;o.textContent=d.bus_line;sel.appendChild(o);sel.value=d.bus_line;}
-    if(typeof feather!=='undefined')feather.replace();
-  }catch(e){Toast.error('Erro ao carregar motorista.');}
-}
+// Cadastro/edição completos (CNH, categoria, validade, status) ficam em add-driver.html
+function drvOpenModal(){location.href='/add-driver#novo';}
+function drvOpenEdit(id){location.href=`/add-driver#editar=${id}`;}
 
 function drvCloseModal(){document.getElementById('drvModal').classList.add('hidden');}
 
@@ -756,7 +723,7 @@ function drvOpenDelete(id,name){
 function drvCloseDelete(){document.getElementById('drvDeleteModal').classList.add('hidden');drvDeletingId=null;}
 async function drvConfirmDelete(){
   try{await API.delete(`/api/admin/drivers/${drvDeletingId}`);Toast.success('Motorista removido!');drvCloseDelete();drvLoad();loadStats();}
-  catch(e){Toast.error('Erro ao remover.');}
+  catch(e){Toast.error(e.message||'Erro ao remover.');drvCloseDelete();}
 }
 
 // ════════════════════════════════════════════════════════

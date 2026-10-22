@@ -26,7 +26,7 @@ sqlite_engine = create_engine(f'sqlite:///{SQLITE_PATH}')
 pg_engine = create_engine(PG_URL)
 
 from src.models import db
-from src.models.user import User, Transaction, BusRoute, BusLocation, Notification, Driver, Rating, Vehicle
+from src.models.user import User, Transaction, BusRoute, BusLocation, Notification, Motorista, Rating, Vehicle
 from src.models.tracking import Route, StopPoint, BusSchedule
 
 # Ordem respeita chaves estrangeiras

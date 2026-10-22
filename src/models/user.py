@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from src.models import db
 
 
@@ -9,7 +9,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), default='user', nullable=False)  # 'user' | 'admin'
+    role = db.Column(db.String(20), default='user', nullable=False)  # 'user' | 'admin' | 'motorista'
     card_balance = db.Column(db.Float, default=0.0, nullable=False)
     card_number = db.Column(db.String(25), nullable=True)
     card_holder = db.Column(db.String(100), nullable=True)
@@ -153,38 +153,66 @@ class Notification(db.Model):
         }
 
 
-class Driver(db.Model):
-    __tablename__ = 'driver'
+CNH_CATEGORIAS = ('A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD', 'AE')
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password = db.Column(db.String(255), nullable=True)
-    cpf = db.Column(db.String(14), unique=True, nullable=False)
-    cnh = db.Column(db.String(11), unique=True, nullable=False)
-    bus_line = db.Column(db.String(100), nullable=False)
-    code = db.Column(db.String(50), unique=True, nullable=False)
+
+class Motorista(db.Model):
+    """Motorista (RF23). O acesso ao app é feito pelo User vinculado (role='motorista')."""
+    __tablename__ = 'motoristas'
+
+    id            = db.Column(db.Integer, primary_key=True)
+    usuario_id    = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    nome          = db.Column(db.String(100), nullable=False)
+    cpf           = db.Column(db.String(11), unique=True, nullable=False)    # só dígitos
+    cnh_numero    = db.Column(db.String(20), unique=True, nullable=False)
+    cnh_categoria = db.Column(db.String(2), nullable=True)   # nulo só em registros migrados
+    cnh_validade  = db.Column(db.Date, nullable=True)        # nulo só em registros migrados
+    telefone      = db.Column(db.String(20), nullable=True)
+    status        = db.Column(db.String(10), default='ativo', nullable=False)  # ativo | afastado | inativo
+    criado_em     = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Campos herdados da versão web (linha fixa, código interno e jornada)
+    bus_line       = db.Column(db.String(100), nullable=True)
+    code           = db.Column(db.String(50), unique=True, nullable=True)
     first_schedule = db.Column(db.String(5), nullable=True)   # "06:00"
     last_schedule  = db.Column(db.String(5), nullable=True)   # "18:30"
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    VALID_STATUSES = ('ativo', 'afastado', 'inativo')
+
+    usuario  = db.relationship('User', backref=db.backref('motorista', uselist=False))
     vehicles = db.relationship('Vehicle', backref='driver', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Driver {self.name}>'
+        return f'<Motorista {self.nome}>'
+
+    @property
+    def cnh_vencida(self) -> bool:
+        return self.cnh_validade is not None and self.cnh_validade < date.today()
 
     def to_dict(self):
         return {
             'id': self.id,
-            'name': self.name,
-            'email': self.email,
+            'usuario_id': self.usuario_id,
+            'nome': self.nome,
+            'email': self.usuario.email if self.usuario else None,
             'cpf': self.cpf,
-            'cnh': self.cnh,
+            'cnh_numero': self.cnh_numero,
+            'cnh_categoria': self.cnh_categoria,
+            'cnh_validade': self.cnh_validade.isoformat() if self.cnh_validade else None,
+            'cnh_vencida': self.cnh_vencida,
+            'telefone': self.telefone,
+            'status': self.status,
+            'criado_em': self.criado_em.isoformat() if self.criado_em else None,
+            'atualizado_em': self.atualizado_em.isoformat() if self.atualizado_em else None,
             'bus_line': self.bus_line,
             'code': self.code,
             'first_schedule': self.first_schedule,
             'last_schedule': self.last_schedule,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            # aliases usados pelas telas web legadas
+            'name': self.nome,
+            'cnh': self.cnh_numero,
+            'created_at': self.criado_em.isoformat() if self.criado_em else None,
         }
 
 
@@ -203,10 +231,10 @@ class Rating(db.Model):
     trip_date = db.Column(db.Date)
     trip_time = db.Column(db.Time)
     schedule_departure = db.Column(db.String(5), nullable=True)   # "07:30" — horário exato do BusSchedule
-    driver_id = db.Column(db.Integer, db.ForeignKey('driver.id', ondelete='SET NULL'), nullable=True)
+    driver_id = db.Column(db.Integer, db.ForeignKey('motoristas.id', ondelete='SET NULL'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    driver = db.relationship('Driver', backref=db.backref('ratings', lazy='dynamic'))
+    driver = db.relationship('Motorista', backref=db.backref('ratings', lazy='dynamic'))
 
     def __repr__(self):
         return f'<Rating {self.id}: {self.overall_rating}★ user={self.user_id}>'
@@ -226,7 +254,7 @@ class Rating(db.Model):
             'trip_time': self.trip_time.isoformat() if self.trip_time else None,
             'schedule_departure': self.schedule_departure,
             'driver_id': self.driver_id,
-            'driver_name': self.driver.name if self.driver else None,
+            'driver_name': self.driver.nome if self.driver else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -242,7 +270,7 @@ class Vehicle(db.Model):
     capacity = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(20), default='ativo', nullable=False)  # 'ativo' | 'inativo' | 'manutencao'
     bus_line = db.Column(db.String(100))
-    driver_id = db.Column(db.Integer, db.ForeignKey('driver.id'), nullable=True)
+    driver_id = db.Column(db.Integer, db.ForeignKey('motoristas.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     VALID_STATUSES = ('ativo', 'inativo', 'manutencao')
@@ -261,17 +289,17 @@ class Vehicle(db.Model):
             'status': self.status,
             'bus_line': self.bus_line,
             'driver_id': self.driver_id,
-            'driver_name': self.driver.name if self.driver else None,
+            'driver_name': self.driver.nome if self.driver else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
 
 class DriverTrip(db.Model):
-    """Registra cada trajeto iniciado pelo motorista no app."""
+    """Trajeto registrado pela tela web legada (motorista.html). O app usa Viagem."""
     __tablename__ = 'driver_trip'
 
     id             = db.Column(db.Integer, primary_key=True)
-    driver_id      = db.Column(db.Integer, db.ForeignKey('driver.id', ondelete='CASCADE'), nullable=False)
+    driver_id      = db.Column(db.Integer, db.ForeignKey('motoristas.id', ondelete='CASCADE'), nullable=False)
     bus_line       = db.Column(db.String(100), nullable=False)   # "4 - Centro - Engenho Braun"
     departure_time = db.Column(db.String(5),   nullable=False)   # "09:00"
     trip_date      = db.Column(db.Date,        nullable=False)   # data em que o trajeto foi iniciado
@@ -279,13 +307,13 @@ class DriverTrip(db.Model):
     started_at     = db.Column(db.DateTime,    default=datetime.utcnow, nullable=False)
     ended_at       = db.Column(db.DateTime,    nullable=True)
 
-    driver = db.relationship('Driver', backref=db.backref('trips', lazy='dynamic'))
+    driver = db.relationship('Motorista', backref=db.backref('trips', lazy='dynamic'))
 
     def to_dict(self):
         return {
             'id':             self.id,
             'driver_id':      self.driver_id,
-            'driver_name':    self.driver.name if self.driver else None,
+            'driver_name':    self.driver.nome if self.driver else None,
             'bus_line':       self.bus_line,
             'departure_time': self.departure_time,
             'trip_date':      self.trip_date.isoformat() if self.trip_date else None,
@@ -317,7 +345,7 @@ class DriverIncident(db.Model):
     __tablename__ = 'driver_incident'
 
     id         = db.Column(db.Integer, primary_key=True)
-    driver_id  = db.Column(db.Integer, db.ForeignKey('driver.id', ondelete='CASCADE'), nullable=False)
+    driver_id  = db.Column(db.Integer, db.ForeignKey('motoristas.id', ondelete='CASCADE'), nullable=False)
     bus_number = db.Column(db.String(20), nullable=True)
     route_id   = db.Column(db.Integer, db.ForeignKey('bus_route.id'), nullable=True)
     type       = db.Column(db.String(30), nullable=False)  # 'atraso' | 'pane' | 'acidente' | 'outro'
@@ -325,13 +353,13 @@ class DriverIncident(db.Model):
     status     = db.Column(db.String(20), default='aberto', nullable=False)  # 'aberto' | 'resolvido'
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    driver = db.relationship('Driver', backref=db.backref('incidents', lazy='dynamic'))
+    driver = db.relationship('Motorista', backref=db.backref('incidents', lazy='dynamic'))
 
     def to_dict(self):
         return {
             'id': self.id,
             'driver_id': self.driver_id,
-            'driver_name': self.driver.name if self.driver else None,
+            'driver_name': self.driver.nome if self.driver else None,
             'bus_number': self.bus_number,
             'route_id': self.route_id,
             'type': self.type,

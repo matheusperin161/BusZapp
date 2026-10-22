@@ -1,7 +1,8 @@
 """Authentication helpers."""
 from functools import wraps
-from flask import session, jsonify
-from src.models.user import User
+from flask import session, jsonify, g
+from src.models import db
+from src.models.user import User, Motorista
 
 
 def get_current_user() -> User | None:
@@ -26,9 +27,23 @@ def admin_required(f):
         user_id = session.get('user_id')
         if not user_id:
             return jsonify({'error': 'Usuário não autenticado'}), 401
-        from src.models import db
         user = db.session.get(User, user_id)
         if not user or user.role != 'admin':
             return jsonify({'error': 'Acesso negado: requer privilégios de administrador'}), 403
+        return f(*args, **kwargs)
+    return decorated
+
+
+def motorista_required(f):
+    """Exige usuário com perfil motorista; disponibiliza o cadastro em g.motorista."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'Usuário não autenticado'}), 401
+        motorista = Motorista.query.filter_by(usuario_id=user_id).first()
+        if not motorista:
+            return jsonify({'error': 'Acesso negado: requer perfil de motorista'}), 403
+        g.motorista = motorista
         return f(*args, **kwargs)
     return decorated

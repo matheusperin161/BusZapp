@@ -59,11 +59,19 @@
   </div>
 
   <!-- Search -->
-  <div class="relative mb-5">
-    <i data-feather="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-yellow-500 pointer-events-none"></i>
-    <input id="searchInput" type="text" placeholder="Buscar por nome ou CPF…"
-           oninput="filterDrivers(this.value)"
-           class="form-input pl-10"/>
+  <div class="flex gap-3 mb-5">
+    <div class="relative flex-1">
+      <i data-feather="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-yellow-500 pointer-events-none"></i>
+      <input id="searchInput" type="text" placeholder="Buscar por nome ou CPF…"
+             oninput="filterDrivers()"
+             class="form-input pl-10"/>
+    </div>
+    <select id="statusFilter" class="form-input" style="max-width:10rem" onchange="loadDrivers()">
+      <option value="">Todos</option>
+      <option value="ativo">Ativos</option>
+      <option value="afastado">Afastados</option>
+      <option value="inativo">Inativos</option>
+    </select>
   </div>
 
   <!-- Driver list -->
@@ -100,8 +108,36 @@
           <input id="dCnh" type="text" placeholder="00000000000" maxlength="11" class="form-input"/>
         </div>
       </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">CATEGORIA CNH *</label>
+          <select id="dCnhCategoria" class="form-input">
+            <option value="">Selecione…</option>
+            <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+            <option>AB</option><option>AC</option><option>AD</option><option>AE</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">VALIDADE CNH *</label>
+          <input id="dCnhValidade" type="date" class="form-input"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">TELEFONE</label>
+          <input id="dTelefone" type="tel" placeholder="(49) 99999-0000" class="form-input"/>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 mb-1 block">STATUS</label>
+          <select id="dStatus" class="form-input">
+            <option value="ativo">Ativo</option>
+            <option value="afastado">Afastado</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+      </div>
       <div>
-        <label class="text-xs font-semibold text-gray-500 mb-1 block">LINHA DO ÔNIBUS *</label>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">LINHA DO ÔNIBUS</label>
         <select id="dBusLine" class="form-input" onchange="loadSchedulesForDriver()">
           <option value="">Selecione a linha…</option>
         </select>
@@ -125,7 +161,7 @@
         <p class="text-xs text-gray-400 mt-1">Define quais avaliações serão direcionadas a este motorista</p>
       </div>
       <div>
-        <label class="text-xs font-semibold text-gray-500 mb-1 block">CÓDIGO DO MOTORISTA *</label>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">CÓDIGO DO MOTORISTA</label>
         <input id="dCode" type="text" placeholder="Ex: MTR12345" class="form-input"/>
       </div>
       <div id="passwordSection">
@@ -172,8 +208,9 @@
 
   async function loadDrivers(){
     try{
-      allDrivers=await API.get('/api/admin/drivers');
-      renderDrivers(allDrivers);
+      const status=document.getElementById('statusFilter').value;
+      allDrivers=await API.get('/api/admin/drivers'+(status?`?status=${status}`:''));
+      filterDrivers();
     }catch(e){
       document.getElementById('driverList').innerHTML='<p class="text-red-400 text-center py-8">Erro ao carregar motoristas.</p>';
     }
@@ -196,18 +233,20 @@
           ${esc(d.name.charAt(0).toUpperCase())}
         </div>
         <div class="flex-1 min-w-0">
-          <p class="font-bold text-gray-900 dark:text-white text-sm">${esc(d.name)}</p>
-          <p class="text-xs text-gray-400 truncate">${esc(d.email)} · CPF: ${esc(d.cpf)}</p>
-          <p class="text-xs text-gray-400">CNH: ${esc(d.cnh)} · Cód: ${esc(d.code)}</p>
+          <p class="font-bold text-gray-900 dark:text-white text-sm">${esc(d.nome)} <span class="text-xs font-normal text-gray-400">· ${esc(d.status)}</span></p>
+          <p class="text-xs text-gray-400 truncate">${esc(d.email||'')} · CPF: ${esc(fmtCpf(d.cpf))}</p>
+          <p class="text-xs text-gray-400">CNH: ${esc(d.cnh_numero)} ${esc(d.cnh_categoria||'')} · validade ${esc(fmtData(d.cnh_validade))}</p>
+          ${d.cnh_vencida?'<p class="text-xs font-bold text-red-500">⚠ CNH vencida</p>':''}
+          ${!d.cnh_validade?'<p class="text-xs font-bold text-amber-500">⚠ Validade da CNH não informada</p>':''}
         </div>
         <div class="flex-shrink-0 text-right hidden sm:block">
-          <span class="badge badge-yellow">${esc(d.bus_line)}</span>
+          ${d.bus_line?`<span class="badge badge-yellow">${esc(d.bus_line)}</span>`:''}
         </div>
         <div class="flex gap-1 flex-shrink-0">
           <button class="btn-icon text-blue-500" onclick="openEditModal(${d.id})" title="Editar">
             <i data-feather="edit-2" class="w-4 h-4"></i>
           </button>
-          <button class="btn-icon text-red-500" onclick="openDeleteModal(${d.id},'${esc(d.name)}')" title="Remover">
+          <button class="btn-icon text-red-500" onclick="openDeleteModal(${d.id},this.dataset.nome)" data-nome="${esc(d.nome)}" title="Remover">
             <i data-feather="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
@@ -215,9 +254,13 @@
     if(typeof feather!=='undefined')feather.replace();
   }
 
-  function filterDrivers(q){
-    const f=q.toLowerCase().trim();
-    renderDrivers(f?allDrivers.filter(d=>d.name.toLowerCase().includes(f)||d.cpf.includes(f)):allDrivers);
+  function fmtCpf(c=''){return c.length===11?c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):c;}
+  function fmtData(iso){return iso?iso.split('-').reverse().join('/'):'—';}
+
+  function filterDrivers(){
+    const f=document.getElementById('searchInput').value.toLowerCase().trim();
+    const dig=f.replace(/\D/g,'');
+    renderDrivers(f?allDrivers.filter(d=>d.nome.toLowerCase().includes(f)||(dig&&d.cpf.includes(dig))):allDrivers);
   }
 
   async function loadBusLines(){
@@ -260,7 +303,8 @@
   function openModal(){
     editingId=null;
     document.getElementById('modalTitle').textContent='Novo Motorista';
-    ['dName','dEmail','dCpf','dCnh','dCode','dPassword'].forEach(id=>document.getElementById(id).value='');
+    ['dName','dEmail','dCpf','dCnh','dCnhCategoria','dCnhValidade','dTelefone','dCode','dPassword'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('dStatus').value='ativo';
     document.getElementById('dBusLine').value='';
     document.getElementById('scheduleSection').classList.add('hidden');
     ['dFirstSchedule','dLastSchedule'].forEach(id=>{document.getElementById(id).innerHTML='<option value="">Selecione…</option>';});
@@ -276,19 +320,23 @@
       const d=await API.get(`/api/admin/drivers/${id}`);
       editingId=id;
       document.getElementById('modalTitle').textContent='Editar Motorista';
-      document.getElementById('dName').value=d.name;
-      document.getElementById('dEmail').value=d.email;
-      document.getElementById('dCpf').value=d.cpf;
-      document.getElementById('dCnh').value=d.cnh;
-      document.getElementById('dCode').value=d.code;
+      document.getElementById('dName').value=d.nome;
+      document.getElementById('dEmail').value=d.email||'';
+      document.getElementById('dCpf').value=fmtCpf(d.cpf);
+      document.getElementById('dCnh').value=d.cnh_numero;
+      document.getElementById('dCnhCategoria').value=d.cnh_categoria||'';
+      document.getElementById('dCnhValidade').value=d.cnh_validade||'';
+      document.getElementById('dTelefone').value=d.telefone||'';
+      document.getElementById('dStatus').value=d.status;
+      document.getElementById('dCode').value=d.code||'';
       document.getElementById('dPassword').value='';
       document.getElementById('passwordRequired').textContent='(opcional)';
       document.getElementById('passwordHint').classList.remove('hidden');
       // Try to match bus_line select
       const sel=document.getElementById('dBusLine');
       let found=false;
-      for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===d.bus_line){sel.selectedIndex=i;found=true;break;}}
-      if(!found){const o=document.createElement('option');o.value=d.bus_line;o.textContent=d.bus_line;sel.appendChild(o);sel.value=d.bus_line;}
+      for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===(d.bus_line||'')){sel.selectedIndex=i;found=true;break;}}
+      if(!found&&d.bus_line){const o=document.createElement('option');o.value=d.bus_line;o.textContent=d.bus_line;sel.appendChild(o);sel.value=d.bus_line;}
       // Load schedules for the selected line, then restore saved values
       await loadSchedulesForDriver();
       if(d.first_schedule) document.getElementById('dFirstSchedule').value=d.first_schedule;
@@ -312,18 +360,22 @@
   async function saveDriver(){
     const password=document.getElementById('dPassword').value;
     const body={
-      name:document.getElementById('dName').value.trim(),
+      nome:document.getElementById('dName').value.trim(),
       email:document.getElementById('dEmail').value.trim(),
       cpf:document.getElementById('dCpf').value.trim(),
-      cnh:document.getElementById('dCnh').value.trim(),
-      bus_line:document.getElementById('dBusLine').value,
-      code:document.getElementById('dCode').value.trim(),
+      cnh_numero:document.getElementById('dCnh').value.trim(),
+      cnh_categoria:document.getElementById('dCnhCategoria').value,
+      cnh_validade:document.getElementById('dCnhValidade').value,
+      telefone:document.getElementById('dTelefone').value.trim(),
+      status:document.getElementById('dStatus').value,
+      bus_line:document.getElementById('dBusLine').value||null,
+      code:document.getElementById('dCode').value.trim()||null,
       first_schedule:document.getElementById('dFirstSchedule').value||null,
       last_schedule:document.getElementById('dLastSchedule').value||null,
     };
-    if(password) body.password=password;
+    if(password) body.senha=password;
     const errEl=document.getElementById('modalError');
-    const baseFields=['name','email','cpf','cnh','bus_line','code'];
+    const baseFields=['nome','email','cpf','cnh_numero','cnh_categoria','cnh_validade'];
     if(baseFields.some(k=>!body[k])){errEl.textContent='Preencha todos os campos obrigatórios.';errEl.classList.remove('hidden');return;}
     if(!editingId && !password){errEl.textContent='A senha de acesso é obrigatória para novos motoristas.';errEl.classList.remove('hidden');return;}
     try{
@@ -341,7 +393,7 @@
   function closeDeleteModal(){document.getElementById('deleteModal').classList.add('hidden');deletingId=null;}
   async function confirmDelete(){
     try{await API.delete(`/api/admin/drivers/${deletingId}`);Toast.success('Motorista removido!');closeDeleteModal();loadDrivers();}
-    catch(e){Toast.error('Erro ao remover.');}
+    catch(e){Toast.error(e.message||'Erro ao remover.');closeDeleteModal();}
   }
 
   // Dark mode
@@ -358,6 +410,10 @@
   function maskCnh(e){e.target.value=e.target.value.replace(/\D/g,'').slice(0,11);}
   document.addEventListener('DOMContentLoaded',()=>{
     loadBusLines();loadDrivers();
+    // Vindo do painel admin: #novo ou #editar=<id>
+    if(location.hash==='#novo')openModal();
+    const editar=location.hash.match(/^#editar=(\d+)$/);
+    if(editar)openEditModal(Number(editar[1]));
     if(typeof feather!=='undefined')feather.replace();
     document.getElementById('dCpf').addEventListener('input',maskCpf);
     document.getElementById('dCnh').addEventListener('input',maskCnh);

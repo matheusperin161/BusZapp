@@ -58,3 +58,64 @@ def find_next_stops_with_eta(bus_lat: float, bus_lon: float, speed_kmh: float, r
         })
 
     return stops_with_eta
+
+
+VELOCIDADE_PADRAO_KMH = 20.0  # usada quando o trecho não tem tempo estimado cadastrado
+
+
+def _distancia_ate_segmento(lat, lon, a, b):
+    """Distância (m) do ponto ao segmento a→b e fração do segmento já percorrida (0..1).
+
+    Projeção equiretangular local — suficiente para trechos urbanos curtos.
+    """
+    k = cos(radians(lat))
+    ax, ay = a.longitude * k, a.latitude
+    bx, by = b.longitude * k, b.latitude
+    px, py = lon * k, lat
+    dx, dy = bx - ax, by - ay
+    comprimento2 = dx * dx + dy * dy
+    t = 0.0 if comprimento2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / comprimento2))
+    proj_lat, proj_lon = ay + t * dy, (ax + t * dx) / k
+    return haversine(lat, lon, proj_lat, proj_lon), t
+
+
+def proxima_parada(lat: float, lon: float, paradas: list, sentido: str = 'ida') -> dict | None:
+    """Próxima parada e minutos estimados até ela (CA08.6).
+
+    `paradas` são StopPoints da linha. O tempo de cada trecho vem de
+    `tempo_ate_proxima_min` (cadastrado no sentido de ida, vale igual para a volta);
+    sem ele, usa a distância do trecho a VELOCIDADE_PADRAO_KMH.
+    O ônibus é encaixado no trecho mais próximo e o tempo é proporcional ao que falta dele.
+    """
+    ida = sorted(paradas, key=lambda p: p.order)
+    if not ida:
+        return None
+    tempos = {}
+    for i in range(len(ida) - 1):
+        a, b = ida[i], ida[i + 1]
+        if a.tempo_ate_proxima_min is not None:
+            minutos = a.tempo_ate_proxima_min
+        else:
+            minutos = calculate_eta(haversine(a.latitude, a.longitude, b.latitude, b.longitude), VELOCIDADE_PADRAO_KMH)
+        tempos[(a.id, b.id)] = tempos[(b.id, a.id)] = minutos
+
+    ordem = ida if sentido == 'ida' else list(reversed(ida))
+    if len(ordem) == 1:
+        unica = ordem[0]
+        distancia = haversine(lat, lon, unica.latitude, unica.longitude)
+        return {'parada': unica, 'distancia_m': distancia, 'eta_min': calculate_eta(distancia, VELOCIDADE_PADRAO_KMH)}
+
+    melhor = None
+    for i in range(len(ordem) - 1):
+        a, b = ordem[i], ordem[i + 1]
+        distancia, t = _distancia_ate_segmento(lat, lon, a, b)
+        if melhor is None or distancia < melhor[0]:
+            melhor = (distancia, t, a, b)
+
+    _, t, a, b = melhor
+    eta = round(tempos[(a.id, b.id)] * (1.0 - t), 1)
+    return {
+        'parada': b,
+        'distancia_m': haversine(lat, lon, b.latitude, b.longitude),
+        'eta_min': eta,
+    }

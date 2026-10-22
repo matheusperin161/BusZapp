@@ -160,23 +160,23 @@ def login():
     if not email or not password:
         return jsonify({'error': 'E-mail e senha são obrigatórios'}), 400
 
-    # Check if it's a driver login first
-    from src.models.user import Driver
-    driver = Driver.query.filter_by(email=email).first()
-    if driver and driver.password and check_password_hash(driver.password, password):
-        session.permanent = remember
-        session['driver_id'] = driver.id
-        session['role'] = 'driver'
-        return jsonify({
-            'message': 'Login realizado com sucesso',
-            'role': 'driver',
-            'redirect': '/motorista',
-            'driver': driver.to_dict(),
-        }), 200
-
-    # Regular user login by email
     user = User.query.filter_by(email=email).first()
     if user and check_password_hash(user.password, password):
+        # Motorista: acesso criado pelo admin no cadastro (perfil 'motorista')
+        if user.role == 'motorista' and user.motorista:
+            session.clear()
+            session.permanent = remember
+            session['user_id'] = user.id
+            session['driver_id'] = user.motorista.id  # usado pelas telas web legadas
+            session['role'] = 'motorista'
+            return jsonify({
+                'message': 'Login realizado com sucesso',
+                'role': 'motorista',
+                'redirect': '/motorista',
+                'user': user.to_dict(),
+                'driver': user.motorista.to_dict(),
+            }), 200
+
         if not user.email_verified:
             return jsonify({
                 'error': 'E-mail não verificado. Verifique sua caixa de entrada ou solicite um novo link.',
@@ -184,6 +184,7 @@ def login():
                 'email': email,
             }), 403
 
+        session.clear()
         session.permanent = remember
         session['user_id'] = user.id
         session['role'] = user.role
@@ -200,7 +201,7 @@ def login():
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
-    session.pop('user_id', None)
+    session.clear()
     return jsonify({'message': 'Logout realizado com sucesso'}), 200
 
 
@@ -362,11 +363,11 @@ def reset_password():
 @auth_bp.route('/driver/me', methods=['GET'])
 def driver_me():
     """Retorna dados do motorista logado na sessão atual."""
-    from src.models.user import Driver
+    from src.models.user import Motorista
     driver_id = session.get('driver_id')
     if not driver_id:
         return jsonify({'error': 'Não autenticado'}), 401
-    driver = db.session.get(Driver, driver_id)
+    driver = db.session.get(Motorista, driver_id)
     if not driver:
         return jsonify({'error': 'Motorista não encontrado'}), 404
     return jsonify(driver.to_dict())
@@ -374,8 +375,8 @@ def driver_me():
 
 @auth_bp.route('/driver/trip/start', methods=['POST'])
 def driver_trip_start():
-    """Registra o início de um trajeto pelo motorista logado."""
-    from src.models.user import Driver, DriverTrip
+    """Registra o início de um trajeto (tela web legada; o app usa /api/viagens)."""
+    from src.models.user import DriverTrip
     driver_id = session.get('driver_id')
     if not driver_id:
         return jsonify({'error': 'Não autenticado'}), 401

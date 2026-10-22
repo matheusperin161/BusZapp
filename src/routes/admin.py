@@ -1,111 +1,215 @@
 """Admin routes for managing drivers and vehicles."""
+from datetime import date
+
 from flask import Blueprint, jsonify, request
+from sqlalchemy import or_
+from werkzeug.security import generate_password_hash
 
 from src.models import db
-from src.models.user import Driver, Vehicle
+from src.models.user import User, Motorista, Vehicle, CNH_CATEGORIAS
+from src.models.tracking import Viagem
 from src.utils.auth import admin_required
+from src.utils.cpf import cpf_valido, somente_digitos
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
-DRIVER_REQUIRED_FIELDS = ('name', 'email', 'cpf', 'cnh', 'bus_line', 'code')
+MOTORISTA_REQUIRED_FIELDS = {
+    'nome': 'nome',
+    'cpf': 'CPF',
+    'cnh_numero': 'número da CNH',
+    'cnh_categoria': 'categoria da CNH',
+    'cnh_validade': 'validade da CNH',
+}
 VEHICLE_REQUIRED_FIELDS = ('plate', 'model', 'brand', 'year', 'capacity', 'status')
 VALID_VEHICLE_STATUSES = ('ativo', 'inativo', 'manutencao')
 
 
 # ── Drivers ──────────────────────────────────────────────────────────────────
 
+def _texto(data, campo):
+    return str(data.get(campo) or '').strip()
+
+
+def _validar_motorista(data, motorista=None):
+    """Valida o payload do cadastro/edição. Retorna (campos, erro, status_http)."""
+    faltando = [rotulo for campo, rotulo in MOTORISTA_REQUIRED_FIELDS.items() if not _texto(data, campo)]
+    if motorista is None and not _texto(data, 'email'):
+        faltando.append('e-mail de acesso')
+    if motorista is None and not data.get('senha'):
+        faltando.append('senha de acesso')
+    if faltando:
+        return None, f'Campos obrigatórios ausentes: {", ".join(faltando)}', 400
+
+    cpf = somente_digitos(data['cpf'])
+    if not cpf_valido(cpf):
+        return None, 'CPF inválido', 400
+
+    categoria = _texto(data, 'cnh_categoria').upper()
+    if categoria not in CNH_CATEGORIAS:
+        return None, f'Categoria de CNH inválida. Use: {", ".join(CNH_CATEGORIAS)}', 400
+
+    try:
+        validade = date.fromisoformat(_texto(data, 'cnh_validade'))
+    except ValueError:
+        return None, 'Validade da CNH inválida (use AAAA-MM-DD)', 400
+
+    status = _texto(data, 'status') or (motorista.status if motorista else 'ativo')
+    if status not in Motorista.VALID_STATUSES:
+        return None, f'Status inválido. Use: {", ".join(Motorista.VALID_STATUSES)}', 400
+
+    if data.get('senha') and len(data['senha']) < 6:
+        return None, 'A senha deve ter pelo menos 6 caracteres', 400
+
+    campos = {
+        'nome': _texto(data, 'nome'),
+        'cpf': cpf,
+        'cnh_numero': _texto(data, 'cnh_numero'),
+        'cnh_categoria': categoria,
+        'cnh_validade': validade,
+        'telefone': _texto(data, 'telefone') or None,
+        'status': status,
+        'bus_line': _texto(data, 'bus_line') or None,
+        'code': _texto(data, 'code') or None,
+        'first_schedule': _texto(data, 'first_schedule') or None,
+        'last_schedule': _texto(data, 'last_schedule') or None,
+    }
+
+    outro = Motorista.id != motorista.id if motorista else True
+    conflitos = [
+        (Motorista.query.filter(Motorista.cpf == campos['cpf'], outro).first(), 'CPF já cadastrado'),
+        (Motorista.query.filter(Motorista.cnh_numero == campos['cnh_numero'], outro).first(), 'CNH já cadastrada'),
+    ]
+    if campos['code']:
+        conflitos.append((Motorista.query.filter(Motorista.code == campos['code'], outro).first(), 'Código já cadastrado'))
+    email = _texto(data, 'email').lower()
+    if email:
+        outro_usuario = User.id != motorista.usuario_id if motorista else True
+        conflitos.append((User.query.filter(User.email == email, outro_usuario).first(), 'E-mail já cadastrado'))
+    for existente, msg in conflitos:
+        if existente:
+            return None, msg, 409
+
+    return campos, None, None
+
+
+def _username_livre(nome: str) -> str:
+    base = nome[:70]
+    candidato, n = base, 2
+    while User.query.filter_by(username=candidato).first():
+        candidato, n = f'{base} ({n})', n + 1
+    return candidato
+
+
 @admin_bp.route('/drivers', methods=['GET'])
 @admin_required
 def list_drivers():
-    drivers = Driver.query.order_by(Driver.created_at.desc()).all()
-    return jsonify([d.to_dict() for d in drivers])
+    """Lista motoristas. Filtros: ?status=ativo|afastado|inativo e ?q= (nome ou CPF)."""
+    query = Motorista.query
+    status = request.args.get('status', '').strip()
+    if status:
+        if status not in Motorista.VALID_STATUSES:
+            return jsonify({'error': f'Status inválido. Use: {", ".join(Motorista.VALID_STATUSES)}'}), 400
+        query = query.filter(Motorista.status == status)
+
+    termo = request.args.get('q', '').strip()
+    if termo:
+        filtros = [Motorista.nome.ilike(f'%{termo}%')]
+        digitos = somente_digitos(termo)
+        if digitos:
+            filtros.append(Motorista.cpf.like(f'%{digitos}%'))
+        query = query.filter(or_(*filtros))
+
+    motoristas = query.order_by(Motorista.nome).all()
+    return jsonify([m.to_dict() for m in motoristas])
 
 
 @admin_bp.route('/drivers', methods=['POST'])
 @admin_required
 def add_driver():
     data = request.get_json() or {}
-    missing = [f for f in DRIVER_REQUIRED_FIELDS if not data.get(f)]
-    if missing:
-        return jsonify({'error': f'Campos obrigatórios ausentes: {", ".join(missing)}'}), 400
+    campos, erro, http = _validar_motorista(data)
+    if erro:
+        return jsonify({'error': erro}), http
 
-    if not data.get('password'):
-        return jsonify({'error': 'Senha de acesso é obrigatória'}), 400
-
-    conflicts = [
-        (Driver.query.filter_by(email=data['email']).first(), 'E-mail já cadastrado'),
-        (Driver.query.filter_by(cpf=data['cpf']).first(), 'CPF já cadastrado'),
-        (Driver.query.filter_by(cnh=data['cnh']).first(), 'CNH já cadastrada'),
-        (Driver.query.filter_by(code=data['code']).first(), 'Código já cadastrado'),
-    ]
-    for obj, msg in conflicts:
-        if obj:
-            return jsonify({'error': msg}), 400
-
-    from werkzeug.security import generate_password_hash
-    driver = Driver(
-        **{f: data[f] for f in DRIVER_REQUIRED_FIELDS},
-        password=generate_password_hash(data['password']),
-        first_schedule=data.get('first_schedule') or None,
-        last_schedule=data.get('last_schedule') or None,
+    # CA02.4 — todo motorista ganha um acesso de usuário com perfil motorista
+    usuario = User(
+        username=_username_livre(campos['nome']),
+        email=_texto(data, 'email').lower(),
+        password=generate_password_hash(data['senha']),
+        role='motorista',
+        email_verified=True,
     )
-    db.session.add(driver)
+    db.session.add(usuario)
+    db.session.flush()
+
+    motorista = Motorista(usuario_id=usuario.id, **campos)
+    db.session.add(motorista)
     db.session.commit()
-    return jsonify({'message': 'Motorista cadastrado com sucesso', 'driver': driver.to_dict()}), 201
+    return jsonify({'message': 'Motorista cadastrado com sucesso', 'driver': motorista.to_dict()}), 201
 
 
 @admin_bp.route('/drivers/<int:driver_id>', methods=['GET'])
 @admin_required
 def get_driver(driver_id):
-    driver = db.session.get(Driver, driver_id)
-    if not driver:
+    motorista = db.session.get(Motorista, driver_id)
+    if not motorista:
         return jsonify({'error': 'Motorista não encontrado'}), 404
-    return jsonify(driver.to_dict())
+    return jsonify(motorista.to_dict())
 
 
 @admin_bp.route('/drivers/<int:driver_id>', methods=['PUT'])
 @admin_required
 def edit_driver(driver_id):
-    driver = db.session.get(Driver, driver_id)
-    if not driver:
+    motorista = db.session.get(Motorista, driver_id)
+    if not motorista:
         return jsonify({'error': 'Motorista não encontrado'}), 404
 
     data = request.get_json() or {}
-    missing = [f for f in DRIVER_REQUIRED_FIELDS if not data.get(f)]
-    if missing:
-        return jsonify({'error': f'Campos obrigatórios ausentes: {", ".join(missing)}'}), 400
+    campos, erro, http = _validar_motorista(data, motorista)
+    if erro:
+        return jsonify({'error': erro}), http
 
-    conflicts = [
-        (Driver.query.filter(Driver.email == data['email'], Driver.id != driver_id).first(), 'E-mail já cadastrado por outro motorista'),
-        (Driver.query.filter(Driver.cpf == data['cpf'], Driver.id != driver_id).first(), 'CPF já cadastrado por outro motorista'),
-        (Driver.query.filter(Driver.cnh == data['cnh'], Driver.id != driver_id).first(), 'CNH já cadastrada por outro motorista'),
-        (Driver.query.filter(Driver.code == data['code'], Driver.id != driver_id).first(), 'Código já cadastrado por outro motorista'),
-    ]
-    for obj, msg in conflicts:
-        if obj:
-            return jsonify({'error': msg}), 400
+    for campo, valor in campos.items():
+        setattr(motorista, campo, valor)
 
-    for field in DRIVER_REQUIRED_FIELDS:
-        setattr(driver, field, data[field])
-
-    driver.first_schedule = data.get('first_schedule') or None
-    driver.last_schedule  = data.get('last_schedule') or None
-
-    if data.get('password'):
-        from werkzeug.security import generate_password_hash
-        driver.password = generate_password_hash(data['password'])
+    usuario = motorista.usuario
+    if _texto(data, 'email'):
+        usuario.email = _texto(data, 'email').lower()
+    if data.get('senha'):
+        usuario.password = generate_password_hash(data['senha'])
 
     db.session.commit()
-    return jsonify({'message': 'Motorista atualizado com sucesso', 'driver': driver.to_dict()}), 200
+    return jsonify({'message': 'Motorista atualizado com sucesso', 'driver': motorista.to_dict()}), 200
 
 
 @admin_bp.route('/drivers/<int:driver_id>', methods=['DELETE'])
 @admin_required
 def delete_driver(driver_id):
-    driver = db.session.get(Driver, driver_id)
-    if not driver:
+    motorista = db.session.get(Motorista, driver_id)
+    if not motorista:
         return jsonify({'error': 'Motorista não encontrado'}), 404
-    db.session.delete(driver)
+
+    # CA02.6 — não exclui com viagem em andamento
+    if motorista.viagens.filter_by(status='em_andamento').first():
+        return jsonify({
+            'error': 'Motorista possui viagem em andamento e não pode ser excluído. '
+                     'Finalize a viagem antes de excluir.',
+            'motivo': 'viagem_em_andamento',
+        }), 409
+    # Viagens encerradas guardam histórico: nesse caso o caminho é inativar
+    if motorista.viagens.first():
+        return jsonify({
+            'error': 'Motorista possui histórico de viagens e não pode ser excluído. '
+                     'Altere o status para inativo.',
+            'motivo': 'possui_historico',
+        }), 409
+
+    Vehicle.query.filter_by(driver_id=motorista.id).update({'driver_id': None})
+    usuario = motorista.usuario
+    db.session.delete(motorista)
+    db.session.flush()
+    if usuario:
+        db.session.delete(usuario)
     db.session.commit()
     return jsonify({'message': 'Motorista excluído com sucesso'}), 200
 
@@ -204,6 +308,9 @@ def delete_vehicle(vehicle_id):
     vehicle = db.session.get(Vehicle, vehicle_id)
     if not vehicle:
         return jsonify({'error': 'Veículo não encontrado'}), 404
+    if Viagem.query.filter_by(veiculo_id=vehicle.id).first():
+        return jsonify({'error': 'Veículo possui viagens registradas e não pode ser excluído. '
+                                 'Altere o status para inativo.'}), 409
     db.session.delete(vehicle)
     db.session.commit()
     return jsonify({'message': 'Veículo excluído com sucesso'}), 200
@@ -227,7 +334,7 @@ def list_routes():
         route_line_str = None
         if bus_route:
             route_line_str = f"{bus_route.route_number} - {bus_route.route_name}"
-        linked_driver = Driver.query.filter_by(bus_line=route_line_str).first() if route_line_str else None
+        linked_driver = Motorista.query.filter_by(bus_line=route_line_str).first() if route_line_str else None
         linked_vehicle = Vehicle.query.filter_by(bus_line=route_line_str).first() if route_line_str else None
 
         result.append({
@@ -237,12 +344,43 @@ def list_routes():
             'origin_lon': r.origin_lon,
             'destination_lat': r.destination_lat,
             'destination_lon': r.destination_lon,
+            'active': r.active,
             'stop_count': len(stops),
             'stops': [s.to_dict() for s in stops],
-            'driver': {'id': linked_driver.id, 'name': linked_driver.name, 'code': linked_driver.code} if linked_driver else None,
+            'driver': {'id': linked_driver.id, 'name': linked_driver.nome, 'code': linked_driver.code} if linked_driver else None,
             'vehicle': {'id': linked_vehicle.id, 'plate': linked_vehicle.plate, 'model': linked_vehicle.model} if linked_vehicle else None,
         })
     return jsonify(result)
+
+
+def _minutos(valor):
+    """Tempo até a próxima parada: número positivo ou None."""
+    if valor in (None, ''):
+        return None
+    minutos = float(valor)
+    if minutos <= 0:
+        raise ValueError('tempo_ate_proxima_min deve ser positivo')
+    return minutos
+
+
+@admin_bp.errorhandler(ValueError)
+def _valor_invalido(e):
+    return jsonify({'error': f'Valor inválido: {e}'}), 400
+
+
+@admin_bp.route('/routes/<int:route_id>', methods=['PATCH'])
+@admin_required
+def toggle_route(route_id):
+    """Ativa/desativa uma linha. Linhas inativas não aparecem para iniciar viagem."""
+    route = db.session.get(Route, route_id)
+    if not route:
+        return jsonify({'error': 'Rota não encontrada'}), 404
+    data = request.get_json() or {}
+    if not isinstance(data.get('active'), bool):
+        return jsonify({'error': 'Informe active: true ou false'}), 400
+    route.active = data['active']
+    db.session.commit()
+    return jsonify({'message': 'Linha atualizada', 'active': route.active})
 
 
 @admin_bp.route('/routes/<int:route_id>/stops', methods=['GET'])
@@ -273,6 +411,7 @@ def add_stop(route_id):
         latitude=float(data['latitude']),
         longitude=float(data['longitude']),
         order=int(data['order']),
+        tempo_ate_proxima_min=_minutos(data.get('tempo_ate_proxima_min')),
     )
     db.session.add(stop)
     db.session.commit()
@@ -291,6 +430,8 @@ def edit_stop(route_id, stop_id):
     stop.latitude = float(data.get('latitude', stop.latitude))
     stop.longitude = float(data.get('longitude', stop.longitude))
     stop.order = int(data.get('order', stop.order))
+    if 'tempo_ate_proxima_min' in data:
+        stop.tempo_ate_proxima_min = _minutos(data['tempo_ate_proxima_min'])
     db.session.commit()
     return jsonify({'message': 'Parada atualizada', 'stop': stop.to_dict()})
 
@@ -353,7 +494,7 @@ def create_route():
 
     # Link driver and vehicle to the route if provided
     if data.get('driver_id'):
-        driver = db.session.get(Driver, int(data['driver_id']))
+        driver = db.session.get(Motorista, int(data['driver_id']))
         if driver:
             driver.bus_line = f"{data['route_number']} - {data['route_name']}"
 
@@ -385,10 +526,11 @@ def active_trips_count():
     from src.models.user import DriverTrip
     from datetime import datetime
     today = datetime.utcnow().date()
-    count = DriverTrip.query.filter_by(trip_date=today).filter(
+    legado = DriverTrip.query.filter_by(trip_date=today).filter(
         DriverTrip.ended_at.is_(None)
     ).count()
-    return jsonify({'count': count})
+    viagens = Viagem.query.filter_by(status='em_andamento').count()
+    return jsonify({'count': legado + viagens})
 
 
 # ── Admin reports ─────────────────────────────────────────────────────────────
@@ -398,7 +540,7 @@ def active_trips_count():
 def list_all_ratings():
     from src.models.user import Rating
     from sqlalchemy.orm import joinedload
-    driver_id_map = {d.id: d for d in Driver.query.all()}
+    driver_id_map = {d.id: d for d in Motorista.query.all()}
     ratings = (
         Rating.query
         .options(joinedload(Rating.user), joinedload(Rating.driver))
@@ -410,7 +552,7 @@ def list_all_ratings():
     for r in ratings:
         item = r.to_dict()
         d = driver_id_map.get(r.driver_id)
-        item['driver_name'] = d.name if d else None
+        item['driver_name'] = d.nome if d else None
         item['driver_code'] = d.code if d else None
         item['username'] = r.user.username if r.user else None
         result.append(item)
