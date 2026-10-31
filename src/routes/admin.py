@@ -1,13 +1,14 @@
 """Admin routes for managing drivers and vehicles."""
 from datetime import date
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
 
 from src.models import db
-from src.models.user import User, Motorista, Vehicle, CNH_CATEGORIAS
+from src.models.user import User, Motorista, Vehicle, Cartao, Transaction, CNH_CATEGORIAS, CARD_TYPES
 from src.models.tracking import Viagem
+from src.services.cartao_service import cartao_do_usuario
 from src.utils.auth import admin_required
 from src.utils.cpf import cpf_valido, somente_digitos
 
@@ -317,17 +318,19 @@ def delete_vehicle(vehicle_id):
 
 
 # ── Stop Points Management ────────────────────────────────────────────────────
+# Telas web (admin-rotas.html): leem e editam as paradas do sentido 'ida' de cada linha,
+# no formato antigo de StopPoint. O app usa /api/admin/paradas (src/routes/paradas.py).
 
-from src.models.tracking import Route, StopPoint
+from src.models.tracking import Route, Parada, LinhaParada
+from src.services.paradas_service import reposicionar
 
 @admin_bp.route('/routes', methods=['GET'])
 @admin_required
 def list_routes():
-    from src.models.tracking import Route, StopPoint
     routes = Route.query.all()
     result = []
     for r in routes:
-        stops = sorted(r.stop_points, key=lambda s: s.order)
+        stops = r.paradas_ordenadas('ida')
         # Find linked driver and vehicle via bus_line name
         from src.models.user import BusRoute as BR
         bus_route = BR.query.filter_by(route_name=r.route_name.replace('Linha_','')).first()
@@ -386,18 +389,15 @@ def toggle_route(route_id):
 @admin_bp.route('/routes/<int:route_id>/stops', methods=['GET'])
 @admin_required
 def list_stops(route_id):
-    from src.models.tracking import Route, StopPoint
     route = db.session.get(Route, route_id)
     if not route:
         return jsonify({'error': 'Rota não encontrada'}), 404
-    stops = sorted(route.stop_points, key=lambda s: s.order)
-    return jsonify([s.to_dict() for s in stops])
+    return jsonify([s.to_dict() for s in route.paradas_ordenadas('ida')])
 
 
 @admin_bp.route('/routes/<int:route_id>/stops', methods=['POST'])
 @admin_required
 def add_stop(route_id):
-    from src.models.tracking import Route, StopPoint
     route = db.session.get(Route, route_id)
     if not route:
         return jsonify({'error': 'Rota não encontrada'}), 404
@@ -405,15 +405,12 @@ def add_stop(route_id):
     missing = [f for f in ('name', 'latitude', 'longitude', 'order') if f not in data]
     if missing:
         return jsonify({'error': f'Campos obrigatórios: {", ".join(missing)}'}), 400
-    stop = StopPoint(
-        route_id=route_id,
-        name=data['name'],
-        latitude=float(data['latitude']),
-        longitude=float(data['longitude']),
-        order=int(data['order']),
-        tempo_ate_proxima_min=_minutos(data.get('tempo_ate_proxima_min')),
-    )
+    parada = Parada(nome=data['name'], latitude=float(data['latitude']), longitude=float(data['longitude']))
+    stop = LinhaParada(linha_id=route_id, parada=parada, sentido='ida', ordem=0,
+                       tempo_estimado_minutos=_minutos(data.get('tempo_ate_proxima_min')))
     db.session.add(stop)
+    # Ordem já ocupada: a nova parada entra nela e as seguintes andam uma posição
+    reposicionar(route_id, 'ida', stop, int(data['order']))
     db.session.commit()
     return jsonify({'message': 'Parada adicionada', 'stop': stop.to_dict()}), 201
 
@@ -421,17 +418,18 @@ def add_stop(route_id):
 @admin_bp.route('/routes/<int:route_id>/stops/<int:stop_id>', methods=['PUT'])
 @admin_required
 def edit_stop(route_id, stop_id):
-    from src.models.tracking import StopPoint
-    stop = db.session.get(StopPoint, stop_id)
-    if not stop or stop.route_id != route_id:
+    stop = db.session.get(LinhaParada, stop_id)
+    if not stop or stop.linha_id != route_id:
         return jsonify({'error': 'Parada não encontrada'}), 404
     data = request.get_json() or {}
-    stop.name = data.get('name', stop.name)
-    stop.latitude = float(data.get('latitude', stop.latitude))
-    stop.longitude = float(data.get('longitude', stop.longitude))
-    stop.order = int(data.get('order', stop.order))
+    parada = stop.parada
+    parada.nome = data.get('name', parada.nome)
+    parada.latitude = float(data.get('latitude', parada.latitude))
+    parada.longitude = float(data.get('longitude', parada.longitude))
+    if 'order' in data and int(data['order']) != stop.ordem:
+        reposicionar(route_id, stop.sentido, stop, int(data['order']))
     if 'tempo_ate_proxima_min' in data:
-        stop.tempo_ate_proxima_min = _minutos(data['tempo_ate_proxima_min'])
+        stop.tempo_estimado_minutos = _minutos(data['tempo_ate_proxima_min'])
     db.session.commit()
     return jsonify({'message': 'Parada atualizada', 'stop': stop.to_dict()})
 
@@ -439,11 +437,14 @@ def edit_stop(route_id, stop_id):
 @admin_bp.route('/routes/<int:route_id>/stops/<int:stop_id>', methods=['DELETE'])
 @admin_required
 def delete_stop(route_id, stop_id):
-    from src.models.tracking import StopPoint
-    stop = db.session.get(StopPoint, stop_id)
-    if not stop or stop.route_id != route_id:
+    stop = db.session.get(LinhaParada, stop_id)
+    if not stop or stop.linha_id != route_id:
         return jsonify({'error': 'Parada não encontrada'}), 404
+    # Remove a parada da linha; o cadastro dela continua em /api/admin/paradas
+    sentido = stop.sentido
     db.session.delete(stop)
+    db.session.flush()
+    reposicionar(route_id, sentido)
     db.session.commit()
     return jsonify({'message': 'Parada removida'})
 
@@ -453,7 +454,6 @@ def delete_stop(route_id, stop_id):
 @admin_bp.route('/routes', methods=['POST'])
 @admin_required
 def create_route():
-    from src.models.tracking import Route, StopPoint
     from src.models.user import BusRoute
     data = request.get_json() or {}
     missing = [f for f in ('route_number', 'route_name', 'origin', 'destination', 'fare',
@@ -504,10 +504,12 @@ def create_route():
             vehicle.bus_line = f"{data['route_number']} - {data['route_name']}"
 
     # Auto-create origin and destination as first stops
-    db.session.add(StopPoint(route_id=rt.id, name=data['origin'],
-                              latitude=origin_lat, longitude=origin_lon, order=1))
-    db.session.add(StopPoint(route_id=rt.id, name=data['destination'],
-                              latitude=dest_lat, longitude=dest_lon, order=2))
+    origem = Parada(nome=data['origin'], latitude=origin_lat, longitude=origin_lon)
+    destino = Parada(nome=data['destination'], latitude=dest_lat, longitude=dest_lon)
+    db.session.add_all([
+        LinhaParada(linha_id=rt.id, parada=origem, sentido='ida', ordem=1),
+        LinhaParada(linha_id=rt.id, parada=destino, sentido='ida', ordem=2),
+    ])
 
     # Auto-create default departure schedules so the schedules page works immediately
     from src.routes.tracking import _create_default_schedules
@@ -603,21 +605,21 @@ def recharge_chart():
 
 # ── User Cards ────────────────────────────────────────────────────────────────
 
-VALID_CARD_TYPES = ('cidadao', 'normal', 'estudante', 'idoso', 'acompanhante', 'carteiro', 'colaborador', 'pcd')
+VALID_CARD_TYPES = CARD_TYPES
 
 @admin_bp.route('/users/cards', methods=['GET'])
 @admin_required
 def list_user_cards():
-    from src.models.user import User
     users = User.query.filter_by(role='user').order_by(User.username).all()
     return jsonify([{
         'id': u.id,
         'username': u.username,
         'email': u.email,
-        'card_number': u.card_number,
-        'card_holder': u.card_holder,
-        'card_type': u.card_type,
-        'card_balance': u.card_balance,
+        'card_number': u.cartao.numero if u.cartao else None,
+        'card_holder': u.cartao.titular if u.cartao else None,
+        'card_type': u.cartao.tipo if u.cartao else None,
+        'card_balance': u.cartao.saldo if u.cartao else 0.0,
+        'card_status': u.cartao.status if u.cartao else None,
         'email_verified': u.email_verified,
     } for u in users])
 
@@ -625,25 +627,41 @@ def list_user_cards():
 @admin_bp.route('/users/<int:user_id>/card', methods=['PUT'])
 @admin_required
 def edit_user_card(user_id):
-    from src.models.user import User
+    """Edição pelo admin (tela web). Mudança de saldo vira uma transação 'ajuste' no extrato."""
     user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
     data = request.get_json() or {}
-    if 'card_number' in data:
-        user.card_number = data['card_number'] or None
-    if 'card_holder' in data:
-        user.card_holder = data['card_holder'] or None
     if 'card_type' in data:
         ct = data['card_type']
         if ct and ct not in VALID_CARD_TYPES:
             return jsonify({'error': f'Tipo inválido. Use: {", ".join(VALID_CARD_TYPES)}'}), 400
-        user.card_type = ct or None
+    novo_saldo = None
     if 'card_balance' in data:
         try:
-            user.card_balance = float(data['card_balance'])
+            novo_saldo = round(float(data['card_balance']) * 100)
         except (TypeError, ValueError):
             return jsonify({'error': 'Saldo inválido'}), 400
+        if novo_saldo < 0:
+            return jsonify({'error': 'Saldo não pode ser negativo'}), 400
+    if 'card_number' in data and data['card_number']:
+        outro = Cartao.query.filter(Cartao.numero == data['card_number'], Cartao.usuario_id != user.id).first()
+        if outro:
+            return jsonify({'error': 'Este número de cartão já pertence a outro usuário'}), 409
+
+    cartao = cartao_do_usuario(user, criar=True)
+    if 'card_number' in data:
+        cartao.numero = data['card_number'] or None
+    if 'card_holder' in data:
+        cartao.titular = data['card_holder'] or None
+    if 'card_type' in data:
+        cartao.tipo = data['card_type'] or None
+    if novo_saldo is not None and novo_saldo != cartao.saldo_centavos:
+        diferenca = novo_saldo - cartao.saldo_centavos
+        cartao.saldo_centavos = novo_saldo
+        db.session.add(Transaction(user_id=user.id, cartao_id=cartao.id, amount=diferenca / 100,
+                                   transaction_type='ajuste',
+                                   description=f'Ajuste de saldo pelo administrador {g.user.username}'))
     db.session.commit()
     return jsonify({'message': 'Cartão atualizado com sucesso'})
 

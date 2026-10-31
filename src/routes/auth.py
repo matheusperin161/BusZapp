@@ -2,13 +2,13 @@
 import os
 import secrets
 from datetime import datetime, timedelta
-from flask import Blueprint, jsonify, request, session, current_app
+from flask import Blueprint, jsonify, request, session, current_app, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 from src.models import db
 from src.models.user import User
-from src.utils.auth import login_required
+from src.utils.auth import login_required, motorista_required, gerar_token, get_current_user
 from src.extensions import limiter
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
@@ -149,6 +149,15 @@ def resend_verification():
     return jsonify({'message': 'Novo link de verificação enviado!', 'email_sent': sent}), 200
 
 
+def _com_token(resposta: dict, user: User, data: dict) -> dict:
+    """App mobile (\"client\": \"mobile\") recebe um token Bearer e nenhum cookie de sessão
+    (o cookie teria prioridade sobre o token e ficaria fora do SecureStore); o web segue só com o cookie."""
+    if data.get('client') == 'mobile':
+        session.clear()
+        resposta['token'] = gerar_token(user)
+    return resposta
+
+
 @auth_bp.route('/login', methods=['POST'])
 @limiter.limit("10 per minute; 50 per hour")
 def login():
@@ -169,13 +178,13 @@ def login():
             session['user_id'] = user.id
             session['driver_id'] = user.motorista.id  # usado pelas telas web legadas
             session['role'] = 'motorista'
-            return jsonify({
+            return jsonify(_com_token({
                 'message': 'Login realizado com sucesso',
                 'role': 'motorista',
                 'redirect': '/motorista',
                 'user': user.to_dict(),
                 'driver': user.motorista.to_dict(),
-            }), 200
+            }, user, data)), 200
 
         if not user.email_verified:
             return jsonify({
@@ -189,12 +198,12 @@ def login():
         session['user_id'] = user.id
         session['role'] = user.role
         redirect = '/admin' if user.role == 'admin' else '/dashboard'
-        return jsonify({
+        return jsonify(_com_token({
             'message': 'Login realizado com sucesso',
             'role': user.role,
             'redirect': redirect,
             'user': user.to_dict(),
-        }), 200
+        }, user, data)), 200
 
     return jsonify({'error': 'E-mail ou senha inválidos'}), 401
 
@@ -202,24 +211,25 @@ def login():
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     session.clear()
+    # Sem sessão, get_current_user só acha o usuário pelo token Bearer: logout do app invalida os tokens
+    user = get_current_user()
+    if user:
+        user.token_version += 1
+        db.session.commit()
     return jsonify({'message': 'Logout realizado com sucesso'}), 200
 
 
 @auth_bp.route('/profile', methods=['GET'])
 @login_required
 def get_profile():
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+    user = g.user
     return jsonify(user.to_dict())
 
 
 @auth_bp.route('/profile', methods=['PUT'])
 @login_required
 def update_profile():
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+    user = g.user
 
     data = request.get_json() or {}
     username = data.get('username', '').strip()
@@ -237,6 +247,7 @@ def update_profile():
     user.email = email
     if data.get('password'):
         user.password = generate_password_hash(data['password'])
+        user.token_version += 1
 
     try:
         db.session.commit()
@@ -350,6 +361,7 @@ def reset_password():
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
     user.password = generate_password_hash(new_password)
+    user.token_version += 1
     reset.used = True
 
     try:
@@ -361,25 +373,18 @@ def reset_password():
 
 
 @auth_bp.route('/driver/me', methods=['GET'])
+@motorista_required
 def driver_me():
-    """Retorna dados do motorista logado na sessão atual."""
-    from src.models.user import Motorista
-    driver_id = session.get('driver_id')
-    if not driver_id:
-        return jsonify({'error': 'Não autenticado'}), 401
-    driver = db.session.get(Motorista, driver_id)
-    if not driver:
-        return jsonify({'error': 'Motorista não encontrado'}), 404
-    return jsonify(driver.to_dict())
+    """Retorna dados do motorista logado."""
+    return jsonify(g.motorista.to_dict())
 
 
 @auth_bp.route('/driver/trip/start', methods=['POST'])
+@motorista_required
 def driver_trip_start():
     """Registra o início de um trajeto (tela web legada; o app usa /api/viagens)."""
     from src.models.user import DriverTrip
-    driver_id = session.get('driver_id')
-    if not driver_id:
-        return jsonify({'error': 'Não autenticado'}), 401
+    driver_id = g.motorista.id
 
     data           = request.get_json() or {}
     bus_line       = (data.get('bus_line') or '').strip()
@@ -413,12 +418,11 @@ def driver_trip_start():
 
 
 @auth_bp.route('/driver/trip/stop', methods=['POST'])
+@motorista_required
 def driver_trip_stop():
     """Registra o fim do trajeto atual do motorista."""
     from src.models.user import DriverTrip
-    driver_id = session.get('driver_id')
-    if not driver_id:
-        return jsonify({'error': 'Não autenticado'}), 401
+    driver_id = g.motorista.id
 
     today = datetime.utcnow().date()
     trip = (
@@ -463,9 +467,7 @@ def upload_profile_picture():
     if size > MAX_AVATAR_BYTES:
         return jsonify({'error': 'Arquivo muito grande. Máximo 3 MB'}), 400
 
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+    user = g.user
 
     ext = file.filename.rsplit('.', 1)[1].lower()
     filename = f"avatar_{user.id}.{ext}"
@@ -491,9 +493,7 @@ def upload_profile_picture():
 @login_required
 def delete_profile_picture():
     """Remove a foto de perfil do usuário."""
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+    user = g.user
 
     if user.profile_picture:
         filepath = os.path.join(current_app.static_folder, user.profile_picture.lstrip('/'))

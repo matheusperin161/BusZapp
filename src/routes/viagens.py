@@ -50,6 +50,15 @@ def _parse_datetime(valor) -> datetime | None:
     return dt
 
 
+def _proxima_parada(viagem: Viagem, lat: float, lon: float) -> dict | None:
+    linha = viagem.linha
+    volta = linha.paradas_ordenadas('volta') if viagem.sentido == 'volta' else []
+    if volta:  # volta cadastrada: a lista já está na ordem de passagem
+        return proxima_parada(lat, lon, volta, 'ida')
+    # sem volta cadastrada, a volta percorre as paradas da ida ao contrário
+    return proxima_parada(lat, lon, linha.paradas_ordenadas('ida'), viagem.sentido)
+
+
 def _viagem_com_posicao(viagem: Viagem) -> dict:
     """Viagem + última posição + próxima parada/estimativa (CA08.6)."""
     data = viagem.to_dict()
@@ -58,7 +67,7 @@ def _viagem_com_posicao(viagem: Viagem) -> dict:
     data['ultima_posicao'] = ultima.to_dict() if ultima else None
     data['proxima_parada'] = None
     if ultima:
-        prox = proxima_parada(ultima.latitude, ultima.longitude, list(viagem.linha.stop_points), viagem.sentido)
+        prox = _proxima_parada(viagem, ultima.latitude, ultima.longitude)
         if prox:
             chegada = ultima.registrado_em + timedelta(minutes=prox['eta_min'])
             data['proxima_parada'] = {
@@ -278,7 +287,8 @@ def listar_linhas():
     resultado = []
     for linha in linhas:
         item = _linha_dict(linha)
-        item['paradas'] = [p.to_dict() for p in sorted(linha.stop_points, key=lambda p: p.order)]
+        item['paradas'] = [p.to_dict() for p in linha.paradas_ordenadas('ida')]
+        item['paradas_volta'] = [p.to_dict() for p in linha.paradas_ordenadas('volta')]
         resultado.append(item)
     return jsonify(resultado)
 

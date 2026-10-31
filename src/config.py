@@ -16,8 +16,11 @@ def _get_database_url() -> str:
     return url
 
 
+DEFAULT_SECRET_KEY = 'dev-secret-key-change-in-production'
+
+
 class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+    SECRET_KEY = os.getenv('SECRET_KEY', DEFAULT_SECRET_KEY)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = _get_database_url()
 
@@ -52,20 +55,6 @@ class ProductionConfig(Config):
     DEBUG = False
     SESSION_COOKIE_SECURE = True
 
-
-config = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'testing': TestingConfig,
-    'default': DevelopmentConfig
-}
-
-# Google Maps / Tracking
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '')
-ROUTE_ORIGIN_LAT = float(os.getenv('ROUTE_ORIGIN_LAT', -27.10597))
-ROUTE_ORIGIN_LON = float(os.getenv('ROUTE_ORIGIN_LON', -52.61336))
-ROUTE_DEST_LAT = float(os.getenv('ROUTE_DEST_LAT', -27.07171))
-ROUTE_DEST_LON = float(os.getenv('ROUTE_DEST_LON', -52.63635))
 
 config = {
     'development': DevelopmentConfig,

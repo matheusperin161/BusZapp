@@ -1,18 +1,20 @@
 """Real-time bus tracking routes and Socket.IO handlers."""
 import os
 from datetime import datetime
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request
 
 from src.models import db
 from src.models.user import BusLocation
-from src.models.tracking import Route, StopPoint, BusSchedule
+from src.models.tracking import Route, BusSchedule
 from src.utils.geo import calculate_speed, find_next_stops_with_eta
 from src.config import GOOGLE_API_KEY
+from src.utils.auth import get_current_user
 
 
 def _check_bus_auth() -> bool:
-    """Accept driver session or static API key (for simulator/GPS devices)."""
-    if session.get('driver_id'):
+    """Accept a logged-in driver (session or Bearer) or static API key (for simulator/GPS devices)."""
+    user = get_current_user()
+    if user and user.motorista:
         return True
     secret = os.getenv('BUS_API_SECRET', '')
     return bool(secret and request.headers.get('X-Bus-Secret') == secret)
@@ -172,7 +174,7 @@ def get_route(route_number):
     if not route:
         return jsonify({'error': f'Rota {route_number} não encontrada. Rode o seed.py.'}), 404
 
-    stop_points = [sp.to_dict() for sp in sorted(route.stop_points, key=lambda sp: sp.order)]
+    stop_points = [sp.to_dict() for sp in route.paradas_ordenadas('ida')]
     return jsonify({'stop_points': stop_points, 'route_id': route.id}), 200
 
 

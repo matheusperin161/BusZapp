@@ -16,6 +16,11 @@ class Route(db.Model):
     active = db.Column(db.Boolean, default=True, server_default=db.true(), nullable=False)
 
     stop_points = db.relationship('StopPoint', backref='route', lazy='dynamic', cascade='all, delete-orphan')
+    linha_paradas = db.relationship('LinhaParada', backref='linha', lazy='dynamic', cascade='all, delete-orphan')
+
+    def paradas_ordenadas(self, sentido: str = 'ida') -> list:
+        """Associações LinhaParada do sentido, na ordem de passagem."""
+        return self.linha_paradas.filter_by(sentido=sentido).order_by(None).order_by(LinhaParada.ordem).all()
 
     def __repr__(self):
         return f'<Route {self.route_name}>'
@@ -32,6 +37,7 @@ class Route(db.Model):
 
 
 class StopPoint(db.Model):
+    """Legado: substituída por Parada + LinhaParada. A tabela fica só como origem da migração."""
     __tablename__ = 'stop_point'
     __table_args__ = {'extend_existing': True}
 
@@ -55,6 +61,97 @@ class StopPoint(db.Model):
             'longitude': self.longitude,
             'order': self.order,
             'tempo_ate_proxima_min': self.tempo_ate_proxima_min,
+        }
+        if eta_minutes is not None:
+            result['eta_minutes'] = eta_minutes
+        return result
+
+
+PARADA_STATUSES = ('ativa', 'inativa')
+
+
+class Parada(db.Model):
+    """Parada de ônibus, independente de linha (CA05.1). Associada às linhas por LinhaParada."""
+    __tablename__ = 'paradas'
+
+    id        = db.Column(db.Integer, primary_key=True)
+    nome      = db.Column(db.String(120), nullable=False)
+    endereco  = db.Column(db.String(255), nullable=True)   # nulo só em paradas migradas de stop_point
+    latitude  = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    status    = db.Column(db.String(10), default='ativa', nullable=False)  # ativa | inativa
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'endereco': self.endereco,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'status': self.status,
+            'criado_em': self.criado_em.isoformat() if self.criado_em else None,
+        }
+
+
+class LinhaParada(db.Model):
+    """Parada numa linha, por sentido, com a ordem de passagem (CA05.2–CA05.4).
+
+    A ordem é única por linha/sentido, garantida nas rotas (um índice único impediria
+    renumerar em lote no PostgreSQL).
+    """
+    __tablename__ = 'linha_parada'
+    __table_args__ = (
+        db.UniqueConstraint('linha_id', 'sentido', 'parada_id', name='uq_linha_sentido_parada'),
+    )
+
+    id        = db.Column(db.Integer, primary_key=True)
+    linha_id  = db.Column(db.Integer, db.ForeignKey('route.id', ondelete='CASCADE'), nullable=False, index=True)
+    parada_id = db.Column(db.Integer, db.ForeignKey('paradas.id'), nullable=False)
+    sentido   = db.Column(db.String(5), nullable=False)   # ida | volta
+    ordem     = db.Column(db.Integer, nullable=False)
+    # Minutos até a parada seguinte neste sentido (nulo: estimado pela distância)
+    tempo_estimado_minutos = db.Column(db.Float, nullable=True)
+
+    parada = db.relationship('Parada')
+
+    # Interface de StopPoint, usada pelos cálculos de geo.py e pelas telas web legadas
+    @property
+    def name(self):
+        return self.parada.nome
+
+    @property
+    def latitude(self):
+        return self.parada.latitude
+
+    @property
+    def longitude(self):
+        return self.parada.longitude
+
+    @property
+    def order(self):
+        return self.ordem
+
+    @property
+    def tempo_ate_proxima_min(self):
+        return self.tempo_estimado_minutos
+
+    def to_dict(self, eta_minutes=None):
+        result = {
+            'id': self.id,
+            'linha_id': self.linha_id,
+            'parada_id': self.parada_id,
+            'sentido': self.sentido,
+            'ordem': self.ordem,
+            'tempo_estimado_minutos': self.tempo_estimado_minutos,
+            'nome': self.parada.nome,
+            'latitude': self.parada.latitude,
+            'longitude': self.parada.longitude,
+            'parada': self.parada.to_dict(),
+            # campos de StopPoint, lidos pelas telas web
+            'name': self.parada.nome,
+            'order': self.ordem,
+            'tempo_ate_proxima_min': self.tempo_estimado_minutos,
         }
         if eta_minutes is not None:
             result['eta_minutes'] = eta_minutes

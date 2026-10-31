@@ -689,7 +689,7 @@
 
     function logout() {
       if (typeof API !== 'undefined') {
-        API.post('/api/logout', {}).catch(() => {}).finally(() => {
+        API.post('/api/auth/logout', {}).catch(() => {}).finally(() => {
           window.location.href = '/login';
         });
       } else {

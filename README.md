@@ -163,3 +163,64 @@ Testes automatizados (SQLite em memória):
 pip install pytest
 python -m pytest
 ```
+
+## API para o app mobile
+
+O app mobile (`BuszApp-Mob`) usa este mesmo backend e o mesmo banco. O web continua igual.
+
+**Autenticação.** O web segue com o cookie de sessão. O app faz login com `"client": "mobile"`
+e recebe um `token`; depois envia `Authorization: Bearer <token>` (válido por 30 dias).
+O logout feito pelo app e a troca ou redefinição de senha invalidam os tokens do usuário.
+
+```json
+POST /api/auth/login  {"email": "...", "password": "...", "client": "mobile"}
+→ {"role": "user", "user": {...}, "token": "..."}
+```
+
+Rotas `/api/*` sempre respondem JSON, inclusive 404/405/500: `{"error": "..."}`.
+
+**Paradas (admin)** — paradas independentes de linha, associadas por sentido (`ida`/`volta`):
+
+| Método | Rota |
+|---|---|
+| GET/POST | `/api/admin/paradas` (`?status=&q=`) |
+| GET/PUT | `/api/admin/paradas/:id` |
+| PATCH | `/api/admin/paradas/:id/desativar` (409 `{error, linhas}` se usada em linha ativa) e `/reativar` |
+| GET/POST | `/api/admin/linhas/:id/paradas` (`?sentido=`; body `{parada_id, sentido, ordem?, tempo_estimado_minutos?}`) |
+| DELETE | `/api/admin/linhas/:id/paradas/:assocId` (reordena as demais) |
+
+`tempo_estimado_minutos` é o tempo até a parada seguinte no mesmo sentido. Enquanto uma linha
+não tiver paradas de `volta` cadastradas, a volta usa as da ida em ordem inversa. As telas web
+(`/api/admin/routes/:id/stops`, `/api/route/:n`) leem e editam as paradas de ida.
+
+**Cartões** — um cartão por usuário, saldo em centavos. É o mesmo cartão das telas web
+(`/api/balance`, `/api/recharge`, `/api/card/*`, `/api/use-transport`):
+
+| Método | Rota |
+|---|---|
+| GET/POST | `/api/cartoes` (body `{numero, titular?, tipo?}`; 8 a 16 dígitos) |
+| GET | `/api/cartoes/:id` |
+| POST | `/api/cartoes/:id/bloquear` |
+| POST | `/api/cartoes/:id/recarga` (`{valor_centavos, payment_method}`) |
+| GET | `/api/cartoes/:id/transacoes?page=&per_page=` |
+| GET | `/api/admin/cartoes?status=` (somente leitura) |
+
+**Endpoints que passaram a exigir login:** `POST /api/incidents` (motorista; o motorista vem do
+login, não do corpo), `GET /api/incidents` e `POST /api/incidents/:id/resolve` (admin) e
+`POST /api/admin/populate-routes` (admin).
+
+### Atualizando um banco existente
+
+Faça **backup** e rode a migração logo após publicar o código, antes de usar o sistema:
+
+```bash
+flask --app wsgi db upgrade
+```
+
+Ela adiciona `user.token_version`, copia cada `stop_point` para `paradas`/`linha_parada` e os
+dados de cartão de `user.card_*` para `cartoes` (saldo em centavos), e liga as transações ao
+cartão. As colunas e a tabela antigas ficam no banco, sem uso. O `downgrade` não é suportado.
+
+Em produção (`FLASK_ENV=production`, padrão do `wsgi.py`) o app não sobe sem `SECRET_KEY`.
+Para testar o app mobile contra a máquina local em HTTP, rode o backend com
+`FLASK_ENV=development`.

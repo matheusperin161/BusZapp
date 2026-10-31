@@ -29,7 +29,7 @@ def calculate_eta(distance_meters: float, speed_kmh: float, default_speed: float
 
 def find_next_stops_with_eta(bus_lat: float, bus_lon: float, speed_kmh: float, route) -> list:
     """Return upcoming stop points with ETA for each, starting from the closest."""
-    stop_points = sorted(route.stop_points, key=lambda sp: sp.order)
+    stop_points = route.paradas_ordenadas('ida')
 
     if not stop_points:
         return []
@@ -82,7 +82,8 @@ def _distancia_ate_segmento(lat, lon, a, b):
 def proxima_parada(lat: float, lon: float, paradas: list, sentido: str = 'ida') -> dict | None:
     """Próxima parada e minutos estimados até ela (CA08.6).
 
-    `paradas` são StopPoints da linha. O tempo de cada trecho vem de
+    `paradas` são as LinhaParada da linha na ordem da ida (com sentido='volta', percorridas ao
+    contrário; uma volta cadastrada à parte chega aqui como 'ida'). O tempo de cada trecho vem de
     `tempo_ate_proxima_min` (cadastrado no sentido de ida, vale igual para a volta);
     sem ele, usa a distância do trecho a VELOCIDADE_PADRAO_KMH.
     O ônibus é encaixado no trecho mais próximo e o tempo é proporcional ao que falta dele.

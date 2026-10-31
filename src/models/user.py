@@ -10,14 +10,17 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default='user', nullable=False)  # 'user' | 'admin' | 'motorista'
+    # card_*: legado, copiados para a tabela cartoes na migração e não mais lidos (ver Cartao)
     card_balance = db.Column(db.Float, default=0.0, nullable=False)
     card_number = db.Column(db.String(25), nullable=True)
     card_holder = db.Column(db.String(100), nullable=True)
-    card_type = db.Column(db.String(30), nullable=True)  # cidadao | normal | estudante | idoso | acompanhante | carteiro | colaborador | pcd
+    card_type = db.Column(db.String(30), nullable=True)
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
     profile_picture = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    
+    # Incrementado no logout do app e na troca/redefinição de senha: invalida os tokens Bearer
+    token_version = db.Column(db.Integer, default=0, server_default='0', nullable=False)
+
 
     transactions = db.relationship('Transaction', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     notifications = db.relationship('Notification', backref='user', lazy='dynamic', cascade='all, delete-orphan')
@@ -32,10 +35,53 @@ class User(db.Model):
             'username': self.username,
             'email': self.email,
             'role': self.role,
-            'card_balance': self.card_balance,
+            'card_balance': self.cartao.saldo if self.cartao else 0.0,
             'email_verified': self.email_verified,
             'profile_picture': self.profile_picture,
             'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+CARD_TYPES = ('cidadao', 'normal', 'estudante', 'idoso', 'acompanhante', 'carteiro', 'colaborador', 'pcd')
+CARTAO_STATUSES = ('ativo', 'bloqueado')
+
+
+class Cartao(db.Model):
+    """Cartão de transporte: um por usuário (CA06). Saldo em centavos.
+
+    `numero` é nulo quando o usuário recarregou pelo web antes de cadastrar o cartão.
+    """
+    __tablename__ = 'cartoes'
+    __table_args__ = (db.CheckConstraint('saldo_centavos >= 0', name='ck_cartoes_saldo_nao_negativo'),)
+
+    id             = db.Column(db.Integer, primary_key=True)
+    usuario_id     = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), unique=True, nullable=False)
+    numero         = db.Column(db.String(25), unique=True, nullable=True)
+    titular        = db.Column(db.String(100), nullable=True)
+    tipo           = db.Column(db.String(30), nullable=True)   # um de CARD_TYPES
+    saldo_centavos = db.Column(db.Integer, default=0, nullable=False)
+    status         = db.Column(db.String(10), default='ativo', nullable=False)  # ativo | bloqueado
+    criado_em      = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    atualizado_em  = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    usuario = db.relationship('User', backref=db.backref('cartao', uselist=False, cascade='all, delete-orphan'))
+
+    @property
+    def saldo(self) -> float:
+        return self.saldo_centavos / 100
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'usuario_id': self.usuario_id,
+            'numero': self.numero,
+            'titular': self.titular,
+            'tipo': self.tipo,
+            'saldo_centavos': self.saldo_centavos,
+            'saldo': self.saldo,
+            'status': self.status,
+            'criado_em': self.criado_em.isoformat() if self.criado_em else None,
+            'atualizado_em': self.atualizado_em.isoformat() if self.atualizado_em else None,
         }
 
 
@@ -44,8 +90,9 @@ class Transaction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    cartao_id = db.Column(db.Integer, db.ForeignKey('cartoes.id', ondelete='SET NULL'), nullable=True, index=True)
     amount = db.Column(db.Float, nullable=False)
-    transaction_type = db.Column(db.String(20), nullable=False)  # 'recharge' | 'usage'
+    transaction_type = db.Column(db.String(20), nullable=False)  # 'recharge' | 'usage' | 'ajuste'
     description = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -56,6 +103,7 @@ class Transaction(db.Model):
         return {
             'id': self.id,
             'user_id': self.user_id,
+            'cartao_id': self.cartao_id,
             'amount': self.amount,
             'transaction_type': self.transaction_type,
             'description': self.description,

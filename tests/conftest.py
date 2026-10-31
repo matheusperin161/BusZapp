@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 from src.main import create_app
 from src.models import db
 from src.models.user import User, Vehicle, BusRoute
-from src.models.tracking import Route, StopPoint
+from src.models.tracking import Route, Parada, LinhaParada
 
 
 @pytest.fixture
@@ -52,8 +52,9 @@ def linha(app):
     db.session.add(route)
     db.session.flush()
     for ordem, lat in enumerate((-27.0, -27.01, -27.02), start=1):
-        db.session.add(StopPoint(route_id=route.id, name=f'Parada {ordem}', latitude=lat,
-                                 longitude=-52.0, order=ordem, tempo_ate_proxima_min=4))
+        parada = Parada(nome=f'Parada {ordem}', endereco=f'Rua {ordem}', latitude=lat, longitude=-52.0)
+        db.session.add(LinhaParada(linha_id=route.id, parada=parada, sentido='ida', ordem=ordem,
+                                   tempo_estimado_minutos=4))
     db.session.commit()
     return route
 

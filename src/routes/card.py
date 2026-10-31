@@ -1,9 +1,13 @@
-"""Card balance, recharge, transport usage, and transaction routes."""
+"""Card balance, recharge, transport usage, and transaction routes (telas web).
+
+Operam sobre o cartão do usuário (tabela cartoes), o mesmo usado pelo app em /api/cartoes.
+"""
 from datetime import datetime
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, g
 
 from src.models import db
-from src.models.user import User, Transaction, BusRoute
+from src.models.user import Transaction, BusRoute, Cartao, CARD_TYPES
+from src.services.cartao_service import cartao_do_usuario, creditar, debitar
 from src.services.notification_service import create_notification
 from src.utils.auth import login_required
 
@@ -11,16 +15,14 @@ card_bp = Blueprint('card', __name__, url_prefix='/api')
 
 VALID_PAYMENT_METHODS = ('cartao', 'pix')
 LOW_BALANCE_THRESHOLD = 5.0
-VALID_CARD_TYPES = ('cidadao', 'normal', 'estudante', 'idoso', 'acompanhante', 'carteiro', 'colaborador', 'pcd')
+VALID_CARD_TYPES = CARD_TYPES
 
 
 @card_bp.route('/balance', methods=['GET'])
 @login_required
 def get_balance():
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
-    return jsonify({'balance': user.card_balance})
+    cartao = g.user.cartao
+    return jsonify({'balance': cartao.saldo if cartao else 0.0})
 
 
 @card_bp.route('/recharge', methods=['POST'])
@@ -39,32 +41,25 @@ def recharge_card():
     if payment_method not in VALID_PAYMENT_METHODS:
         return jsonify({'error': 'Método de pagamento inválido'}), 400
 
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
-
+    user = g.user
     tx_id_suffix = f'{user.id}_{int(datetime.utcnow().timestamp())}'
     payment_info = _build_payment_info(payment_method, tx_id_suffix, amount)
 
-    user.card_balance += amount
-    transaction = Transaction(
-        user_id=user.id,
-        amount=amount,
-        transaction_type='recharge',
-        description=f'Recarga via {payment_info["method"]} - R$ {amount:.2f}',
-    )
-    db.session.add(transaction)
-    db.session.commit()
+    cartao = cartao_do_usuario(user, criar=True)
+    transaction = creditar(cartao, round(amount * 100),
+                           f'Recarga via {payment_info["method"]} - R$ {amount:.2f}')
+    if not transaction:
+        return jsonify({'error': 'Cartão bloqueado'}), 409
 
     create_notification(
         user.id,
         'Recarga Realizada',
-        f'Recarga de R$ {amount:.2f} via {payment_info["method"]}. Novo saldo: R$ {user.card_balance:.2f}.',
+        f'Recarga de R$ {amount:.2f} via {payment_info["method"]}. Novo saldo: R$ {cartao.saldo:.2f}.',
     )
 
     return jsonify({
         'message': 'Recarga realizada com sucesso',
-        'new_balance': user.card_balance,
+        'new_balance': cartao.saldo,
         'transaction': transaction.to_dict(),
         'payment_info': payment_info,
     }), 200
@@ -84,17 +79,18 @@ def register_card():
     if card_type not in VALID_CARD_TYPES:
         return jsonify({'error': f'Tipo de cartão inválido. Tipos válidos: {", ".join(VALID_CARD_TYPES)}'}), 400
 
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+    user = g.user
 
     # Enforce 1 card per user
-    if user.card_number and user.card_number.strip():
+    if user.cartao and user.cartao.numero:
         return jsonify({'error': 'Você já possui um cartão cadastrado. Cada usuário pode ter apenas 1 cartão.'}), 409
+    if Cartao.query.filter_by(numero=card_number).first():
+        return jsonify({'error': 'Este número de cartão já está cadastrado.'}), 409
 
-    user.card_number = card_number
-    user.card_holder = holder_name
-    user.card_type   = card_type
+    cartao = cartao_do_usuario(user, criar=True)
+    cartao.numero  = card_number
+    cartao.titular = holder_name
+    cartao.tipo    = card_type
     db.session.commit()
 
     create_notification(
@@ -114,14 +110,13 @@ def register_card():
 @card_bp.route('/card/info', methods=['GET'])
 @login_required
 def get_card_info():
-    user = db.session.get(User, session['user_id'])
-    if not user:
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+    cartao = g.user.cartao
     return jsonify({
-        'card_number': user.card_number,
-        'card_holder': user.card_holder,
-        'card_type':   user.card_type,
-        'card_balance': user.card_balance,
+        'card_number': cartao.numero if cartao else None,
+        'card_holder': cartao.titular if cartao else None,
+        'card_type':   cartao.tipo if cartao else None,
+        'card_balance': cartao.saldo if cartao else 0.0,
+        'card_status': cartao.status if cartao else None,
     }), 200
 
 
@@ -141,7 +136,7 @@ def _build_payment_info(method: str, tx_suffix: str, amount: float) -> dict:
 def get_transactions():
     transactions = (
         Transaction.query
-        .filter_by(user_id=session['user_id'])
+        .filter_by(user_id=g.user.id)
         .order_by(Transaction.created_at.desc())
         .all()
     )
@@ -154,33 +149,30 @@ def use_transport():
     data = request.get_json() or {}
     route_id = data.get('route_id')
 
-    user = db.session.get(User, session['user_id'])
-    route = db.session.get(BusRoute, route_id)
+    user = g.user
+    route = db.session.get(BusRoute, route_id) if route_id is not None else None
+    cartao = user.cartao
 
-    if not user or not route:
+    if not route:
         return jsonify({'error': 'Usuário ou rota não encontrada'}), 404
-    if user.card_balance < route.fare:
+    if not cartao:
+        return jsonify({'error': 'Saldo insuficiente'}), 400
+    if cartao.status != 'ativo':
+        return jsonify({'error': 'Cartão bloqueado'}), 409
+
+    transaction = debitar(cartao, round(route.fare * 100), f'Uso do transporte - Linha {route.route_number}')
+    if not transaction:
         return jsonify({'error': 'Saldo insuficiente'}), 400
 
-    user.card_balance -= route.fare
-    transaction = Transaction(
-        user_id=user.id,
-        amount=-route.fare,
-        transaction_type='usage',
-        description=f'Uso do transporte - Linha {route.route_number}',
-    )
-    db.session.add(transaction)
-    db.session.commit()
-
-    if user.card_balance < LOW_BALANCE_THRESHOLD:
+    if cartao.saldo < LOW_BALANCE_THRESHOLD:
         create_notification(
             user.id,
             'Saldo Baixo',
-            f'Saldo atual: R$ {user.card_balance:.2f}. Recarregue para evitar interrupções.',
+            f'Saldo atual: R$ {cartao.saldo:.2f}. Recarregue para evitar interrupções.',
         )
 
     return jsonify({
         'message': 'Transporte utilizado com sucesso',
-        'new_balance': user.card_balance,
+        'new_balance': cartao.saldo,
         'transaction': transaction.to_dict(),
     }), 200
