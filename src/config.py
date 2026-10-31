@@ -10,9 +10,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 def _get_database_url() -> str:
     """Resolve DATABASE_URL, corrigindo prefixo legado do Heroku/Render."""
     url = os.getenv('DATABASE_URL', f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'app.db')}")
-    # Heroku/Render ainda pode retornar 'postgres://' — SQLAlchemy 2.x exige 'postgresql://'
-    if url.startswith('postgres://'):
-        url = url.replace('postgres://', 'postgresql://', 1)
+    # Heroku/Render ainda pode retornar 'postgres://' — SQLAlchemy 2.x exige 'postgresql://'.
+    # O driver vai explícito: a partir do SQLAlchemy 2.1 'postgresql://' usa o psycopg 3,
+    # e o projeto instala o psycopg2.
+    for prefixo in ('postgres://', 'postgresql://'):
+        if url.startswith(prefixo):
+            url = url.replace(prefixo, 'postgresql+psycopg2://', 1)
     return url
 
 
