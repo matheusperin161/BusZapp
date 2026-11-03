@@ -1,6 +1,7 @@
 """Application factory and entry point."""
 import os
-from flask import Flask, redirect, send_from_directory
+from flask import Flask, jsonify, redirect, request, send_from_directory
+from werkzeug.exceptions import HTTPException
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -19,6 +20,8 @@ def create_app(env: str = 'default') -> Flask:
     project_root = os.path.dirname(os.path.dirname(__file__))
     app = Flask(__name__, static_folder=os.path.join(project_root, 'static'))
     app.config.from_object(config[env])
+    if env == 'production' and app.config['SECRET_KEY'] == 'dev-secret-key-change-in-production':
+        app.logger.warning('SECRET_KEY padrão em produção! Defina SECRET_KEY no ambiente.')
 
     # Allowed origins: comma-separated list from env, fallback to localhost for dev
     _raw_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:8080,http://127.0.0.1:8080')
@@ -66,11 +69,32 @@ def create_app(env: str = 'default') -> Flask:
         response.headers.pop('X-Powered-By', None)
         return response
 
+    # API sempre responde JSON (o app mobile não deve receber páginas HTML de erro)
+    @app.errorhandler(HTTPException)
+    def api_http_error(e):
+        if request.path.startswith('/api/'):
+            return jsonify({'error': e.description or e.name}), e.code
+        return e
+
+    @app.errorhandler(Exception)
+    def api_unhandled_error(e):
+        if isinstance(e, HTTPException):
+            return api_http_error(e)
+        db.session.rollback()
+        app.logger.exception('Erro não tratado em %s', request.path)
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Erro interno do servidor'}), 500
+        return 'Erro interno do servidor', 500
+
     # Serve frontend SPA com URLs sem .html
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def serve(path):
         static_folder = app.static_folder
+
+        # Rota de API inexistente não cai no index.html
+        if path == 'api' or path.startswith('api/'):
+            return jsonify({'error': 'Endpoint não encontrado'}), 404
 
         # URLs sem .html: redireciona /<page>.html para /<page>
         # (exceto arquivos de verificação do Google, que bots não seguem redirect)

@@ -7,7 +7,6 @@ from src.models import db
 from src.models.user import BusLocation
 from src.models.tracking import Route, StopPoint, BusSchedule
 from src.utils.geo import calculate_speed, find_next_stops_with_eta
-from src.config import GOOGLE_API_KEY
 
 
 def _check_bus_auth() -> bool:
@@ -82,14 +81,10 @@ def update_location():
         bus_location.longitude = data['longitude']
         bus_location.speed = speed_kmh
     else:
-        # Try to find route by bus_id prefix
-        bus_id_str = str(data['bus_id'])
-        route = None
-        for rn in ['1', '2', '3', '4', '5']:
-            if bus_id_str.startswith(rn):
-                route = _get_route_by_number(rn)
-                if route:
-                    break
+        # Linha do ônibus vem do horário cadastrado para esse bus_id
+        # (antes era adivinhada pelo 1º dígito, o que quebrava linhas 6+ e 10+)
+        schedule = BusSchedule.query.filter_by(bus_id=data['bus_id']).first()
+        route = db.session.get(Route, schedule.route_id) if schedule else None
         bus_location = BusLocation(
             bus_id=data['bus_id'],
             route_id=route.id if route else None,

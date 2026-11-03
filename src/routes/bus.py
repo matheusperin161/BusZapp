@@ -1,11 +1,11 @@
 """Bus routes, notifications, and ratings."""
 from datetime import datetime
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, g, jsonify, request, session
 from sqlalchemy import func
 
 from src.models import db
 from src.models.user import BusRoute, BusLocation, Notification, Rating, Motorista, DriverTrip
-from src.utils.auth import login_required
+from src.utils.auth import admin_required, login_required, motorista_required
 
 bus_bp = Blueprint('bus', __name__, url_prefix='/api')
 
@@ -25,6 +25,7 @@ def get_bus_locations(route_id):
 
 
 @bus_bp.route('/admin/populate-routes', methods=['POST'])
+@admin_required
 def populate_routes():
     if BusRoute.query.count() > 0:
         return jsonify({'message': 'Rotas já existem no banco de dados'}), 200
@@ -72,19 +73,19 @@ def get_notifications():
 @login_required
 def submit_rating():
     data = request.get_json() or {}
-    overall_rating = data.get('overall_rating')
+    try:
+        overall_rating = int(data.get('overall_rating') or 0)
+        sub_ratings = {
+            k: int(data.get(k) or 0)
+            for k in ('punctuality_rating', 'cleanliness_rating', 'comfort_rating', 'service_rating')
+        }
+    except (TypeError, ValueError):
+        return jsonify({'error': 'As notas devem ser números inteiros'}), 400
 
-    if not overall_rating or not (1 <= int(overall_rating) <= 5):
+    if not (1 <= overall_rating <= 5):
         return jsonify({'error': 'Avaliação geral é obrigatória e deve estar entre 1 e 5'}), 400
-
-    sub_ratings = {
-        'punctuality_rating': data.get('punctuality_rating', 0),
-        'cleanliness_rating': data.get('cleanliness_rating', 0),
-        'comfort_rating': data.get('comfort_rating', 0),
-        'service_rating': data.get('service_rating', 0),
-    }
-    for key, val in sub_ratings.items():
-        if not (0 <= int(val) <= 5):
+    for val in sub_ratings.values():
+        if not (0 <= val <= 5):
             return jsonify({'error': 'Todas as avaliações devem estar entre 0 e 5'}), 400
 
     trip_date = None
@@ -117,8 +118,8 @@ def submit_rating():
 
     rating = Rating(
         user_id=session['user_id'],
-        overall_rating=int(overall_rating),
-        **{k: int(v) for k, v in sub_ratings.items()},
+        overall_rating=overall_rating,
+        **sub_ratings,
         comments=data.get('comments', ''),
         bus_line=bus_line,
         trip_date=trip_date,
@@ -178,17 +179,18 @@ def get_ratings_stats():
 # ── Ocorrências do Motorista ────────────────────────────────────────────────
 
 @bus_bp.route('/incidents', methods=['POST'])
+@motorista_required
 def create_incident():
-    """Motorista registra uma ocorrência durante o trajeto."""
-    from src.models.user import Motorista, DriverIncident
+    """Motorista registra uma ocorrência durante o trajeto.
+
+    O motorista vem da sessão (motorista_required); driver_id do corpo é ignorado
+    para que ninguém registre ocorrência em nome de outro motorista.
+    """
+    from src.models.user import DriverIncident
 
     data = request.get_json() or {}
-
-    # Bug fix: driver_id pode vir como string do localStorage — converter para int
-    try:
-        driver_id = int(data.get('driver_id') or 0) or None
-    except (TypeError, ValueError):
-        driver_id = None
+    driver = g.motorista
+    driver_id = driver.id
 
     # Bug fix: campos de texto podem vir como None — usar '' como fallback seguro
     bus_number    = (data.get('bus_number')    or '').strip()
@@ -201,14 +203,10 @@ def create_incident():
 
     VALID_TYPES = ('atraso', 'pane', 'acidente', 'outro')
 
-    if not driver_id or not inc_type:
-        return jsonify({'error': 'driver_id e type são obrigatórios'}), 400
+    if not inc_type:
+        return jsonify({'error': 'type é obrigatório'}), 400
     if inc_type not in VALID_TYPES:
         return jsonify({'error': f'Tipo inválido. Use: {", ".join(VALID_TYPES)}'}), 400
-
-    driver = db.session.get(Motorista, driver_id)
-    if not driver:
-        return jsonify({'error': 'Motorista não encontrado'}), 404
 
     incident = DriverIncident(
         driver_id=driver_id,
@@ -254,12 +252,13 @@ def create_incident():
     try:
         db.session.commit()
         return jsonify({'message': 'Ocorrência registrada com sucesso', 'incident': incident.to_dict()}), 201
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         return jsonify({'error': 'Erro ao registrar ocorrência'}), 500
 
 
 @bus_bp.route('/incidents', methods=['GET'])
+@admin_required
 def list_incidents():
     """Admin lista todas as ocorrências."""
     from src.models.user import DriverIncident
@@ -271,6 +270,7 @@ def list_incidents():
 
 
 @bus_bp.route('/incidents/<int:incident_id>/resolve', methods=['POST'])
+@admin_required
 def resolve_incident(incident_id):
     """Admin marca uma ocorrência como resolvida."""
     from src.models.user import DriverIncident

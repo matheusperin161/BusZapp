@@ -13,7 +13,24 @@ def _get_database_url() -> str:
     # Heroku/Render ainda pode retornar 'postgres://' — SQLAlchemy 2.x exige 'postgresql://'
     if url.startswith('postgres://'):
         url = url.replace('postgres://', 'postgresql://', 1)
+    # SQLAlchemy 2.1+ usa psycopg (v3) como driver padrão de 'postgresql://';
+    # o projeto instala psycopg2-binary, então o driver é fixado explicitamente.
+    if url.startswith('postgresql://'):
+        url = url.replace('postgresql://', 'postgresql+psycopg2://', 1)
     return url
+
+
+def _engine_options(url: str) -> dict:
+    """Opções de pool só fazem sentido no PostgreSQL (no SQLite quebram a conexão)."""
+    if not url.startswith('postgresql'):
+        return {}
+    return {
+        'pool_pre_ping': True,       # verifica conexão antes de usar
+        'pool_recycle': 300,         # recicla conexões a cada 5 min
+        'pool_size': 5,
+        'max_overflow': 10,
+        'connect_args': {'options': '-c timezone=America/Sao_Paulo'},
+    }
 
 
 class Config:
@@ -27,14 +44,7 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
 
-    # Pool settings — ignorados pelo SQLite, usados pelo PostgreSQL
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,       # verifica conexão antes de usar
-        'pool_recycle': 300,         # recicla conexões a cada 5 min
-        'pool_size': 5,
-        'max_overflow': 10,
-        'connect_args': {'options': '-c timezone=America/Sao_Paulo'}
-    }
+    SQLALCHEMY_ENGINE_OPTIONS = _engine_options(SQLALCHEMY_DATABASE_URI)
 
 
 class DevelopmentConfig(Config):
@@ -52,20 +62,6 @@ class ProductionConfig(Config):
     DEBUG = False
     SESSION_COOKIE_SECURE = True
 
-
-config = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'testing': TestingConfig,
-    'default': DevelopmentConfig
-}
-
-# Google Maps / Tracking
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '')
-ROUTE_ORIGIN_LAT = float(os.getenv('ROUTE_ORIGIN_LAT', -27.10597))
-ROUTE_ORIGIN_LON = float(os.getenv('ROUTE_ORIGIN_LON', -52.61336))
-ROUTE_DEST_LAT = float(os.getenv('ROUTE_DEST_LAT', -27.07171))
-ROUTE_DEST_LON = float(os.getenv('ROUTE_DEST_LON', -52.63635))
 
 config = {
     'development': DevelopmentConfig,

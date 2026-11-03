@@ -330,7 +330,7 @@ def list_routes():
         stops = sorted(r.stop_points, key=lambda s: s.order)
         # Find linked driver and vehicle via bus_line name
         from src.models.user import BusRoute as BR
-        bus_route = BR.query.filter_by(route_name=r.route_name.replace('Linha_','')).first()
+        bus_route = BR.query.filter_by(route_number=r.route_name.replace('Linha_', '', 1)).first()
         route_line_str = None
         if bus_route:
             route_line_str = f"{bus_route.route_number} - {bus_route.route_name}"
