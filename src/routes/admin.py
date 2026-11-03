@@ -648,6 +648,35 @@ def edit_user_card(user_id):
     return jsonify({'message': 'Cartão atualizado com sucesso'})
 
 
+def _onibus_das_viagens(gps_cutoff):
+    """Viagens em andamento (app do motorista) no mesmo formato do BusLocation,
+    para o mapa do painel mostrar os ônibus do site e do app juntos."""
+    from src.routes.viagens import _linha_dict
+
+    onibus = []
+    for viagem in Viagem.query.filter_by(status='em_andamento').all():
+        posicao = viagem.ultima_posicao()
+        if not posicao or posicao.registrado_em < gps_cutoff:
+            continue
+        linha = _linha_dict(viagem.linha)
+        quando = posicao.registrado_em.isoformat()
+        onibus.append({
+            'id': f'viagem-{viagem.id}',
+            'viagem_id': viagem.id,
+            'origem': 'app',
+            'bus_number': viagem.veiculo.plate if viagem.veiculo else None,
+            'latitude': posicao.latitude,
+            'longitude': posicao.longitude,
+            'speed': posicao.velocidade or 0.0,
+            'timestamp': quando,
+            'last_updated': quando,
+            'route': {'route_number': linha['numero'], 'route_name': linha['nome']},
+            'driver_name': viagem.motorista.nome if viagem.motorista else None,
+            'sentido': viagem.sentido,
+        })
+    return onibus
+
+
 @admin_bp.route('/all-bus-locations', methods=['GET'])
 @admin_required
 def list_all_bus_locations():
@@ -676,10 +705,7 @@ def list_all_bus_locations():
         .all()
     )
     loc_ids = [row[0] for row in latest_ids if row[0] is not None]
-    if not loc_ids:
-        return jsonify([])
-
-    locations = BusLocation.query.filter(BusLocation.id.in_(loc_ids)).all()
+    locations = BusLocation.query.filter(BusLocation.id.in_(loc_ids)).all() if loc_ids else []
 
     # Monta mapa bus_number -> trip mais recente do dia para enriquecer a rota
     all_today_trips = (
@@ -709,4 +735,6 @@ def list_all_bus_locations():
                     'route_name': route_name,
                 }
         result.append(d)
+    # Motoristas que iniciaram a viagem pelo app (sistema de viagens)
+    result.extend(_onibus_das_viagens(gps_cutoff))
     return jsonify(result)
