@@ -165,3 +165,33 @@ def test_motorista_afastado_nao_inicia(client, motoristas, linha, veiculos):
     db.session.commit()
     como(client, motoristas[0])
     assert iniciar(client, linha, veiculos[0]).status_code == 403
+
+
+def test_mapa_do_admin_mostra_onibus_do_app(client, motoristas, linha, veiculos):
+    """Viagem iniciada pelo app aparece em /api/admin/all-bus-locations (mapa do painel)."""
+    como(client, motoristas[0])
+    viagem_id = iniciar(client, linha, veiculos[0]).get_json()['viagem']['id']
+    client.post(f'/api/viagens/{viagem_id}/posicoes',
+                json={'latitude': -27.005, 'longitude': -52.0, 'velocidade': 32})
+    # segunda viagem com posição velha (mais de 15 min) não aparece
+    como(client, motoristas[1])
+    outra = iniciar(client, linha, veiculos[1]).get_json()['viagem']['id']
+    db.session.add(Posicao(viagem_id=outra, latitude=-27.0, longitude=-52.0,
+                           registrado_em=datetime.utcnow() - timedelta(minutes=20)))
+    db.session.commit()
+
+    criar_usuario('chefe@teste.com', role='admin')
+    como(client, 'chefe@teste.com', 'senha123')
+    onibus = client.get('/api/admin/all-bus-locations').get_json()
+    assert len(onibus) == 1
+    o = onibus[0]
+    assert o['origem'] == 'app' and o['viagem_id'] == viagem_id
+    assert o['bus_number'] == 'AAA1A11' and o['speed'] == 32
+    assert o['route'] == {'route_number': '1', 'route_name': 'Centro - Bairro'}
+    assert o['driver_name'] == 'Motorista 0' and o['sentido'] == 'ida'
+
+    # finalizada → some do mapa
+    como(client, motoristas[0])
+    client.post(f'/api/viagens/{viagem_id}/finalizar')
+    como(client, 'chefe@teste.com', 'senha123')
+    assert client.get('/api/admin/all-bus-locations').get_json() == []
